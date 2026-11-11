@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<!-- Library of Limu · new offy v2 — © 2026 李牧飞 Aphisit Kaewnet -->
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4f2ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Limu">
+<meta name="format-detection" content="telephone=no">
+<meta name="description" content="Library of Limu — แฟลชการ์ดคำศัพท์ HSK, 听写, พจนานุกรม และสถิติการเรียน">
+<title>Library of Limu</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-lite-webfont@1.1.0/style.css" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css?v=2.0.0">
+<script>
+/* apply the saved / system theme before first paint */
+(function () {
+  var t = null;
+  try { var d = JSON.parse(localStorage.getItem('offy.v2') || localStorage.getItem('offy.v1') || 'null'); t = d && d.settings && d.settings.theme; } catch (e) {}
+  if (t !== 'dark' && t !== 'light') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+</head>
+<body>
+
+<!-- ================= icon sprite ================= -->
+<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.5l8.500 7V19a1.500 1.500 0 0 1-1.500 1.500h-4v-6h-6v6H5A1.500 1.500 0 0 1 3.500 19z"/></symbol>
+  <symbol id="i-learn" viewBox="0 0 24 24"><path d="m12 3.500 8.500 4.500-8.500 4.500L3.500 8z"/><path d="m3.500 12 8.500 4.500 8.500-4.500"/><path d="m3.500 16 8.500 4.500 8.500-4.500"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 6.500h9M19 6.500h1M4 12h3M13 12h7M4 17.500h10M20 17.500h0"/><circle cx="16" cy="6.500" r="2.200"/><circle cx="10" cy="12" r="2.200"/><circle cx="17" cy="17.500" r="2.200"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.500"/><path d="m20 20-4.200-4.200"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20v-8M12 20V5M19 20v-5"/></symbol>
+  <symbol id="i-line" viewBox="0 0 24 24"><path d="M4 4v16h16"/><path d="m8 15 3.500-4.500 3 2.500L19 7"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M5 5.500A2.500 2.500 0 0 1 7.500 3H19v15H7.500A2.500 2.500 0 0 0 5 20.500z"/><path d="M5 20.500A2.500 2.500 0 0 0 7.500 21H19"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.650 1.650 0 0 0 .33 1.820l.06.06a2 2 0 1 1-2.830 2.830l-.06-.06a1.650 1.650 0 0 0-1.820-.33 1.650 1.650 0 0 0-1 1.510V21a2 2 0 1 1-4 0v-.09A1.650 1.650 0 0 0 9 19.400a1.650 1.650 0 0 0-1.820.33l-.06.06a2 2 0 1 1-2.830-2.830l.06-.06A1.650 1.650 0 0 0 4.680 15a1.650 1.650 0 0 0-1.510-1H3a2 2 0 1 1 0-4h.09A1.650 1.650 0 0 0 4.600 9a1.650 1.650 0 0 0-.33-1.820l-.06-.06a2 2 0 1 1 2.830-2.830l.06.06A1.650 1.650 0 0 0 9 4.680a1.650 1.650 0 0 0 1-1.510V3a2 2 0 1 1 4 0v.09a1.650 1.650 0 0 0 1 1.510 1.650 1.650 0 0 0 1.820-.33l.06-.06a2 2 0 1 1 2.830 2.830l-.06.06A1.650 1.650 0 0 0 19.400 9a1.650 1.650 0 0 0 1.510 1H21a2 2 0 1 1 0 4h-.09a1.650 1.650 0 0 0-1.510 1z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.500v2M12 19.500v2M2.500 12h2M19.500 12h2M5.300 5.300l1.400 1.400M17.300 17.300l1.400 1.400M5.300 18.700l1.400-1.400M17.300 6.700l1.400-1.400"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.500A8 8 0 0 1 9.500 4 8 8 0 1 0 20 14.500z"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.500 12S6 5.500 12 5.500 21.500 12 21.500 12 18 18.500 12 18.500 2.500 12 2.500 12z"/><circle cx="12" cy="12" r="2.800"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="m4 4 16 16"/><path d="M9.900 5.800A8.700 8.700 0 0 1 12 5.500c6 0 9.500 6.500 9.500 6.500a16 16 0 0 1-2.900 3.700M6.400 7.300C3.900 9.100 2.500 12 2.500 12S6 18.500 12 18.500a8.800 8.800 0 0 0 3.900-.9"/><path d="M10 10a2.800 2.800 0 0 0 4 4"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path d="M11 5.500 6.500 9H3.500v6h3L11 18.500z"/><path d="M15 9a4.200 4.200 0 0 1 0 6M17.800 6.200a8.200 8.200 0 0 1 0 11.600"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M11 5.500 6.500 9H3.500v6h3L11 18.500z"/><path d="m15.500 9.500 5 5M20.500 9.500l-5 5"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.200v13.600a.6.600 0 0 0 .900.500l11-6.800a.6.600 0 0 0 0-1L8.900 4.700a.6.600 0 0 0-.9.500z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.500" y="5" width="3.800" height="14" rx="1.200" fill="currentColor" stroke="none"/><rect x="13.700" y="5" width="3.800" height="14" rx="1.200" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.500 4.500 4.500L19 7.500"/></symbol>
+  <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="m14.500 5.500-6.500 6.500 6.500 6.500"/></symbol>
+  <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="m9.500 5.500 6.500 6.500-6.500 6.500"/></symbol>
+  <symbol id="i-chev-d" viewBox="0 0 24 24"><path d="m5.500 9.500 6.500 6.500 6.500-6.500"/></symbol>
+  <symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.600-5.900"/><path d="M4 4.500v4.500h4.500"/></symbol>
+  <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M16.500 4H20v3.500M4 19.500 20 4M20 16.500V20h-3.500M14.500 14.500 20 20M4 4.500l4.500 4.500"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2.500 3.500 3.500L17 9.500"/><path d="M3.500 11V9.500A3.500 3.500 0 0 1 7 6h13.500"/><path d="m7 21.500-3.500-3.500L7 14.500"/><path d="M20.500 13v1.500A3.500 3.500 0 0 1 17 18H3.500"/></symbol>
+  <symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 21.500c3.900 0 6.500-2.600 6.500-6.300 0-2.700-1.500-4.700-3-6.500-.3 1.300-1 2.200-2 2.700.2-2.900-.700-5.900-3.500-8.400.2 3-1.500 4.700-2.700 6.300C6.200 10.700 5.500 12.500 5.500 15.200c0 3.700 2.600 6.300 6.500 6.300z"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.500"/><circle cx="12" cy="12" r="4.500"/><circle cx="12" cy="12" r=".8" fill="currentColor"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.500"/><path d="M12 7.500V12l3 2"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.800l2.840 5.750 6.350.920-4.600 4.480 1.090 6.320L12 17.280l-5.680 2.990 1.090-6.320-4.600-4.480 6.350-.920z" fill="currentColor" stroke="currentColor" stroke-width="1.200"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M16.800 3.700a2.500 2.500 0 0 1 3.500 3.500L8 19.500 3.500 20.500l1-4.500z"/><path d="m14.500 6 3.500 3.500"/></symbol>
+  <symbol id="i-kbd" viewBox="0 0 24 24"><rect x="2.500" y="6" width="19" height="12" rx="2.500"/><path d="M6.500 10h.01M10.200 10h.01M13.800 10h.01M17.500 10h.01M8 14h8"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7.500A2.500 2.500 0 0 0 5 5.500v13A2.500 2.500 0 0 0 7.500 21h9a2.500 2.500 0 0 0 2.500-2.500V8z"/><path d="M14 3v5h5M9 13h6M9 16.500h4"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M8.500 13.500 4 9l4.500-4.500"/><path d="M4 9h10a6 6 0 0 1 0 12h-2.500"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l.9 12a1.500 1.500 0 0 0 1.500 1.500h7.200a1.500 1.500 0 0 0 1.500-1.500L18 7M9 7V4.500h6V7"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7.500 10.500 12 15l4.500-4.500M5 19.500h14"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 15V4M7.500 8.500 12 4l4.500 4.500M5 19.500h14"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.500"/><path d="M12 11v5M12 7.800h.01"/></symbol>
+  <symbol id="i-cards" viewBox="0 0 24 24"><rect x="3.500" y="7" width="12" height="14" rx="2.200"/><path d="M8.500 3.500h9.300A2.200 2.200 0 0 1 20 5.700V17"/></symbol>
+  <symbol id="i-ear" viewBox="0 0 24 24"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="3" y="13.500" width="4.200" height="7" rx="1.800"/><rect x="16.800" y="13.500" width="4.200" height="7" rx="1.800"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8.500 6.500H20M8.500 12H20M8.500 17.500H20M4.500 6.500h.01M4.500 12h.01M4.500 17.500h.01"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3 5 13.500h6l-1 7.500 8-10.500h-6z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.500" y="5" width="17" height="15.500" rx="2.500"/><path d="M3.500 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9.500" rx="2.200"/><path d="M8.500 11V8a3.500 3.500 0 0 1 7 0v3"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9.500 18h5M10.500 21h3"/><path d="M12 3a6 6 0 0 0-3.800 10.600c.6.600.9 1.400 1 2.400h5.600c.1-1 .4-1.800 1-2.400A6 6 0 0 0 12 3z"/></symbol>
+  <symbol id="i-skip" viewBox="0 0 24 24"><path d="M6 5.500v13l9-6.500z"/><path d="M18.500 5.500v13"/></symbol>
+  <symbol id="i-mastered" viewBox="0 0 24 24"><path d="M6.500 3.500h11v17l-5.500-3.500-5.500 3.500z"/><path d="m9.500 10 2 2 3.500-3.500"/></symbol>
+  <symbol id="i-brush" viewBox="0 0 24 24"><path d="M4 20c2.500 0 4.500-.5 5.500-2.500.8-1.600-.3-3.400-2-3.500C5.500 14 4.800 15.500 5 17c.1 1.200-.3 2.300-1 3z"/><path d="M10 14 19.500 3.500M12.500 16.500 21 6"/></symbol>
+</svg>
+
+<div class="shell" id="shell">
+
+  <!-- ================= navigation: rail (wide) / tab bar (narrow) ================= -->
+  <nav class="nav" id="nav" aria-label="เมนูหลัก">
+    <button class="nav-brand" id="brandBtn" aria-label="เกี่ยวกับ Library of Limu"><span class="seal hz">词</span></button>
+    <div class="nav-items">
+      <a href="#/home" data-nav="home"><svg class="ic"><use href="#i-home"/></svg><span>หน้าแรก</span></a>
+      <a href="#/learn" data-nav="learn"><svg class="ic"><use href="#i-learn"/></svg><span>เรียน</span></a>
+      <a href="#/practice" data-nav="practice"><svg class="ic"><use href="#i-sliders"/></svg><span>จัดสำรับ</span></a>
+      <a href="#/dict" data-nav="dict"><svg class="ic"><use href="#i-search"/></svg><span>คลังคำ</span></a>
+      <a href="#/stats" data-nav="stats"><svg class="ic"><use href="#i-chart"/></svg><span>สถิติ</span></a>
+      <a href="#/library" data-nav="library" class="rail-only"><svg class="ic"><use href="#i-book"/></svg><span>หนังสือ</span></a>
+    </div>
+    <div class="nav-foot rail-only">
+      <button class="ibtn js-pinyin" aria-label="แสดง/ซ่อนพินอิน" data-tip="พินอิน"><svg class="ic"><use href="#i-eye"/></svg></button>
+      <button class="ibtn js-sound" aria-label="เปิด/ปิดเสียงเอฟเฟกต์" data-tip="เสียง"><svg class="ic"><use href="#i-vol"/></svg></button>
+      <button class="ibtn js-theme" aria-label="สลับธีมสว่าง/มืด" data-tip="ธีม"><svg class="ic"><use href="#i-moon"/></svg></button>
+      <a class="ibtn" href="#/settings" data-nav="settings" aria-label="ตั้งค่า" data-tip="ตั้งค่า"><svg class="ic"><use href="#i-gear"/></svg></a>
+    </div>
+  </nav>
+
+  <main class="main" id="main">
+
+    <!-- ================= HOME ================= -->
+    <section class="view" id="v-home">
+      <header class="ph">
+        <div class="ph-t"><p class="eyebrow" id="hDate"></p><h1>Library of Limu</h1></div>
+        <div class="ph-a tab-only">
+          <button class="ibtn js-pinyin" aria-label="แสดง/ซ่อนพินอิน"><svg class="ic"><use href="#i-eye"/></svg></button>
+          <button class="ibtn js-theme" aria-label="สลับธีมสว่าง/มืด"><svg class="ic"><use href="#i-moon"/></svg></button>
+          <a class="ibtn" href="#/settings" aria-label="ตั้งค่า"><svg class="ic"><use href="#i-gear"/></svg></a>
+        </div>
+      </header>
+      <div class="home-grid">
+        <div class="col">
+          <div id="homeHero"></div>
+          <div class="trio" id="homeTrio"></div>
+          <div class="card" id="homeWeek"></div>
+        </div>
+        <div class="col">
+          <div id="homeWord"></div>
+          <div class="card list" id="homeLinks"></div>
+          <p class="fine">ข้อมูลทั้งหมดอาจไม่ถูกต้อง 100% เพราะจัดทำคนเดียว<br><span lang="en">All information may not be 100% accurate as this is a solo project.</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= LEARN (levels) ================= -->
+    <section class="view" id="v-learn">
+      <header class="ph">
+        <div class="ph-t"><p class="eyebrow">HSK 3.0 · แฟลชการ์ดตามระดับ</p><h1>เรียนตามระดับ</h1></div>
+      </header>
+      <div class="lv-grid" id="lvGrid"></div>
+      <p class="fine">แต่ละระดับแบ่งเป็นด่าน ด่านละ 10 คำ · เร็ว ๆ นี้: คำศัพท์ตามบทเรียนในหนังสือ HSK และ 部首 214 ตัว</p>
+    </section>
+
+    <!-- ================= LEVEL (stage map) ================= -->
+    <section class="view" id="v-level">
+      <header class="ph">
+        <button class="back-btn" data-up="/learn" aria-label="กลับ"><svg class="ic"><use href="#i-chev-l"/></svg></button>
+        <div class="ph-t"><p class="eyebrow" id="lvEyebrow"></p><h1 id="lvTitle">HSK</h1></div>
+      </header>
+      <div class="trio" id="lvSummary"></div>
+      <div class="row wrap" id="lvActions"></div>
+      <div class="card stage-card">
+        <div class="stage-grid" id="stageGrid"></div>
+        <div class="stage-legend">
+          <span><i class="k fresh"></i>ยังไม่เล่น</span><span><i class="k done"></i>เล่นแล้ว</span><span><i class="k gold"></i>3 ดาว</span><span><i class="k next"></i>ด่านแนะนำ</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= PRACTICE (custom deck builder) ================= -->
+    <section class="view" id="v-practice">
+      <header class="ph">
+        <div class="ph-t"><p class="eyebrow">Custom</p><h1>จัดสำรับเอง</h1></div>
+        <div class="ph-a"><button class="btn sm" id="cRandomize"><svg class="ic"><use href="#i-shuffle"/></svg>สุ่มให้</button></div>
+      </header>
+      <div class="pr-grid">
+        <div class="col">
+          <div class="card">
+            <h3 class="ct">รูปแบบ</h3>
+            <div class="seg" id="cType">
+              <button data-v="flash"><svg class="ic"><use href="#i-cards"/></svg>แฟลชการ์ด</button>
+              <button data-v="tingxie"><svg class="ic"><use href="#i-pen"/></svg><span class="hz">听写</span> เขียนตามคำบอก</button>
+            </div>
+            <h3 class="ct">ที่มาของคำ</h3>
+            <div class="seg" id="cMode">
+              <button data-v="manual">เลือกเอง</button>
+              <button data-v="random">สุ่ม</button>
+              <button data-v="review">ทบทวน<span class="cnt" id="cReviewCnt">0</span></button>
+            </div>
+          </div>
+          <div class="card" id="cSrcCard">
+            <h3 class="ct">ระดับ <span class="opt" id="cCatHint"></span></h3>
+            <div class="chips" id="cCats"></div>
+            <div id="cStagesWrap"></div>
+          </div>
+          <div class="card" id="cPickBox">
+            <h3 class="ct">เพิ่มคำเฉพาะลงสำรับ <span class="opt">ไม่บังคับ</span></h3>
+            <div class="search">
+              <svg class="ic"><use href="#i-search"/></svg>
+              <input class="input" id="cSearch" placeholder="ตัวจีน พินอิน หรือความหมาย" autocomplete="off">
+              <button class="clr" id="cSearchClr" aria-label="ล้าง"><svg class="ic"><use href="#i-x"/></svg></button>
+            </div>
+            <div class="sr-list" id="cSearchRes"></div>
+            <div class="wchips" id="cPicked"></div>
+            <details class="more">
+              <summary><svg class="ic"><use href="#i-plus"/></svg>คำของฉัน (นอก HSK)</summary>
+              <div class="grid2">
+                <input class="input hz" id="mwZh" placeholder="ตัวจีน เช่น 电脑">
+                <input class="input" id="mwPy" placeholder="พินอิน เช่น diànnǎo" autocapitalize="off">
+              </div>
+              <input class="input" id="mwTh" placeholder="ความหมายไทย เช่น คอมพิวเตอร์">
+              <input class="input" id="mwEn" placeholder="English (ไม่บังคับ)">
+              <button class="btn soft block" id="mwAdd">บันทึกคำนี้</button>
+              <div class="wchips" id="myWordsList"></div>
+            </details>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <h3 class="ct">จำนวนคำ <span class="opt">เว้นว่าง = ทั้งหมดที่เลือก</span></h3>
+            <div class="row">
+              <input class="input num" id="cCount" type="number" inputmode="numeric" min="1" max="2200" placeholder="ทั้งหมด">
+              <div class="chips nowrap" id="cCountChips"><button class="chip" data-n="10">10</button><button class="chip" data-n="20">20</button><button class="chip" data-n="30">30</button><button class="chip" data-n="50">50</button></div>
+            </div>
+          </div>
+          <div class="card" id="cFlashOpts">
+            <h3 class="ct">โจทย์</h3>
+            <div class="seg" id="cAsk">
+              <button data-v="zh"><span class="hz">字</span> → ความหมาย</button>
+              <button data-v="mean">ความหมาย → <span class="hz">字</span></button>
+              <button data-v="listen"><svg class="ic"><use href="#i-ear"/></svg>ฟัง</button>
+            </div>
+            <h3 class="ct">การตอบ</h3>
+            <div class="seg" id="cQuiz"><button data-v="quiz">4 ตัวเลือก</button><button data-v="self">พลิกการ์ดตรวจเอง</button></div>
+            <h3 class="ct">เวลา</h3>
+            <div class="seg" id="cTimer"><button data-v="countdown">นับถอยหลังต่อการ์ด</button><button data-v="stopwatch">จับเวลาเฉย ๆ</button></div>
+            <div class="chips" id="cSec" style="margin-top:10px"></div>
+          </div>
+          <div class="card" id="cDictOpts" hidden>
+            <h3 class="ct">วิธีตอบ</h3>
+            <div class="seg" id="cAns">
+              <button data-v="draw"><svg class="ic"><use href="#i-brush"/></svg>เขียนบนจอ</button>
+              <button data-v="type"><svg class="ic"><use href="#i-kbd"/></svg>พิมพ์พินอิน</button>
+              <button data-v="paper"><svg class="ic"><use href="#i-file"/></svg>กระดาษ</button>
+            </div>
+            <h3 class="ct">อ่านซ้ำต่อคำ</h3>
+            <div class="seg" id="cRepeat"><button data-v="1">1 ครั้ง</button><button data-v="2">2 ครั้ง</button><button data-v="3">3 ครั้ง</button></div>
+            <h3 class="ct">ความเร็วเสียง <b class="val" id="cRateVal">0.8×</b></h3>
+            <input type="range" id="cRate" min="0.5" max="1.2" step="0.05" value="0.8">
+            <div class="set-row">
+              <div class="lbl"><b>แสดงความหมายเป็นคำใบ้</b><small>ช่วยแยกคำพ้องเสียง เช่น <span class="hz">是 / 事 / 市</span></small></div>
+              <label class="switch"><input type="checkbox" id="cMeanHint" checked><span></span></label>
+            </div>
+            <div class="set-row" id="cStrictRow" hidden>
+              <div class="lbl"><b>ตรวจวรรณยุกต์ด้วย</b><small>พิมพ์ได้ทั้ง nǐhǎo และ ni3hao3</small></div>
+              <label class="switch"><input type="checkbox" id="cStrict" checked><span></span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="start-bar">
+        <div class="summary" id="cSummary">—</div>
+        <button class="btn primary lg" id="cCreate"><svg class="ic"><use href="#i-play"/></svg>เริ่ม</button>
+      </div>
+    </section>
+
+    <!-- ================= GAME ================= -->
+    <section class="view immersive" id="v-game">
+      <div class="g-top">
+        <button class="ibtn" id="gPause" aria-label="พัก"><svg class="ic"><use href="#i-pause"/></svg></button>
+        <div class="g-title"><b id="gTitle">—</b><small id="gProg">0 / 0</small></div>
+        <div class="combo" id="gCombo" aria-live="polite"></div>
+        <div class="timer" id="gTimer">
+          <svg viewBox="0 0 44 44"><circle class="trk" cx="22" cy="22" r="18"/><circle class="arc" id="gArc" cx="22" cy="22" r="18" stroke-dasharray="113.1" stroke-dashoffset="0"/></svg>
+          <span id="gTime">10</span>
+        </div>
+      </div>
+      <div class="g-bar"><i id="gBar"></i></div>
+      <div class="g-body">
+        <div class="stage" id="gStage">
+          <div class="deck-note" id="gDeck"></div>
+          <div class="swipe-note" id="gSwipe"></div>
+          <div class="pile l" id="pileL"><b>0</b><span>ทบทวน</span></div>
+          <div class="pile r" id="pileR"><b>0</b><span>จำได้</span></div>
+        </div>
+        <div class="g-answer" id="gAnswer"></div>
+        <div class="result" id="gResult" hidden></div>
+      </div>
+    </section>
+
+    <!-- ================= DICTATION ================= -->
+    <section class="view immersive" id="v-dictation">
+      <div class="g-top">
+        <button class="ibtn" id="dQuit" aria-label="ออก"><svg class="ic"><use href="#i-x"/></svg></button>
+        <div class="g-title"><b id="dTitle">听写</b><small id="dProg">0 / 0</small></div>
+        <div class="clock" id="dClock">00:00</div>
+      </div>
+      <div class="g-bar"><i id="dBar"></i></div>
+      <div class="d-body">
+        <div class="d-prompt">
+          <div id="dNotice"></div>
+          <button class="speak-big" id="dSpeak" aria-label="ฟังอีกครั้ง">
+            <svg class="ic"><use href="#i-vol"/></svg>
+            <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+          </button>
+          <div class="d-status" id="dStatus">แตะเพื่อฟัง</div>
+          <div class="row center">
+            <button class="btn sm" id="dReplay"><svg class="ic"><use href="#i-repeat"/></svg>ฟังซ้ำ</button>
+            <button class="btn sm" id="dSlow">ช้า 0.6×</button>
+          </div>
+          <div class="hints" id="dHints"></div>
+        </div>
+        <div class="d-work" id="dWork"></div>
+      </div>
+    </section>
+
+    <!-- ================= DICTATION ANSWER SHEET ================= -->
+    <section class="view immersive scroll" id="v-dsheet">
+      <header class="ph">
+        <div class="ph-t"><p class="eyebrow" id="dsHint"></p><h1>ใบตรวจคำตอบ <span class="hz">听写</span></h1></div>
+        <div class="ph-a"><span class="score" id="dsScore">0 / 0</span></div>
+      </header>
+      <div class="card flush"><table class="sheet-table"><thead><tr><th>#</th><th>คำตอบของคุณ</th><th>เฉลย</th><th class="c">ผล</th></tr></thead><tbody id="dsBody"></tbody></table></div>
+      <div class="start-bar">
+        <button class="btn" id="dsDiscard">ทิ้งผล</button>
+        <button class="btn" id="dsAllOk"><svg class="ic"><use href="#i-check"/></svg>ที่เหลือถูกทั้งหมด</button>
+        <button class="btn primary lg" id="dsSave">บันทึกผล</button>
+      </div>
+    </section>
+
+    <!-- ================= DICTIONARY ================= -->
+    <section class="view" id="v-dict">
+      <header class="ph">
+        <div class="ph-t"><p class="eyebrow" id="qCount"></p><h1>คลังคำศัพท์</h1></div>
+        <div class="ph-a tab-only"><button class="ibtn js-pinyin" aria-label="แสดง/ซ่อนพินอิน"><svg class="ic"><use href="#i-eye"/></svg></button></div>
+      </header>
+      <div class="q-bar">
+        <div class="search lg">
+          <svg class="ic"><use href="#i-search"/></svg>
+          <input class="input" id="qInput" placeholder="ค้นหา ตัวจีน · พินอิน (nihao, ni3hao3) · ไทย · English" autocomplete="off" enterkeyhint="search">
+          <button class="clr" id="qClear" aria-label="ล้างการค้นหา"><svg class="ic"><use href="#i-x"/></svg></button>
+        </div>
+        <div class="q-filters">
+          <div class="chips scroll" id="qLevels"></div>
+          <select class="input sel" id="qPos" aria-label="ชนิดคำ"></select>
+          <select class="input sel" id="qStatus" aria-label="สถานะ">
+            <option value="">ทุกสถานะ</option><option value="new">ยังไม่เคยเล่น</option><option value="learning">กำลังเรียน</option><option value="mastered">จำได้แล้ว</option><option value="review">รอทบทวน</option>
+          </select>
+        </div>
+      </div>
+      <div class="card flush word-list" id="qList"></div>
+      <div class="center-row"><button class="btn sm" id="qMore" hidden>แสดงเพิ่ม</button></div>
+    </section>
+
+    <!-- ================= STATS ================= -->
+    <section class="view" id="v-stats">
+      <header class="ph">
+        <div class="ph-t"><p class="eyebrow">Dashboard</p><h1>สถิติการเรียน</h1></div>
+        <div class="ph-a"><div class="seg sm" id="stRange"><button data-r="7">7 วัน</button><button data-r="30">30 วัน</button><button data-r="90">90 วัน</button><button data-r="0">ทั้งหมด</button></div></div>
+      </header>
+      <div id="stBody"></div>
+    </section>
+
+    <!-- ================= LIBRARY ================= -->
+    <section class="view" id="v-library">
+      <header class="ph">
+        <button class="back-btn tab-only" data-up="/home" aria-label="กลับ"><svg class="ic"><use href="#i-chev-l"/></svg></button>
+        <div class="ph-t"><p class="eyebrow">Only Offy</p><h1>ชั้นหนังสือ</h1></div>
+      </header>
+      <p class="lead">สรุปเนื้อหาตามความเข้าใจส่วนตัวเพื่อใช้ทบทวน ไม่ควรใช้อ้างอิงเชิงวิชาการ</p>
+      <div class="shelf" id="shelf"></div>
+    </section>
+
+    <!-- ================= BOOK ================= -->
+    <section class="view" id="v-book">
+      <header class="ph">
+        <button class="back-btn" data-up="/library" aria-label="กลับชั้นหนังสือ"><svg class="ic"><use href="#i-chev-l"/></svg></button>
+        <div class="ph-t"><p class="eyebrow" id="bkVol"></p><h1 id="bkTitle">Book</h1></div>
+        <div class="ph-a">
+          <button class="ibtn" id="bkToc" aria-label="สารบัญ"><svg class="ic"><use href="#i-list"/></svg></button>
+        </div>
+      </header>
+      <article class="card reader">
+        <div class="prose" id="bkBody"></div>
+      </article>
+      <div class="pager">
+        <button class="btn" id="bkPrev"><svg class="ic"><use href="#i-chev-l"/></svg>ก่อนหน้า</button>
+        <div class="dots" id="bkDots"></div>
+        <button class="btn" id="bkNext">ถัดไป<svg class="ic"><use href="#i-chev-r"/></svg></button>
+      </div>
+    </section>
+
+    <!-- ================= SETTINGS ================= -->
+    <section class="view" id="v-settings">
+      <header class="ph">
+        <button class="back-btn tab-only" data-up="/home" aria-label="กลับ"><svg class="ic"><use href="#i-chev-l"/></svg></button>
+        <div class="ph-t"><p class="eyebrow">Settings</p><h1>ตั้งค่า</h1></div>
+      </header>
+      <div class="set-grid">
+        <div class="col">
+          <h3 class="st">การแสดงผล</h3>
+          <div class="card rows">
+            <div class="set-row"><div class="lbl"><b>ธีม</b></div><div class="seg sm" id="sTheme"><button data-v="light">สว่าง</button><button data-v="dark">มืด</button><button data-v="auto">ตามระบบ</button></div></div>
+            <div class="set-row"><div class="lbl"><b>แสดงพินอิน</b><small>บนการ์ด รายการคำ และคำใบ้</small></div><label class="switch"><input type="checkbox" id="sPinyin"><span></span></label></div>
+            <div class="set-row"><div class="lbl"><b>คำแปลภาษาไทย</b></div><label class="switch"><input type="checkbox" id="sTh"><span></span></label></div>
+            <div class="set-row"><div class="lbl"><b>คำแปลภาษาอังกฤษ</b></div><label class="switch"><input type="checkbox" id="sEn"><span></span></label></div>
+          </div>
+
+          <h3 class="st">เสียง</h3>
+          <div class="card rows">
+            <div class="set-row"><div class="lbl"><b>เสียงเอฟเฟกต์</b><small>เสียงพลิกการ์ด ตอบถูก/ผิด และจบด่าน</small></div><label class="switch"><input type="checkbox" id="sSfx"><span></span></label></div>
+            <div class="set-row col"><div class="lbl"><b>ระดับเสียงเอฟเฟกต์ <span class="val" id="sVolVal">60%</span></b></div><input type="range" id="sVol" min="0" max="100" step="5"></div>
+            <div class="set-row"><div class="lbl"><b>การสั่นตอบสนอง</b><small>เฉพาะอุปกรณ์ที่รองรับ</small></div><label class="switch"><input type="checkbox" id="sHaptic"><span></span></label></div>
+            <div class="set-row col"><div class="lbl"><b>เสียงอ่านภาษาจีน</b><small id="sVoiceNote"></small></div><select class="input" id="sVoice"></select></div>
+            <div class="set-row col"><div class="lbl"><b>ความเร็วเสียงอ่าน <span class="val" id="sRateVal">0.8×</span></b></div><input type="range" id="sRate" min="0.5" max="1.2" step="0.05"></div>
+            <div class="set-row"><button class="btn soft block" id="sTest"><svg class="ic"><use href="#i-vol"/></svg>ทดสอบเสียง <span class="hz">你好，欢迎来到 Library of Limu</span></button></div>
+          </div>
+
+          <h3 class="st">แฟลชการ์ด</h3>
+          <div class="card rows">
+            <div class="set-row col"><div class="lbl"><b>โจทย์</b></div><div class="seg sm" id="sAsk"><button data-v="zh"><span class="hz">字</span> → ความหมาย</button><button data-v="mean">ความหมาย → <span class="hz">字</span></button><button data-v="listen">ฟัง</button></div></div>
+            <div class="set-row col"><div class="lbl"><b>การตอบ</b></div><div class="seg sm" id="sQuiz"><button data-v="quiz">4 ตัวเลือก</button><button data-v="self">พลิกการ์ดตรวจเอง</button></div></div>
+            <div class="set-row col"><div class="lbl"><b>เวลา</b><small>เมื่อนับถอยหลังหมดจะนับว่าตอบผิด</small></div><div class="seg sm" id="sTimer"><button data-v="countdown">นับถอยหลัง</button><button data-v="stopwatch">จับเวลาเฉย ๆ</button></div><div class="chips" id="sSec"></div></div>
+            <div class="set-row"><div class="lbl"><b>ไปใบถัดไปเองเมื่อตอบถูก</b><small>แตะการ์ดเพื่อหยุดอ่านเฉลยได้</small></div><label class="switch"><input type="checkbox" id="sAutoNext"><span></span></label></div>
+            <div class="set-row"><div class="lbl"><b>อ่านออกเสียงเมื่อเฉลย</b></div><label class="switch"><input type="checkbox" id="sAutoSpeak"><span></span></label></div>
+          </div>
+        </div>
+        <div class="col">
+          <h3 class="st">เป้าหมายรายวัน</h3>
+          <div class="card rows">
+            <div class="set-row col"><div class="lbl"><b>การ์ดต่อวัน <span class="val" id="sGoalVal">30</span></b></div><input type="range" id="sGoal" min="10" max="200" step="10"></div>
+          </div>
+
+          <h3 class="st">ขนาดตัวอักษร</h3>
+          <div class="card">
+            <div class="preview">
+              <div class="pv-py pyx">nǐ hǎo</div><div class="pv-zh hz">你好</div>
+              <div class="pv-th lang-th">สวัสดี</div><div class="pv-en lang-en">hello</div>
+              <div class="pv-ex"><span class="hz">你好，我叫小明。</span><br><span class="lang-th">สวัสดี ฉันชื่อเสี่ยวหมิง</span></div>
+            </div>
+            <div id="fontSliders"></div>
+            <button class="btn sm" id="sFontReset">คืนค่าเริ่มต้น</button>
+          </div>
+
+          <h3 class="st">ข้อมูลของฉัน</h3>
+          <div class="card">
+            <p class="note">ข้อมูลทั้งหมดเก็บในเบราว์เซอร์ของเครื่องนี้เท่านั้น สำรองเป็นไฟล์เพื่อย้ายเครื่องหรือกันข้อมูลหาย (นำเข้าไฟล์สำรองจาก new offy v1 ได้)</p>
+            <div class="grid2">
+              <button class="btn" id="sExport"><svg class="ic"><use href="#i-down"/></svg>สำรองข้อมูล</button>
+              <button class="btn" id="sImport"><svg class="ic"><use href="#i-up"/></svg>นำเข้าข้อมูล</button>
+            </div>
+            <input type="file" id="sImportFile" accept="application/json,.json" hidden>
+            <div class="grid2" style="margin-top:10px">
+              <button class="btn danger" data-reset="review">ล้างรายการทบทวน</button>
+              <button class="btn danger" data-reset="stats">ล้างสถิติและดาว</button>
+              <button class="btn danger" data-reset="mywords">ลบคำของฉัน</button>
+              <button class="btn danger solid" data-reset="all">ล้างทั้งหมด</button>
+            </div>
+          </div>
+          <p class="fine">new offy v2 · Library of Limu<br>© 2026 李牧飞 Aphisit Kaewnet</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ================= shared overlays ================= -->
+<div class="scrim" id="scrim"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true">
+  <div class="grab" id="sheetGrab"><i></i></div>
+  <button class="ibtn sheet-x" id="sheetX" aria-label="ปิด"><svg class="ic"><use href="#i-x"/></svg></button>
+  <div class="sheet-body" id="sheetBody"></div>
+  <div class="sheet-foot" id="sheetFoot"></div>
+</aside>
+<div class="modal-wrap" id="modalWrap"><div class="modal" role="alertdialog" aria-modal="true"><h3 id="mTitle"></h3><div class="m-msg" id="mMsg"></div><div class="acts" id="mActs"></div></div></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="tip" id="tip"></div>
+<div class="edge-pull" id="edgeL"><svg class="ic"><use href="#i-chev-l"/></svg></div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script src="data/words.js?v=2.0.0"></script>
+<script src="data/books.js?v=2.0.0"></script>
+<script src="js/core.js?v=2.0.0"></script>
+<script src="js/play.js?v=2.0.0"></script>
+<script src="js/app.js?v=2.0.0"></script>
+</body>
+</html>

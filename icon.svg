@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="22%" cy="14%" r="110%">
+      <stop offset="0%" stop-color="#2f8767"/>
+      <stop offset="58%" stop-color="#1f6f54"/>
+      <stop offset="100%" stop-color="#144a38"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect x="86" y="86" width="340" height="340" rx="46" fill="none" stroke="#ffffff" stroke-opacity=".2" stroke-width="5"/>
+  <path d="M256 86v340M86 256h340" stroke="#ffffff" stroke-opacity=".16" stroke-width="4" stroke-dasharray="12 11"/>
+  <text x="256" y="344" text-anchor="middle" fill="#fffdf8" font-family="'KaiTi','STKaiti','Kaiti SC','LXGW WenKai',serif" font-size="250">词</text>
+</svg>
