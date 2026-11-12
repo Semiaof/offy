@@ -1,7 +1,7 @@
-// Library of Limu · new offy v2 — offline support.
+// Library of Limu · new offy v3 — offline support.
 // Bump CACHE_NAME whenever app files change so old caches are dropped.
-const CACHE_NAME = 'new-offy-v2-0';
-const CORE_ASSETS = ['./', './index.html', './css/app.css', './js/core.js', './js/play.js', './js/app.js', './data/words.js', './data/books.js', './manifest.json', './icon.svg', './icons/icon-180.png', './icons/icon-192.png'];
+const CACHE_NAME = 'new-offy-v3-0';
+const CORE_ASSETS = ['./', './index.html', './css/app.css', './js/core.js', './js/play.js', './js/app.js', './data/words.js', './data/books.js', './manifest.json', './fonts/PinyinSans.woff', './icon.svg', './icons/icon-180.png', './icons/icon-192.png'];
 
 self.addEventListener('install', event => {
   self.skipWaiting();

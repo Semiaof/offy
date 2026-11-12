@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Library of Limu · new offy v2 — © 2026 李牧飞 Aphisit Kaewnet -->
+<!-- Library of Limu · new offy v3 — © 2026 李牧飞 Aphisit Kaewnet -->
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -17,14 +17,15 @@
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="fonts/PinyinSans.woff" as="font" type="font/woff" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-lite-webfont@1.1.0/style.css" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=2.0.0">
+<link rel="stylesheet" href="css/app.css?v=3.0.0">
 <script>
 /* apply the saved / system theme before first paint */
 (function () {
   var t = null;
-  try { var d = JSON.parse(localStorage.getItem('offy.v2') || localStorage.getItem('offy.v1') || 'null'); t = d && d.settings && d.settings.theme; } catch (e) {}
+  try { var d = JSON.parse(localStorage.getItem('offy.v3') || localStorage.getItem('offy.v2') || localStorage.getItem('offy.v1') || 'null'); t = d && d.settings && d.settings.theme; } catch (e) {}
   if (t !== 'dark' && t !== 'light') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', t);
 })();
@@ -415,25 +416,54 @@
           </div>
         </div>
         <div class="col">
+          <h3 class="st">ปรับแต่งการ์ดและสี</h3>
+          <div class="card tune">
+            <div class="pv-stage" id="pvStage">
+              <div class="pcard pv" id="pvCard" role="button" tabindex="0" aria-label="ตัวอย่างการ์ด แตะเพื่อพลิก"></div>
+              <div class="pv-ui" aria-hidden="true"><span class="btn primary sm">ปุ่มหลัก</span><span class="chip on">ตัวเลือก</span><span class="pv-link">ลิงก์</span></div>
+            </div>
+            <div class="seg sm" id="tuneTab">
+              <button data-v="front">ก่อนตอบ</button><button data-v="back">หลังตอบ</button><button data-v="color">สี</button>
+            </div>
+
+            <div class="tune-pane" id="tuneFront">
+              <h3 class="ct">ตัวอย่างคำ</h3>
+              <div class="chips" id="tuneLen">
+                <button class="chip" data-n="1">1 ตัว</button><button class="chip" data-n="2">2 ตัว</button><button class="chip" data-n="3">3 ตัว</button><button class="chip" data-n="4">4 ตัว</button>
+              </div>
+              <div class="fs">
+                <div class="row"><span id="tuneFrontLbl">ขนาดตัวจีน</span><span class="val" id="tuneFrontVal">100%</span></div>
+                <input type="range" id="tuneFrontSize" min="60" max="120" step="5" aria-label="ขนาดตัวจีนหน้าการ์ด">
+              </div>
+              <div class="set-row" id="tuneGridRow">
+                <div class="lbl"><b>จัดคำ 4 ตัวเป็น 2 แถว</b><small>เช่น <span class="hz">不好 / 意思</span> ตัวใหญ่ขึ้นและไม่ตกบรรทัดเอง</small></div>
+                <label class="switch"><input type="checkbox" id="tuneGrid4"><span></span></label>
+              </div>
+              <p class="note">ตั้งขนาดแยกตามจำนวนตัวอักษรได้ คำที่ยาวกว่า 4 ตัวจะแบ่งเป็น 2 แถวอัตโนมัติ</p>
+            </div>
+
+            <div class="tune-pane" id="tuneBack" hidden>
+              <div id="fontSliders"></div>
+            </div>
+
+            <div class="tune-pane" id="tuneColor" hidden>
+              <div id="colorRows"></div>
+            </div>
+
+            <div class="row wrap tune-foot">
+              <button class="btn sm" id="sFontReset">คืนค่าขนาดเริ่มต้น</button>
+              <button class="btn sm" id="sColorReset">คืนค่าสีเริ่มต้น</button>
+            </div>
+          </div>
+
           <h3 class="st">เป้าหมายรายวัน</h3>
           <div class="card rows">
             <div class="set-row col"><div class="lbl"><b>การ์ดต่อวัน <span class="val" id="sGoalVal">30</span></b></div><input type="range" id="sGoal" min="10" max="200" step="10"></div>
           </div>
 
-          <h3 class="st">ขนาดตัวอักษร</h3>
-          <div class="card">
-            <div class="preview">
-              <div class="pv-py pyx">nǐ hǎo</div><div class="pv-zh hz">你好</div>
-              <div class="pv-th lang-th">สวัสดี</div><div class="pv-en lang-en">hello</div>
-              <div class="pv-ex"><span class="hz">你好，我叫小明。</span><br><span class="lang-th">สวัสดี ฉันชื่อเสี่ยวหมิง</span></div>
-            </div>
-            <div id="fontSliders"></div>
-            <button class="btn sm" id="sFontReset">คืนค่าเริ่มต้น</button>
-          </div>
-
           <h3 class="st">ข้อมูลของฉัน</h3>
           <div class="card">
-            <p class="note">ข้อมูลทั้งหมดเก็บในเบราว์เซอร์ของเครื่องนี้เท่านั้น สำรองเป็นไฟล์เพื่อย้ายเครื่องหรือกันข้อมูลหาย (นำเข้าไฟล์สำรองจาก new offy v1 ได้)</p>
+            <p class="note">ข้อมูลทั้งหมดเก็บในเบราว์เซอร์ของเครื่องนี้เท่านั้น สำรองเป็นไฟล์เพื่อย้ายเครื่องหรือกันข้อมูลหาย (นำเข้าไฟล์สำรองจาก new offy v1 และ v2 ได้)</p>
             <div class="grid2">
               <button class="btn" id="sExport"><svg class="ic"><use href="#i-down"/></svg>สำรองข้อมูล</button>
               <button class="btn" id="sImport"><svg class="ic"><use href="#i-up"/></svg>นำเข้าข้อมูล</button>
@@ -446,7 +476,7 @@
               <button class="btn danger solid" data-reset="all">ล้างทั้งหมด</button>
             </div>
           </div>
-          <p class="fine">new offy v2 · Library of Limu<br>© 2026 李牧飞 Aphisit Kaewnet</p>
+          <p class="fine">new offy v3 · Library of Limu<br>© 2026 李牧飞 Aphisit Kaewnet</p>
         </div>
       </div>
     </section>
@@ -468,10 +498,10 @@
 <div class="edge-pull" id="edgeL"><svg class="ic"><use href="#i-chev-l"/></svg></div>
 <canvas id="confetti" aria-hidden="true"></canvas>
 
-<script src="data/words.js?v=2.0.0"></script>
-<script src="data/books.js?v=2.0.0"></script>
-<script src="js/core.js?v=2.0.0"></script>
-<script src="js/play.js?v=2.0.0"></script>
-<script src="js/app.js?v=2.0.0"></script>
+<script src="data/words.js?v=3.0.0"></script>
+<script src="data/books.js?v=3.0.0"></script>
+<script src="js/core.js?v=3.0.0"></script>
+<script src="js/play.js?v=3.0.0"></script>
+<script src="js/app.js?v=3.0.0"></script>
 </body>
 </html>

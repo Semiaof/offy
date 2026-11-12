@@ -1,6 +1,6 @@
 'use strict';
 /* =====================================================================
-   Library of Limu · new offy v2 — play
+   Library of Limu · new offy v3 — play
    flashcard game on the card table · 听写 dictation · writing pad · answer sheet
    ===================================================================== */
 
@@ -161,7 +161,7 @@ const Game = {
     let front;
     if (s.ask === 'mean') { const th = S().showTh && w.th; front = `<div class="q-mean">${esc(th ? w.th : (w.en || w.th))}</div>${th && S().showEn && w.en ? `<div class="q-en">${esc(w.en)}</div>` : ''}`; }
     else if (s.ask === 'listen') front = `<button class="q-spk" data-say aria-label="ฟังอีกครั้ง">${ic('vol')}</button>`;
-    else front = `<div class="zh ${w._len > 3 ? 'long' : ''}">${esc(w.zh)}</div>`;
+    else front = hzFront(w.zh);
     const tap = s.answer === 'self' ? 'แตะการ์ดเพื่อพลิกดูคำตอบ' : s.ask === 'listen' ? 'แตะลำโพงเพื่อฟังอีกครั้ง' : '';
     el.innerHTML = `<div class="flip">
       <div class="face front">${front}${tap ? `<div class="tap">${tap}</div>` : ''}</div>
@@ -378,11 +378,12 @@ const Game = {
       const fx = pile.left + pile.width / 2 - (rect.left + rect.width / 2), fy = pile.top + pile.height / 2 - (rect.top + rect.height * 0.45);
       const rot = Math.random() * 26 - 13;
       el.style.zIndex = 10 + i; el.style.transform = `translate(${(Math.random() * 18 - 9).toFixed(0)}px,${(Math.random() * 14 - 7).toFixed(0)}px) rotate(${rot.toFixed(0)}deg)`;
-      if (i === n - 1) el.textContent = BY_ID.get(r.id)?.zh || '';
+      if (i === n - 1) el.innerHTML = `<div class="face front" style="box-shadow:none">${hzFront(BY_ID.get(r.id)?.zh || '')}</div>`;
       table.appendChild(el);
       if (el.animate) anims.push(el.animate([{ transform: `translate(${fx}px,${fy}px) scale(.26) rotate(0deg)`, opacity: .3 }, { transform: el.style.transform, opacity: 1 }], { duration: 460, delay: i * 45, easing: 'cubic-bezier(.2,.85,.25,1)', fill: 'backwards' }).finished.catch(() => { }));
     }
     this.setPile('L', 0, false); this.setPile('R', 0, false); sfx('swoosh');
+    for (let i = 0; i < Math.min(n, 8); i++) setTimeout(() => { if (this.alive(s)) sfx('gather', i); }, 150 + i * 60);
     await Promise.all(anims); await sleep(260);
     if (!this.alive(s)) return;
     this.showResult(best);
@@ -504,7 +505,7 @@ const Dicta = {
     $('#dHints').innerHTML =
       `<span class="hint shown">${w._len} ตัวอักษร</span>` +
       (showMean ? `<span class="hint shown">${esc(meaningText(w))}</span>` : `<button class="hint" data-h="mean">${ic('bulb')}ดูความหมาย</button>`) +
-      (it.showPy ? `<span class="hint shown" style="font-family:var(--py)">${esc(w.py)}</span>` : (s.ans === 'type' ? '' : `<button class="hint" data-h="py">${ic('bulb')}ดูพินอิน</button>`));
+      (it.showPy ? `<span class="hint shown" style="font-family:var(--pinyin)">${esc(w.py)}</span>` : (s.ans === 'type' ? '' : `<button class="hint" data-h="py">${ic('bulb')}ดูพินอิน</button>`));
   },
   async autoPlay() { const s = this.s, idx = s.idx; await sleep(380); if (this.s === s && s.mounted && s.idx === idx && !this.item().revealed) this.play(); },
   async play(slow = false) {
@@ -723,7 +724,7 @@ const DSheet = {
       const w = BY_ID.get(it.id); if (!w) return '';
       const yours = s.ans === 'draw' ? (it.img ? `<img src="${it.img}" alt="">` : '<span class="muted">—</span>') : s.ans === 'type' ? `<b class="ans-typed" style="font-size:17px">${esc(it.typed || '—')}</b>` : `<span class="muted">กระดาษ ข้อ ${i + 1}</span>`;
       return `<tr><td class="muted tn">${i + 1}</td><td>${yours}${it.hint ? '<small>ใช้คำใบ้พินอิน</small>' : ''}</td>
-        <td><div class="row" style="gap:6px"><span class="a-zh">${esc(w.zh)}</span><button class="ibtn sm" data-speak="${esc(w.id)}" aria-label="ฟังเสียง">${ic('vol')}</button></div><small class="pyx" style="font-family:var(--py)">${esc(w.py)}</small><small>${esc(meaningText(w))}</small></td>
+        <td><div class="row" style="gap:6px"><span class="a-zh">${esc(w.zh)}</span><button class="ibtn sm" data-speak="${esc(w.id)}" aria-label="ฟังเสียง">${ic('vol')}</button></div><small class="pyx">${esc(w.py)}</small><small>${esc(meaningText(w))}</small></td>
         <td class="c"><button class="mark ${it.ok === true ? 'ok' : ''}" data-mk="${i}" data-v="1" aria-label="ถูก">${ic('check')}</button> <button class="mark ${it.ok === false ? 'no' : ''}" data-mk="${i}" data-v="0" aria-label="ผิด">${ic('x')}</button></td></tr>`;
     }).join('');
     const ok = s.items.filter(i => i.ok === true).length, marked = s.items.filter(i => i.ok !== null).length;

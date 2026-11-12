@@ -1,6 +1,6 @@
 'use strict';
 /* =====================================================================
-   Library of Limu · new offy v2 — app
+   Library of Limu · new offy v3 — app
    appearance · home · learn · stage map · custom deck · dictionary
    statistics · library · settings · routes · boot
    ===================================================================== */
@@ -16,11 +16,45 @@ function applySettings() {
   const r = document.documentElement.style;
   r.setProperty('--s-hz', s.scale.hz / 100); r.setProperty('--s-mean', s.scale.mean / 100);
   r.setProperty('--s-ex', s.scale.ex / 100); r.setProperty('--s-dict', s.scale.dict / 100);
+  [1, 2, 3, 4].forEach(n => r.setProperty('--f' + n, (s.front['s' + n] || 100) / 100));
+  applyColors(theme);
   $$('.js-theme use').forEach(u => u.setAttribute('href', theme === 'dark' ? '#i-sun' : '#i-moon'));
   $$('.js-pinyin').forEach(b => { b.classList.toggle('off', !s.showPinyin); b.querySelector('use').setAttribute('href', s.showPinyin ? '#i-eye' : '#i-eye-off'); });
   $$('.js-sound').forEach(b => { b.classList.toggle('off', !s.sfx); b.querySelector('use').setAttribute('href', s.sfx ? '#i-vol' : '#i-mute'); });
   const meta = $('meta[name="theme-color"]'); if (meta) meta.content = theme === 'dark' ? '#111311' : '#f4f2ec';
   Sfx.setVol();
+}
+/** custom colours: every shade is derived from the few colours picked in settings, for the current theme.
+    An empty value removes the override, so the built-in palette in the stylesheet applies again. */
+function applyColors(theme = currentTheme()) {
+  const c = S().colors || {}, st = document.documentElement.style, dark = theme === 'dark';
+  const put = o => Object.entries(o).forEach(([k, v]) => { if (v == null) st.removeProperty(k); else st.setProperty(k, v); });
+  const A = Color.ok(c.accent) ? c.accent : null;
+  // app accent (buttons, links, active states, calendar)
+  if (A) {
+    const a = dark ? Color.bright(A, .3) : A, base = dark ? '#222722' : '#e9e6dd';
+    put({
+      '--accent': a, '--accent-hover': dark ? Color.mix(a, '#ffffff', .16) : Color.mix(a, '#000000', .14),
+      '--on-accent': Color.lum(a) > .42 ? '#111411' : '#ffffff', '--accent-soft': Color.alpha(a, dark ? .16 : .13),
+      '--accent-ink': dark ? Color.mix(a, '#ffffff', .18) : Color.deep(A, .17),
+      '--h1': Color.mix(base, a, .3), '--h2': Color.mix(base, a, .55), '--h3': Color.mix(base, a, .8), '--h4': dark ? Color.mix(a, '#ffffff', .15) : Color.mix(a, '#000000', .12)
+    });
+  } else put({ '--accent': null, '--accent-hover': null, '--on-accent': null, '--accent-soft': null, '--accent-ink': null, '--h1': null, '--h2': null, '--h3': null, '--h4': null });
+  // card table — follows the accent unless picked separately; kept dark enough for the white labels on it
+  const F0 = Color.ok(c.felt) ? c.felt : (A ? Color.mix(A, '#000000', .18) : null);
+  if (F0) {
+    const F = Color.deep(F0, .16);
+    put(dark ? { '--felt-a': Color.mix(F, '#000000', .16), '--felt-b': Color.mix(F, '#000000', .34), '--felt-c': Color.mix(F, '#000000', .54) }
+      : { '--felt-a': Color.mix(F, '#ffffff', .12), '--felt-b': F, '--felt-c': Color.mix(F, '#000000', .26) });
+  } else put({ '--felt-a': null, '--felt-b': null, '--felt-c': null });
+  // the card itself: paper, hanzi ink, pinyin
+  const P = Color.ok(c.paper) ? c.paper : null, I = Color.ok(c.ink) ? c.ink : null, Y = Color.ok(c.pinyin) ? c.pinyin : null;
+  if (P || I || Y || A) {
+    const p = P || (dark ? '#f6f4ee' : '#fffefb'), light = Color.lum(p) > .38;
+    const ink = I || (light ? '#1a1a18' : '#f2f2ec');
+    const py = Y || (A ? (light ? Color.deep(A, .2) : Color.bright(A, .42)) : (light ? '#1f6f54' : '#7fd8b2'));
+    put({ '--paper': p, '--paper-ink': ink, '--paper-line': Color.mix(p, ink, .1), '--paper-muted': Color.mix(p, ink, .6), '--paper-soft': Color.mix(p, ink, .06), '--paper-chip': Color.mix(p, py, .14), '--paper-py': py });
+  } else put({ '--paper': null, '--paper-ink': null, '--paper-line': null, '--paper-muted': null, '--paper-soft': null, '--paper-chip': null, '--paper-py': null });
 }
 /** switch theme with a circular reveal from the button that was pressed */
 function setTheme(next, origin) {
@@ -685,7 +719,74 @@ window.setDeepPinyinPage = n => Book.go(n - 1);
 window.openPosInDict = openPosInDict;
 
 /* ---------- SETTINGS ---------- */
-const FONT_SLIDERS = [['hz', 'ตัวจีนบนการ์ด'], ['mean', 'พินอิน ความหมาย และตัวเลือก'], ['ex', 'ประโยคตัวอย่าง'], ['dict', 'รายการคำศัพท์']];
+const FONT_SLIDERS = [['hz', 'ตัวจีนด้านเฉลย'], ['mean', 'พินอิน ความหมาย และตัวเลือก'], ['ex', 'ประโยคตัวอย่าง'], ['dict', 'รายการคำในคลังคำ']];
+const TUNE_SAMPLES = {
+  1: { lvl: 1, zh: '爱', py: 'ài', pos: 'Verb', th: 'รัก', en: 'to love', ex_zh: '我爱我的爸爸妈妈。', ex_py: 'Wǒ ài wǒ de bàba māma.', ex_th: 'ฉันรักพ่อแม่ของฉัน', ex_en: 'I love my mom and dad.' },
+  2: { lvl: 1, zh: '你好', py: 'nǐ hǎo', pos: 'Phrase', th: 'สวัสดี', en: 'hello', ex_zh: '你好，我叫小明。', ex_py: 'Nǐ hǎo, wǒ jiào Xiǎomíng.', ex_th: 'สวัสดี ฉันชื่อเสี่ยวหมิง', ex_en: 'Hello, my name is Xiaoming.' },
+  3: { lvl: 2, zh: '图书馆', py: 'túshūguǎn', pos: 'Noun', th: 'ห้องสมุด', en: 'library', ex_zh: '我在图书馆看书。', ex_py: 'Wǒ zài túshūguǎn kàn shū.', ex_th: 'ฉันอ่านหนังสืออยู่ที่ห้องสมุด', ex_en: 'I am reading in the library.' },
+  4: { lvl: 2, zh: '不好意思', py: 'bù hǎoyìsi', pos: 'Phrase', th: 'ขอโทษ, เขินอาย', en: 'sorry, embarrassed', ex_zh: '不好意思，我来晚了。', ex_py: 'Bù hǎoyìsi, wǒ lái wǎn le.', ex_th: 'ขอโทษนะ ฉันมาสาย', ex_en: 'Sorry, I am late.' }
+};
+/* [key, label, presets: [value ('' = built-in), name, colour shown on the swatch (null = "auto")], colour the picker opens with] */
+const COLOR_ROWS = [
+  ['accent', 'สีหลักของแอป', [['', 'หยก (เริ่มต้น)', '#1f6f54'], ['#2a5db0', 'คราม'], ['#c2412d', 'ชาด'], ['#b7791f', 'อำพัน'], ['#7a4aa6', 'องุ่น'], ['#3b4250', 'หมึก']], '#1f6f54'],
+  ['felt', 'สีโต๊ะวางการ์ด', [['', 'ตามสีหลัก', null], ['#1d5c45', 'เขียวสักหลาด'], ['#1f3f6b', 'กรมท่า'], ['#7a2a2a', 'แดงเข้ม'], ['#33383d', 'ชาร์โคล'], ['#6b4a2e', 'ไม้']], '#1d5c45'],
+  ['paper', 'สีการ์ด', [['', 'ขาวนวล (เริ่มต้น)', '#fffefb'], ['#f7efdc', 'ครีม'], ['#eceeed', 'เทาหมอก'], ['#e4f0e3', 'เขียวอ่อน'], ['#20231f', 'ดำถ่าน']], '#fffefb'],
+  ['ink', 'สีตัวจีน', [['', 'อัตโนมัติ', null], ['#1a1a18', 'ดำ'], ['#1d3557', 'น้ำเงินหมึก'], ['#9d2b22', 'แดงชาด'], ['#2f5d3a', 'เขียวเข้ม']], '#1a1a18'],
+  ['pinyin', 'สีพินอิน', [['', 'ตามสีหลัก', null], ['#1f6f54', 'เขียว'], ['#2a5db0', 'น้ำเงิน'], ['#c2412d', 'แดง'], ['#6b6b66', 'เทา']], '#1f6f54']
+];
+const Tune = {
+  tab: 'front', len: 2,
+  init() {
+    const s = () => S();
+    $('#tuneTab').addEventListener('click', e => { const b = e.target.closest('button[data-v]'); if (!b) return; this.tab = b.dataset.v; this.show(); });
+    $('#tuneLen').addEventListener('click', e => { const b = e.target.closest('[data-n]'); if (!b) return; this.len = +b.dataset.n; this.show(); });
+    $('#tuneFrontSize').oninput = e => { s().front['s' + this.len] = +e.target.value; $('#tuneFrontVal').textContent = e.target.value + '%'; applySettings(); Store.save(); };
+    $('#tuneGrid4').onchange = e => { s().front.rows4 = e.target.checked; Store.save(); this.preview(); };
+    $('#fontSliders').innerHTML = FONT_SLIDERS.map(([k, n]) => `<div class="fs"><div class="row"><span>${n}</span><span class="val" id="fv-${k}">100%</span></div><input type="range" min="60" max="160" step="5" data-fk="${k}" aria-label="${n}"></div>`).join('');
+    $('#fontSliders').addEventListener('input', e => { const k = e.target.dataset.fk; if (!k) return; s().scale[k] = +e.target.value; $('#fv-' + k).textContent = e.target.value + '%'; applySettings(); Store.save(); });
+    $('#sFontReset').onclick = () => { s().scale = { ...DEFAULT_SETTINGS.scale }; s().front = { ...DEFAULT_SETTINGS.front }; applySettings(); Store.save(); this.show(); toast('คืนค่าขนาดเริ่มต้นแล้ว', { icon: 'check', ms: 1600 }); };
+    $('#sColorReset').onclick = () => { s().colors = { ...DEFAULT_SETTINGS.colors }; applySettings(); Store.save(); this.markColors(); toast('คืนค่าสีเริ่มต้นแล้ว', { icon: 'check', ms: 1600 }); };
+    // the preview is a real card: tap to flip, speaker speaks
+    const pv = $('#pvCard');
+    pv.onclick = e => { if (e.target.closest('[data-say]')) { TTS.speak(this.sample().zh); return; } pv.classList.toggle('flipped'); sfx('flip'); };
+    pv.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pv.click(); } };
+    // colour rows are built once; picking only moves the selection (rebuilding would close an open colour picker)
+    $('#colorRows').innerHTML = COLOR_ROWS.map(([k, name, presets, start]) => `<div class="crow"><div class="row"><span>${name}</span><small id="cn-${k}"></small></div><div class="sws">`
+      + presets.map(([v, label, show]) => `<button class="sw ${show === null ? 'auto' : ''}" data-ck="${k}" data-cv="${v}" ${show === null ? '' : `style="--sw:${show || v}"`} aria-label="${label}" data-tip="${label}">${show === null ? 'A' : ''}</button>`).join('')
+      + `<label class="sw custom" data-tip="เลือกสีเอง">${ic('plus')}<input type="color" data-ck="${k}" value="${start}" aria-label="เลือก${name}เอง"></label></div></div>`).join('');
+    $('#colorRows').addEventListener('click', e => { const b = e.target.closest('button[data-ck]'); if (!b) return; sfx('pop'); this.setColor(b.dataset.ck, b.dataset.cv); });
+    $('#colorRows').addEventListener('input', e => { if (e.target.type === 'color') this.setColor(e.target.dataset.ck, e.target.value); });
+  },
+  sample() { const t = TUNE_SAMPLES[this.len]; return RAW_WORDS.find(x => x.zh === t.zh) || t; },
+  setColor(k, v) { S().colors[k] = v; applySettings(); Store.save(); this.markColors(); },
+  markColors() {
+    COLOR_ROWS.forEach(([k, , presets]) => {
+      const cur = String(S().colors[k] || '').toLowerCase(), hit = presets.find(p => p[0] === cur), custom = !!cur && !hit;
+      $$(`#colorRows button[data-ck="${k}"]`).forEach(b => b.classList.toggle('on', b.dataset.cv === cur));
+      const inp = $(`#colorRows input[data-ck="${k}"]`), lab = inp.parentElement;
+      lab.classList.toggle('on', custom);
+      if (custom) { lab.style.setProperty('--sw', cur); if (inp.value !== cur) inp.value = cur; } else lab.style.removeProperty('--sw');
+      $('#cn-' + k).textContent = hit ? hit[1] : cur.toUpperCase();
+    });
+  },
+  preview() {
+    // same markup as the game, so what you see here is what the table shows
+    $('#pvCard').innerHTML = Game.cardEl.call({ s: { ask: 'zh', answer: 'quiz' } }, this.sample()).innerHTML;
+  },
+  show() {
+    const s = S(), f = s.front;
+    segSet($('#tuneTab'), this.tab);
+    $('#tuneFront').hidden = this.tab !== 'front'; $('#tuneBack').hidden = this.tab !== 'back'; $('#tuneColor').hidden = this.tab !== 'color';
+    $('#sFontReset').hidden = this.tab === 'color'; $('#sColorReset').hidden = this.tab !== 'color';
+    $$('#tuneLen .chip').forEach(b => b.classList.toggle('on', +b.dataset.n === this.len));
+    $('#tuneFrontLbl').textContent = `ขนาดตัวจีน · คำ ${this.len} ตัว${this.len === 4 ? 'ขึ้นไป' : ''}`;
+    $('#tuneFrontSize').value = f['s' + this.len]; $('#tuneFrontVal').textContent = f['s' + this.len] + '%';
+    $('#tuneGridRow').hidden = this.len !== 4; $('#tuneGrid4').checked = f.rows4 !== false;
+    FONT_SLIDERS.forEach(([k]) => { const r = $(`[data-fk="${k}"]`); r.value = s.scale[k]; $('#fv-' + k).textContent = s.scale[k] + '%'; });
+    this.preview(); this.markColors();
+    $('#pvCard').classList.toggle('flipped', this.tab !== 'front');
+  }
+};
 const Settings = {
   init() {
     const s = () => S();
@@ -707,9 +808,7 @@ const Settings = {
     $('#sRate').oninput = e => { s().rate = +e.target.value; $('#sRateVal').textContent = rateTxt(s().rate); Store.save(); };
     $('#sTest').onclick = async () => { const ok = await TTS.speak('你好，欢迎来到 Library of Limu'); if (!ok && !TTS.voices.length) toast('ไม่พบเสียงภาษาจีนในเครื่องนี้', { icon: 'info' }); };
     $('#sGoal').oninput = e => { s().goal = +e.target.value; $('#sGoalVal').textContent = s().goal; Store.save(); };
-    $('#fontSliders').innerHTML = FONT_SLIDERS.map(([k, n]) => `<div class="fs"><div class="row"><span>${n}</span><span class="val" id="fv-${k}">100%</span></div><input type="range" min="60" max="180" step="5" data-fk="${k}" aria-label="${n}"></div>`).join('');
-    $('#fontSliders').addEventListener('input', e => { const k = e.target.dataset.fk; if (!k) return; s().scale[k] = +e.target.value; $('#fv-' + k).textContent = e.target.value + '%'; applySettings(); Store.save(); });
-    $('#sFontReset').onclick = () => { s().scale = { ...DEFAULT_SETTINGS.scale }; applySettings(); Store.save(); this.show(); };
+    Tune.init();
     $('#sExport').onclick = () => this.exportData();
     $('#sImport').onclick = () => $('#sImportFile').click();
     $('#sImportFile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) this.importData(f); };
@@ -724,7 +823,7 @@ const Settings = {
     $('#sVol').value = s.vol; $('#sVolVal').textContent = s.vol + '%';
     $('#sRate').value = s.rate; $('#sRateVal').textContent = rateTxt(s.rate);
     $('#sGoal').value = s.goal; $('#sGoalVal').textContent = s.goal;
-    FONT_SLIDERS.forEach(([k]) => { const r = $(`[data-fk="${k}"]`); r.value = s.scale[k]; $('#fv-' + k).textContent = s.scale[k] + '%'; });
+    Tune.show();
     $$('#v-settings input[type=range]').forEach(rangeFill);
     this.renderVoices();
   },
@@ -746,7 +845,7 @@ const Settings = {
     const r = new FileReader();
     r.onload = async () => {
       let d; try { d = JSON.parse(r.result); } catch (e) { toast('ไฟล์ไม่ถูกต้อง อ่าน JSON ไม่ได้', { icon: 'info' }); return; }
-      if (!d || (d.v !== 1 && d.v !== 2) || !d.settings || !Array.isArray(d.sessions)) { toast('ไฟล์นี้ไม่ใช่ไฟล์สำรองของ new offy', { icon: 'info' }); return; }
+      if (!d || ![1, 2, 3].includes(d.v) || !d.settings || !Array.isArray(d.sessions)) { toast('ไฟล์นี้ไม่ใช่ไฟล์สำรองของ new offy', { icon: 'info' }); return; }
       if (!(await confirmDlg('นำเข้าข้อมูล?', `ข้อมูลปัจจุบันจะถูกแทนที่ด้วยไฟล์นี้ (${d.sessions.length} รอบการเล่น)`, 'นำเข้า', true))) return;
       Store.d = Store.normalize(d); Store.flush(); buildWords(); applySettings(); Custom.c = null;
       sfx('save'); toast('นำเข้าข้อมูลแล้ว', { icon: 'check' }); this.show();
@@ -853,17 +952,20 @@ function boot() {
     else if (currentView === 'v-book') Book.key(e);
     else if (e.key === '/' && currentView === 'v-dict') { e.preventDefault(); $('#qInput').focus(); }
   });
+  let lastW = innerWidth;
   addEventListener('resize', debounce(() => {
     if (currentView === 'v-game' && Game.s) Game.fit();
     if (currentView === 'v-dictation' && Dicta.s && Dicta.s.ans === 'draw') Pad.layout();
-    if (currentView === 'v-stats') StatsView.show();
+    // phones fire "resize" while scrolling (the toolbar hides) — charts only need redrawing when the width changes, and then without replaying their animations
+    if (innerWidth === lastW) return; lastW = innerWidth;
+    if (currentView === 'v-stats') Fx.quiet(() => StatsView.show());
   }, 160));
   // the app is open in another tab and saved there: pick the newer data up instead of overwriting it later
   addEventListener('storage', e => {
     if (e.key !== Store.KEY || !e.newValue) return;
     try { Store.d = Store.normalize(JSON.parse(e.newValue)); } catch (err) { return; }
     buildWords(); applySettings(); Custom.c = null;
-    if (!VIEWS[Router.parse(location.hash).name]?.immersive && !Sheet.isOpen() && !modalOpen()) renderRoute(location.hash);
+    if (!VIEWS[Router.parse(location.hash).name]?.immersive && !Sheet.isOpen() && !modalOpen()) Fx.quiet(() => renderRoute(location.hash));
   });
   document.addEventListener('visibilitychange', () => { if (document.hidden && currentView === 'v-game' && Game.s && !Game.s.finished && !Game.s.paused && Game.s.phase === 'ask') Game.pause(); });
 
@@ -878,7 +980,7 @@ function boot() {
   }, { passive: true });
 
   Router.start();
-  if (Store.migrated) setTimeout(() => toast(Store.migrated === 'v1' ? 'นำความคืบหน้าจาก new offy v1 มาให้แล้ว' : 'นำความคืบหน้าจากเวอร์ชันเก่ามาให้แล้ว', { icon: 'check', ms: 3600 }), 700);
+  if (Store.migrated) setTimeout(() => toast(Store.migrated === 'v2' || Store.migrated === 'v1' ? `นำความคืบหน้าจาก new offy ${Store.migrated} มาให้แล้ว` : 'นำความคืบหน้าจากเวอร์ชันเก่ามาให้แล้ว', { icon: 'check', ms: 3600 }), 700);
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => { });
 }
 boot();

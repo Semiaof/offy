@@ -1,6 +1,6 @@
 'use strict';
 /* =====================================================================
-   Library of Limu · new offy v2 — core
+   Library of Limu · new offy v3 — core
    utilities · pinyin · vocabulary · storage · stats / spaced review
    sound · speech · UI helpers · router · charts · effects
    © 2026 李牧飞 Aphisit Kaewnet
@@ -111,17 +111,42 @@ function compactRange(nums) {
   return out.join(', ');
 }
 
+/** hanzi for the front of a card: one row up to 4 characters (4 can be 2 x 2), longer words split in two rows */
+function hzFront(zh) {
+  const ch = Array.from(String(zh || '')), n = ch.length, f = S().front || {};
+  if (n <= 3 || (n === 4 && f.rows4 === false)) return `<div class="zh n${Math.max(1, n)}">${esc(zh)}</div>`;
+  const per = Math.ceil(n / 2), rows = esc(ch.slice(0, per).join('')) + '<br>' + esc(ch.slice(per).join(''));
+  return n === 4 ? `<div class="zh n4 rows">${rows}</div>` : `<div class="zh n5" style="--fz:${Math.min(.34, .82 / per).toFixed(3)}">${rows}</div>`;
+}
+
+/* ---------- colour helpers (custom app / card colours) ---------- */
+const Color = {
+  ok(h) { return /^#[0-9a-f]{6}$/i.test(h || ''); },
+  rgb(h) { const n = parseInt(h.slice(1), 16); return [n >> 16 & 255, n >> 8 & 255, n & 255]; },
+  hex(c) { return '#' + c.map(v => clamp(Math.round(v), 0, 255).toString(16).padStart(2, '0')).join(''); },
+  mix(a, b, t) { const x = this.rgb(a), y = this.rgb(b); return this.hex(x.map((v, i) => v + (y[i] - v) * t)); },
+  alpha(h, a) { const [r, g, b] = this.rgb(h); return `rgba(${r}, ${g}, ${b}, ${a})`; },
+  /** relative luminance 0 (black) … 1 (white) */
+  lum(h) { const [r, g, b] = this.rgb(h).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }); return .2126 * r + .7152 * g + .0722 * b; },
+  /** darken until white text on top stays readable */
+  deep(h, max = .2) { let c = h, i = 0; while (this.lum(c) > max && i++ < 8) c = this.mix(c, '#000000', .16); return c; },
+  /** lighten until it reads on a dark background */
+  bright(h, min = .32) { let c = h, i = 0; while (this.lum(c) < min && i++ < 8) c = this.mix(c, '#ffffff', .16); return c; }
+};
+
 /* ---------- 4. storage ---------- */
-const DEFAULT_SETTINGS = { theme: null, showPinyin: true, showTh: true, showEn: true, answer: 'quiz', ask: 'zh', timer: 'countdown', sec: 10, autoNext: true, autoSpeak: false, rate: 0.8, voiceURI: '', sfx: true, vol: 60, haptic: true, goal: 30, scale: { hz: 100, mean: 100, ex: 100, dict: 100 } };
+const DEFAULT_SETTINGS = { theme: null, showPinyin: true, showTh: true, showEn: true, answer: 'quiz', ask: 'zh', timer: 'countdown', sec: 10, autoNext: true, autoSpeak: false, rate: 0.8, voiceURI: '', sfx: true, vol: 60, haptic: true, goal: 30, scale: { hz: 100, mean: 100, ex: 100, dict: 100 },
+  front: { s1: 100, s2: 100, s3: 100, s4: 100, rows4: true },          // hanzi size on the card front, by number of characters
+  colors: { accent: '', felt: '', paper: '', ink: '', pinyin: '' } };   // '' = built-in colour
 const Store = {
-  KEY: 'offy.v2', d: null, migrated: '',
-  defaults() { return { v: 2, created: Date.now(), settings: clone(DEFAULT_SETTINGS), sessions: [], ws: {}, stages: {}, review: [], customWords: [], legacy: { days: {} }, last: null, customCfg: null }; },
+  KEY: 'offy.v3', d: null, migrated: '',
+  defaults() { return { v: 3, created: Date.now(), settings: clone(DEFAULT_SETTINGS), sessions: [], ws: {}, stages: {}, review: [], customWords: [], legacy: { days: {} }, last: null, customCfg: null }; },
   read(k) { try { const d = JSON.parse(localStorage.getItem(k) || 'null'); return d && typeof d === 'object' ? d : null; } catch (e) { return null; } },
   /** make any saved / imported object safe to use (also upgrades v1 data) */
   normalize(d) {
-    d = Object.assign(this.defaults(), d); d.v = 2;
+    d = Object.assign(this.defaults(), d); d.v = 3;
     d.settings = Object.assign(clone(DEFAULT_SETTINGS), d.settings || {});
-    d.settings.scale = Object.assign({ ...DEFAULT_SETTINGS.scale }, d.settings.scale || {});
+    ['scale', 'front', 'colors'].forEach(k => { d.settings[k] = Object.assign({ ...DEFAULT_SETTINGS[k] }, d.settings[k] && typeof d.settings[k] === 'object' ? d.settings[k] : {}); });
     ['sessions', 'review', 'customWords'].forEach(k => { if (!Array.isArray(d[k])) d[k] = []; });
     ['ws', 'stages'].forEach(k => { if (!d[k] || typeof d[k] !== 'object') d[k] = {}; });
     if (!d.legacy || typeof d.legacy !== 'object') d.legacy = { days: {} };
@@ -130,7 +155,8 @@ const Store = {
   },
   load() {
     let d = this.read(this.KEY);
-    if (!d) { const v1 = this.read('offy.v1'); if (v1 && v1.settings && Array.isArray(v1.sessions)) { d = v1; this.migrated = 'v1'; } }
+    // first run of this version: carry progress over from new offy v2, else v1 (their own keys are left untouched)
+    if (!d) for (const old of ['v2', 'v1']) { const o = this.read('offy.' + old); if (o && o.settings && Array.isArray(o.sessions)) { d = o; this.migrated = old; break; } }
     const fresh = !d;
     this.d = this.normalize(d || {});
     if (fresh && this.migrateOld()) this.migrated = 'old';
@@ -341,6 +367,7 @@ const Sfx = {
     off() { this.tone(660, { dur: .07, gain: .06 }); this.tone(440, { t: .06, dur: .1, gain: .06 }); },
     open() { this.noise({ from: 500, to: 1600, dur: .16, gain: .035, q: .6 }); },
     deal() { this.noise({ from: 3200, to: 1300, dur: .07, gain: .06, q: 1.2 }); },
+    gather(i = 0) { this.noise({ from: 2600, to: 900, dur: .09, gain: .085, q: 1.1 }); this.tone(190 + i * 14, { to: 120, dur: .07, gain: .05 }); },
     flip() { this.noise({ from: 2600, to: 520, dur: .17, gain: .09 }); this.tone(170, { t: .1, to: 110, dur: .09, gain: .07 }); },
     swoosh() { this.noise({ from: 600, to: 2800, dur: .2, gain: .06, q: .7 }); },
     correct(combo = 1) {
@@ -578,6 +605,13 @@ const Charts = {
 
 /* ---------- 11. effects ---------- */
 const Fx = {
+  still: false,
+  /** re-render without replaying entrance animations (data changed in another tab, window resized …) */
+  quiet(fn) {
+    this.still = true;
+    try { fn(); } finally { this.still = false; }
+    try { document.getAnimations().forEach(a => { const t = a.effect && a.effect.getComputedTiming(); if (t && t.iterations !== Infinity) try { a.finish(); } catch (e) { } }); } catch (e) { }
+  },
   /** after HTML is inserted: grow bars / rings / counters from zero to their target */
   settle(root = document) {
     const run = () => {
@@ -586,11 +620,11 @@ const Fx = {
       $$('[data-off]', root).forEach(e => { e.style.strokeDashoffset = e.dataset.off; });
       $$('[data-flex]', root).forEach(e => { e.style.flexGrow = e.dataset.flex; });
     };
-    requestAnimationFrame(() => requestAnimationFrame(run));
+    if (this.still) run(); else requestAnimationFrame(() => requestAnimationFrame(run));
     $$('[data-count]', root).forEach(e => this.count(e, +e.dataset.count));
   },
   count(el, to, dur = 800) {
-    if (reducedMotion() || !isFinite(to) || to === 0) { el.textContent = fmtNum(to); return; }
+    if (this.still || reducedMotion() || !isFinite(to) || to === 0) { el.textContent = fmtNum(to); return; }
     const t0 = performance.now();
     const step = now => { const k = clamp((now - t0) / dur, 0, 1), e = 1 - Math.pow(1 - k, 4); el.textContent = fmtNum(Math.round(to * e)); if (k < 1 && el.isConnected) requestAnimationFrame(step); };
     el.textContent = '0'; requestAnimationFrame(step);
