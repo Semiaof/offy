@@ -19,7 +19,18 @@ const GAME_LIST = [
   { id: 'cloze', icon: 'g-gap', name: L('ป้ายร้านทอง', 'Golden sign'), sub: L('เติมคำทองลงป้ายร้าน', 'Fill the missing gold word') },
   { id: 'tone', icon: 'g-tone', name: L('ล่าวรรณยุกต์', 'Tone hunt'), sub: L('วาดเส้นเสียงด้วยนิ้ว', 'Draw the tones') },
   { id: 'rain', icon: 'g-rain', name: L('โคมลอย', 'Sky lanterns'), sub: L('ตอบก่อนโคมลอยพ้นฟ้า', 'Answer before they float away') },
-  { id: 'listen', icon: 'ear', name: L('ระฆังฟังเสียง', 'Bells'), sub: L('ฟังแล้วตีระฆังให้ถูก', 'Hear it, ring the right bell') }
+  { id: 'listen', icon: 'ear', name: L('ระฆังฟังเสียง', 'Bells'), sub: L('ฟังแล้วตีระฆังให้ถูก', 'Hear it, ring the right bell') },
+  { id: 'runner', icon: 'g-runner', name: L('วิ่งหนีหินยักษ์', 'Boulder runner'), sub: L('ปัดซ้าย-ขวาเข้าทางแยก & โดดหลบ', '3-lane signpost runner & dodge') },
+  { id: 'parkour', icon: 'g-parkour', name: L('โหนสลิงข้ามเหว', 'Lava grapple'), sub: L('ยิงตะขอเหล็กโหนคานคำศัพท์', 'Grapple across the lava chasm') },
+  { id: 'kunai', icon: 'g-kunai', name: L('มีดบินสังหารเงา', 'Shadow kunai'), sub: L('ปามีดสั้นสกัดมือสังหารเงา', 'Throw kunai at shadow assassins') },
+  { id: 'bomb', icon: 'g-bomb', name: L('กู้ระเบิดดินปืน', 'Fuse defusal'), sub: L('ตัดสายชนวนคำแปลก่อนระเบิด', 'Cut the right fuse wire in time') },
+  { id: 'siege', icon: 'g-siege', name: L('ปืนกลยันต์เพลิง', 'Talisman siege'), sub: L('รัวยันต์ไฟปราบฝูงผีดิบเจียงซี', 'Rapid-fire talismans vs Jiangshi') },
+  { id: 'forge', icon: 'g-forge', name: L('ตีดาบเหล็กไหล', 'Hellfire forge'), sub: L('ทุบค้อนหลอมอักษรลงใบดาบศึก', 'Hammer red-hot characters into a blade') },
+  { id: 'jade', icon: 'g-jade', name: L('ด่านตรวจป้ายหยก', 'Jade inspector'), sub: L('สายฟ้าฟาดป้ายหยกที่แปลปลอม', 'Strike the fake jade plaque') },
+  { id: 'slice', icon: 'g-slice', name: L('คมดาบพู่กัน', 'Brush-blade slash'), sub: L('ฟันป้ายไม้คำศัพท์กลางอากาศ', 'Slice airborne word plaques in half') },
+  { id: 'cipher', icon: 'g-cipher', name: L('กุญแจกลไกราชวงศ์', 'Royal lockbox'), sub: L('หมุนล้อพินอินปลดสลักหีบสมบัติ', 'Dial brass pinyin wheels to unlock') },
+  { id: 'dimsum', icon: 'g-dimsum', name: L('สายพานเข่งติ่มซำ', 'Dim sum belt'), sub: L('ตัดสินไว รับเสิร์ฟหรือส่งคืนครัว', 'Speed-sort true or fake pairings') },
+  { id: 'lanternfog', icon: 'g-lanternfog', name: L('ตะเกียงส่องหมอก', 'Lantern fog'), sub: L('ส่องตะเกียงเชื่อมคำในม่านหมอก', 'Light up characters hidden in mist') }
 ];
 const GAME_BY_ID = Object.fromEntries(GAME_LIST.map(g => [g.id, g]));
 const gameName = id => (GAME_BY_ID[id] || GAME_BY_ID.flash).name;
@@ -1043,5 +1054,618 @@ const MG = {
       if (e.key === 'r' || e.key === 'R') { this.say(s); return; }
       const n = +e.key; if (n >= 1 && n <= 4) { e.preventDefault(); this.choose(s, n - 1); }
     }
+  },
+
+  /* ---------- R1 · วิ่งหนีหินยักษ์ (3-Lane Signpost Runner & Trap Dodge) ---------- */
+  runner: {
+    mount(s, el) {
+      s.i = -1; s.lane = 1; s.act = 'run'; s.dist = 80;
+      el.innerHTML = `<div class="m-table rn-arena" id="rnArena">
+          <div class="rn-top"><span class="rn-goal" id="rnGoal"></span><span class="rn-dist" id="rnDist">🪨 80m</span></div>
+          <div class="rn-persp"><div class="rn-road"><i data-l="0"></i><i data-l="1"></i><i data-l="2"></i></div></div>
+          <div class="rn-gates" id="rnGates"></div>
+          <div class="rn-trap" id="rnTrap" hidden></div>
+          <div class="rn-hero" id="rnHero" style="left:50%"><div class="rn-body hz">侠</div><small id="rnState">วิ่ง</small></div>
+          <div class="rn-boulder" id="rnBoulder">🪨 ${L('หินเพลิงยักษ์กำลังกลิ้งไล่บี้!', 'Giant fire boulder chasing!')}</div>
+        </div>
+        <div class="m-panel rn-panel">
+          <div class="rn-ctrl">
+            <button class="btn" data-rn="L">⬅️ ${L('เลนซ้าย', 'Left')} (1/←)</button>
+            <button class="btn" data-rn="M">⬆️ ${L('เลนกลาง / โดด', 'Center / Jump')} (2/↑)</button>
+            <button class="btn" data-rn="R">➡️ ${L('เลนขวา', 'Right')} (3/→)</button>
+            <button class="btn ghost" data-rn="S">⬇️ ${L('สไลด์หลบ', 'Slide')} (↓)</button>
+          </div>
+          <div class="m-foot" id="rnFoot"></div>
+        </div>`;
+      const arena = $('#rnArena');
+      let sx = 0, sy = 0;
+      arena.onpointerdown = e => { sx = e.clientX; sy = e.clientY; };
+      arena.onpointerup = e => {
+        const dx = e.clientX - sx, dy = e.clientY - sy;
+        if (Math.hypot(dx, dy) >= 24) {
+          if (Math.abs(dx) > Math.abs(dy)) this.steer(s, s.lane + (dx > 0 ? 1 : -1), true);
+          else this.doAct(s, dy < 0 ? 'jump' : 'slide');
+        }
+      };
+      el.onclick = e => {
+        const g = e.target.closest('.rn-sign'); if (g) { this.steer(s, +g.dataset.l, true); return; }
+        const ln = e.target.closest('[data-l]'); if (ln) { this.steer(s, +ln.dataset.l, true); return; }
+        const tr = e.target.closest('.rn-trap'); if (tr) { this.doAct(s, tr.dataset.kind || 'jump'); return; }
+        const b = e.target.closest('[data-rn]'); if (!b) return;
+        const k = b.dataset.rn;
+        if (k === 'L') this.steer(s, 0, true);
+        else if (k === 'M') { if (s.rn && s.rn.trap && !s.rn.trapDone) this.doAct(s, 'jump'); else this.steer(s, 1, true); }
+        else if (k === 'R') this.steer(s, 2, true);
+        else if (k === 'S') this.doAct(s, 'slide');
+      };
+      this.next(s);
+      s.rnLast = performance.now();
+      const loop = now => { if (!Mini.alive(s) || s.finished) return; s.raf = requestAnimationFrame(loop); this.step(s, now); };
+      s.raf = requestAnimationFrame(loop);
+    },
+    stop(s) { cancelAnimationFrame(s.raf); },
+    steer(s, l, dash) {
+      if (!s.rn || s.rn.done || s.paused) return;
+      s.lane = clamp(l, 0, 2);
+      const hero = $('#rnHero'); if (hero) hero.style.left = [24, 50, 76][s.lane] + '%';
+      const st = $('#rnState'); if (st) st.textContent = [L('เลนซ้าย', 'Left'), L('เลนกลาง', 'Center'), L('เลนขวา', 'Right')][s.lane];
+      if (dash && s.rn.p > 0.18) s.rn.p = Math.max(s.rn.p, 0.86);
+    },
+    doAct(s, kind) {
+      if (!s.rn || s.paused) return;
+      s.act = kind;
+      const hero = $('#rnHero'), st = $('#rnState');
+      if (hero) { hero.classList.remove('jump', 'slide'); void hero.offsetWidth; hero.classList.add(kind); }
+      if (st) st.textContent = kind === 'jump' ? L('โดด!', 'Jump!') : L('สไลด์!', 'Slide!');
+      if (s.rn.trap && !s.rn.trapDone) {
+        s.rn.trapDone = true;
+        const tr = $('#rnTrap'), arena = $('#rnArena');
+        if (tr) tr.hidden = true;
+        if (hero && arena) { const [x, y] = GX.at(hero, arena); GX.burst(arena, x, y - 20, { n: 18, color: '#63e6be', dist: 70 }); GX.text(arena, x, y - 44, kind === 'jump' ? 'ตีลังกาข้ามกับดัก!' : 'สไลด์ลอดใบมีด!', 'big'); }
+      }
+      Mini.later(() => { s.act = 'run'; if (hero) hero.classList.remove('jump', 'slide'); }, 560);
+    },
+    next(s) {
+      s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
+      const w = s.words[s.i], bad = distractors(w, 2), okLane = Math.floor(Math.random() * 3);
+      const opts = []; let bi = 0;
+      for (let i = 0; i < 3; i++) opts.push(i === okLane ? w : bad[bi++]);
+      const hasTrap = s.i % 2 === 1, trapKind = (s.i >> 1) % 2 === 0 ? 'jump' : 'slide';
+      s.rn = { w, opts, okLane, p: 0, ok: true, t: performance.now(), done: false, trap: hasTrap ? trapKind : null, trapDone: !hasTrap };
+      $('#rnGoal').innerHTML = `${L('ทางแยก:', 'Fork:')} <b>${esc(meaningText(w))}</b>`;
+      $('#rnFoot').innerHTML = '';
+      const gates = $('#rnGates');
+      gates.innerHTML = opts.map((x, i) => `<button type="button" class="rn-sign" data-l="${i}"><span class="hz">${esc(x.zh)}</span><small class="pyx">${esc(x.py)}</small><i>${['左 1', '中 2', '右 3'][i]}</i></button>`).join('');
+      const tr = $('#rnTrap');
+      if (hasTrap) {
+        tr.hidden = false; tr.dataset.kind = trapKind;
+        tr.className = 'rn-trap ' + trapKind;
+        tr.textContent = trapKind === 'jump' ? `⚠️ ${L('หนามเหล็ก · กดโดด (↑) หรือแตะที่นี่', 'Spikes · Jump (↑)')}` : `⚙️ ${L('คานใบมีด · กดสไลด์ (↓) หรือแตะที่นี่', 'Blade beam · Slide (↓)')}`;
+      } else tr.hidden = true;
+    },
+    step(s, now) {
+      const dt = Math.min((now - (s.rnLast || now)) / 1000, 0.1); s.rnLast = now;
+      const rn = s.rn; if (!rn || rn.done || s.paused || document.hidden) return;
+      rn.p += dt * 0.36;
+      const gates = $('#rnGates'), p = Math.min(rn.p, 1);
+      if (gates) {
+        gates.style.top = (52 + p * 145) + 'px';
+        gates.style.transform = `scale(${(0.62 + p * 0.44).toFixed(3)})`;
+      }
+      if (rn.p >= 0.92) this.resolve(s);
+    },
+    resolve(s) {
+      const rn = s.rn; if (!rn || rn.done) return;
+      const arena = $('#rnArena'), hero = $('#rnHero'), signs = $$('#rnGates .rn-sign');
+      const [hx, hy] = GX.at(hero, arena);
+      if (s.lane === rn.okLane) {
+        rn.done = true;
+        signs[s.lane].classList.add('ok');
+        s.dist = Math.min(120, s.dist + 12); $('#rnDist').textContent = `🪨 ${s.dist}m`;
+        GX.burst(arena, hx, hy - 18, { n: 26, color: '#ffd27a', dist: 90 });
+        GX.text(arena, hx, hy - 48, `${rn.w.zh} · ทะลุด่าน!`, 'big');
+        if (S().autoSpeak) speakWord(rn.w);
+        Mini.mark(rn.w, rn.ok, performance.now() - rn.t, signs[s.lane]);
+        Mini.advance(rn.ok, $('#rnFoot'), () => this.next(s));
+      } else {
+        rn.ok = false; rn.p = 0.12;
+        signs[s.lane].classList.add('no');
+        s.dist = Math.max(10, s.dist - 20); $('#rnDist').textContent = `🪨 ${s.dist}m`;
+        GX.flash(arena, 'rgba(255,50,35,.38)', 220); GX.quake(arena, 8);
+        GX.text(arena, hx, hy - 44, L('ผิดช่อง! เลือกเลนใหม่', 'Wrong lane!'), 'bad');
+        Mini.slip();
+      }
+    },
+    key(s, e) {
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A' || e.key === '1') { e.preventDefault(); this.steer(s, e.key === '1' ? 0 : s.lane - 1, e.key === '1'); }
+      else if (e.key === '2') { e.preventDefault(); this.steer(s, 1, true); }
+      else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D' || e.key === '3') { e.preventDefault(); this.steer(s, e.key === '3' ? 2 : s.lane + 1, e.key === '3'); }
+      else if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { e.preventDefault(); this.doAct(s, 'jump'); }
+      else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { e.preventDefault(); this.doAct(s, 'slide'); }
+    }
+  },
+
+  /* ---------- P2 · โหนสลิงข้ามเหว (Grappling Hook Lava Chasm) ---------- */
+  parkour: {
+    mount(s, el) {
+      s.i = -1;
+      el.innerHTML = `<div class="m-table pk-arena" id="pkArena">
+          <div class="pk-goal" id="pkGoal"></div>
+          <div class="pk-beams" id="pkBeams"></div>
+          <svg class="pk-rope-svg" id="pkSvg" viewBox="0 0 100 100" preserveAspectRatio="none"><line id="pkLine" x1="20" y1="78" x2="20" y2="78" stroke="#ffd27a" stroke-width="1.2" stroke-dasharray="3 1.5" opacity="0"/></svg>
+          <div class="pk-hero" id="pkHero"><span class="hz">侠</span></div>
+          <div class="pk-lava">🔥 ${L('เหวลาวาภูเขาไฟ · ยิงตะขอเหล็ก (飞爪) เกี่ยวคานคำศัพท์ที่ถูก!', 'Volcanic Lava Chasm · Grapple the right beam!')}</div>
+        </div>
+        <div class="m-panel"><div class="m-foot" id="pkFoot"></div></div>`;
+      el.onclick = e => { const b = e.target.closest('.pk-beam'); if (b) this.hook(s, +b.dataset.o, b); };
+      this.next(s);
+    },
+    next(s) {
+      s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
+      const w = s.words[s.i], opts = shuffle([w, ...distractors(w, 3)]);
+      s.pk = { w, opts, ok: true, t: performance.now(), done: false };
+      $('#pkGoal').innerHTML = `${L('ยิงตะขอเกี่ยวคานคำว่า:', 'Grapple the beam for:')} <b>${esc(meaningText(w))}</b>`;
+      $('#pkFoot').innerHTML = '';
+      const hero = $('#pkHero'), line = $('#pkLine');
+      if (hero) { hero.style.left = '18%'; hero.style.bottom = '54px'; hero.style.transform = 'translate(-50%,0)'; }
+      if (line) line.setAttribute('opacity', '0');
+      $('#pkBeams').innerHTML = opts.map((x, i) => `<button type="button" class="pk-beam" data-o="${i}"><i>🪝 <kbd>${i + 1}</kbd></i><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small></button>`).join('');
+    },
+    hook(s, i, btn) {
+      const pk = s.pk; if (!pk || pk.done || s.paused) return;
+      const arena = $('#pkArena'), hero = $('#pkHero'), line = $('#pkLine');
+      const [bx, by] = GX.at(btn, arena), [hx, hy] = GX.at(hero, arena);
+      const W = arena.clientWidth || 1, H = arena.clientHeight || 1;
+      line.setAttribute('x1', (hx / W * 100).toFixed(1)); line.setAttribute('y1', (hy / H * 100).toFixed(1));
+      line.setAttribute('x2', (bx / W * 100).toFixed(1)); line.setAttribute('y2', (by / H * 100).toFixed(1));
+      line.setAttribute('opacity', '1');
+      if (pk.opts[i] === pk.w) {
+        pk.done = true; btn.classList.add('ok');
+        hero.animate([
+          { left: '18%', bottom: '54px', transform: 'translate(-50%,0) rotate(0deg)' },
+          { left: (bx / W * 100).toFixed(1) + '%', bottom: '132px', transform: 'translate(-50%,0) rotate(-18deg) scale(1.16)', offset: 0.55 },
+          { left: '82%', bottom: '62px', transform: 'translate(-50%,0) rotate(0deg) scale(1)' }
+        ], { duration: 580, easing: 'cubic-bezier(.2,.85,.35,1)', fill: 'forwards' });
+        GX.burst(arena, bx, by, { n: 28, color: '#ffd27a', dist: 95 });
+        GX.text(arena, bx, by + 24, '飞爪! โหนสลิงข้ามเหว', 'big');
+        if (S().autoSpeak) speakWord(pk.w);
+        Mini.mark(pk.w, pk.ok, performance.now() - pk.t, btn);
+        Mini.advance(pk.ok, $('#pkFoot'), () => this.next(s));
+      } else {
+        pk.ok = false; btn.classList.add('no'); btn.disabled = true;
+        GX.shake(btn, 7); GX.burst(arena, bx, by, { n: 12, color: '#ff5a4d', dist: 50 });
+        setTimeout(() => line.setAttribute('opacity', '0'), 240);
+        Mini.slip();
+      }
+    },
+    key(s, e) { const n = +e.key; if (n >= 1 && n <= 4) { e.preventDefault(); const b = $(`#pkBeams .pk-beam[data-o="${n - 1}"]`); if (b && !b.disabled) b.click(); } }
+  },
+
+  /* ---------- W3 · มีดบินสังหารเงา (Flying Kunai Assassination) ---------- */
+  kunai: {
+    mount(s, el) {
+      s.i = -1;
+      el.innerHTML = `<div class="m-table kn-arena" id="knArena">
+          <div class="pk-goal" id="knGoal"></div>
+          <div class="kn-foes" id="knFoes"></div>
+          <div class="kn-hand">🗡️ ${L('แตะเป้าหมายเพื่อปามีดบินเหล็กกล้า (飞刀!)', 'Tap target to hurl steel kunai')}</div>
+        </div>
+        <div class="m-panel"><div class="m-foot" id="knFoot"></div></div>`;
+      el.onclick = e => { const b = e.target.closest('.kn-foe'); if (b) this.throwKunai(s, +b.dataset.o, b); };
+      this.next(s);
+    },
+    next(s) {
+      s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
+      const w = s.words[s.i], opts = shuffle([w, ...distractors(w, 3)]);
+      s.kn = { w, opts, ok: true, t: performance.now(), done: false };
+      $('#knGoal').innerHTML = `${L('ปามีดสั้นสกัดมือสังหารคำว่า:', 'Assassinate target holding:')} <b>${esc(meaningText(w))}</b>`;
+      $('#knFoot').innerHTML = '';
+      $('#knFoes').innerHTML = opts.map((x, i) => `<button type="button" class="kn-foe" data-o="${i}"><kbd>${i + 1}</kbd><span class="kn-mask">忍</span><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small></button>`).join('');
+    },
+    throwKunai(s, i, btn) {
+      const kn = s.kn; if (!kn || kn.done || s.paused) return;
+      const arena = $('#knArena'), [tx, ty] = GX.at(btn, arena);
+      const blade = document.createElement('div'); blade.className = 'kn-blade'; arena.appendChild(blade);
+      blade.animate([
+        { left: (arena.clientWidth / 2) + 'px', top: (arena.clientHeight - 20) + 'px', transform: 'translate(-50%,-50%) scale(1.3)' },
+        { left: tx + 'px', top: ty + 'px', transform: 'translate(-50%,-50%) scale(.9)' }
+      ], { duration: 190, easing: 'ease-in', fill: 'forwards' }).onfinish = () => blade.remove();
+      if (kn.opts[i] === kn.w) {
+        kn.done = true;
+        setTimeout(() => {
+          if (!Mini.alive(s)) return;
+          btn.classList.add('ok');
+          GX.flash(arena, 'rgba(255,45,35,.42)', 210); GX.quake(arena, 8);
+          GX.burst(arena, tx, ty, { n: 28, color: '#ff3b2f', dist: 95 });
+          GX.burst(arena, tx, ty, { n: 14, color: '#ffd27a', dist: 55 });
+          GX.text(arena, tx, ty - 34, '一击必杀! ปักทะลุเกราะ', 'big');
+          if (S().autoSpeak) speakWord(kn.w);
+          Mini.mark(kn.w, kn.ok, performance.now() - kn.t, btn);
+          Mini.advance(kn.ok, $('#knFoot'), () => this.next(s));
+        }, 180);
+      } else {
+        kn.ok = false; btn.classList.add('no'); btn.disabled = true;
+        GX.shake(btn, 7); Mini.slip();
+      }
+    },
+    key(s, e) { const n = +e.key; if (n >= 1 && n <= 4) { e.preventDefault(); const b = $(`#knFoes .kn-foe[data-o="${n - 1}"]`); if (b && !b.disabled) b.click(); } }
+  },
+
+  /* ---------- Y3 · กู้ระเบิดดินปืน (Black Powder Fuse Cut) ---------- */
+  bomb: {
+    mount(s, el) {
+      s.i = -1;
+      el.innerHTML = `<div class="m-table bm-arena" id="bmArena">
+          <div class="pk-goal">${L('ตัดสายชนวนที่มีความหมายตรงกับคำบนลูกระเบิดเหล็ก!', 'Cut the fuse wire matching the iron bomb word!')}</div>
+          <div class="bm-core" id="bmCore"><span class="bm-spark" id="bmSpark">✦</span><b class="hz" id="bmZh"></b><small class="pyx" id="bmPy"></small></div>
+          <div class="bm-wires" id="bmWires"></div>
+        </div>
+        <div class="m-panel"><div class="m-foot" id="bmFoot"></div></div>`;
+      el.onclick = e => { const b = e.target.closest('.bm-wire'); if (b) this.cut(s, +b.dataset.o, b); };
+      this.next(s);
+    },
+    next(s) {
+      s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
+      const w = s.words[s.i], opts = shuffle([w, ...distractors(w, 3)]);
+      s.bm = { w, opts, ok: true, t: performance.now(), done: false };
+      $('#bmZh').textContent = w.zh; $('#bmPy').textContent = w.py; $('#bmFoot').innerHTML = '';
+      $('#bmCore').className = 'bm-core';
+      $('#bmWires').innerHTML = opts.map((x, i) => `<button type="button" class="bm-wire" data-o="${i}"><kbd>${i + 1}</kbd><i class="bm-cord"></i><span>✂️ ${esc(meaningText(x))}</span></button>`).join('');
+    },
+    cut(s, i, btn) {
+      const bm = s.bm; if (!bm || bm.done || s.paused) return;
+      const arena = $('#bmArena'), core = $('#bmCore'), [x, y] = GX.at(btn, arena);
+      if (bm.opts[i] === bm.w) {
+        bm.done = true; btn.classList.add('ok'); core.classList.add('safe');
+        GX.burst(arena, x, y, { n: 26, color: '#63e6be', dist: 85 });
+        GX.text(arena, x, y - 30, '拆弹成功! กู้ระเบิดสำเร็จ', 'big');
+        if (S().autoSpeak) speakWord(bm.w);
+        Mini.mark(bm.w, bm.ok, performance.now() - bm.t, btn);
+        Mini.advance(bm.ok, $('#bmFoot'), () => this.next(s));
+      } else {
+        bm.ok = false; btn.classList.add('no'); btn.disabled = true;
+        GX.flash(arena, 'rgba(255,80,20,.45)', 240); GX.quake(arena, 9);
+        GX.burst(arena, x, y, { n: 20, color: '#ff5a36', dist: 75 });
+        Mini.slip();
+      }
+    },
+    key(s, e) { const n = +e.key; if (n >= 1 && n <= 4) { e.preventDefault(); const b = $(`#bmWires .bm-wire[data-o="${n - 1}"]`); if (b && !b.disabled) b.click(); } }
+  },
+
+  /* ---------- Z1 · ปืนกลยันต์เพลิงปราบผีดิบ (Rapid-Fire Talisman Gatling) ---------- */
+  siege: {
+    mount(s, el) {
+      s.i = -1;
+      el.innerHTML = `<div class="m-table sg-arena" id="sgArena">
+          <div class="pk-goal" id="sgGoal"></div>
+          <div class="sg-horde" id="sgHorde"></div>
+          <div class="sg-turret">敕 · ${L('แท่นยิงยันต์เพลิงปราบผีดิบเจียงซี', 'Rapid-Fire Talisman Altar')}</div>
+        </div>
+        <div class="m-panel"><div class="m-foot" id="sgFoot"></div></div>`;
+      el.onclick = e => { const b = e.target.closest('.sg-mob'); if (b) this.fire(s, +b.dataset.o, b); };
+      this.next(s);
+    },
+    next(s) {
+      s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
+      const w = s.words[s.i], opts = shuffle([w, ...distractors(w, 3)]);
+      s.sg = { w, opts, ok: true, t: performance.now(), done: false };
+      $('#sgGoal').innerHTML = `${L('ยิงยันต์เพลิงปราบผีดิบคำว่า:', 'Fire talismans at Jiangshi with:')} <b>${esc(meaningText(w))}</b>`;
+      $('#sgFoot').innerHTML = '';
+      $('#sgHorde').innerHTML = opts.map((x, i) => `<button type="button" class="sg-mob" data-o="${i}"><kbd>${i + 1}</kbd><i class="sg-tal">敕</i><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small></button>`).join('');
+    },
+    fire(s, i, btn) {
+      const sg = s.sg; if (!sg || sg.done || s.paused) return;
+      const arena = $('#sgArena'), [tx, ty] = GX.at(btn, arena);
+      for (let k = 0; k < 3; k++) {
+        const tal = document.createElement('div'); tal.className = 'sg-shot hz'; tal.textContent = '敕'; arena.appendChild(tal);
+        tal.animate([
+          { left: (arena.clientWidth / 2) + 'px', top: (arena.clientHeight - 24) + 'px', transform: 'translate(-50%,-50%) scale(.7)' },
+          { left: (tx + (k - 1) * 10) + 'px', top: ty + 'px', transform: 'translate(-50%,-50%) rotate(15deg) scale(1.1)' }
+        ], { duration: 180 + k * 45, fill: 'forwards' }).onfinish = () => tal.remove();
+      }
+      if (sg.opts[i] === sg.w) {
+        sg.done = true;
+        setTimeout(() => {
+          if (!Mini.alive(s)) return;
+          btn.classList.add('ok');
+          GX.flash(arena, 'rgba(255,160,40,.42)', 220); GX.quake(arena, 8);
+          GX.burst(arena, tx, ty, { n: 32, color: '#ff922b', dist: 100 });
+          GX.burst(arena, tx, ty, { n: 16, color: '#ffd27a', dist: 60 });
+          GX.text(arena, tx, ty - 34, '破邪! เผาผีดิบเป็นจุณ', 'big');
+          if (S().autoSpeak) speakWord(sg.w);
+          Mini.mark(sg.w, sg.ok, performance.now() - sg.t, btn);
+          Mini.advance(sg.ok, $('#sgFoot'), () => this.next(s));
+        }, 210);
+      } else {
+        sg.ok = false; btn.classList.add('no'); btn.disabled = true;
+        GX.shake(btn, 7); Mini.slip();
+      }
+    },
+    key(s, e) { const n = +e.key; if (n >= 1 && n <= 4) { e.preventDefault(); const b = $(`#sgHorde .sg-mob[data-o="${n - 1}"]`); if (b && !b.disabled) b.click(); } }
+  },
+
+  /* ---------- V2 · ตีดาบเหล็กไหลไฟนรก (Hellfire War-Blade Forging) ---------- */
+  forge: {
+    mount(s, el) {
+      s.i = -1;
+      el.innerHTML = `<div class="m-table fg-arena" id="fgArena">
+          <div class="pk-goal" id="fgGoal"></div>
+          <div class="fg-anvil"><div class="fg-blade" id="fgBlade"></div><div class="fg-hammer" id="fgHam">🔨</div></div>
+          <div class="fg-ingots" id="fgIngots"></div>
+        </div>
+        <div class="m-panel"><div class="m-foot" id="fgFoot"></div></div>`;
+      el.onclick = e => { const b = e.target.closest('.fg-ingot'); if (b) this.strike(s, +b.dataset.i, b); };
+      this.next(s);
+    },
+    next(s) {
+      s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
+      const w = s.words[s.i], chars = Array.from(w.zh).filter(c => /[㐀-鿿]/.test(c));
+      const extra = [];
+      for (const d of distractors(w, 4)) for (const c of Array.from(d.zh)) if (!chars.includes(c) && !extra.includes(c) && extra.length < Math.max(3, 6 - chars.length)) extra.push(c);
+      const pool = shuffle([...chars, ...extra]);
+      s.fg = { w, chars, pool, at: 0, ok: true, t: performance.now(), done: false };
+      $('#fgGoal').innerHTML = `${L('ทุบค้อนตีดาบคำว่า:', 'Forge the war-blade for:')} <b>${esc(meaningText(w))}</b> <small class="pyx">(${esc(w.py)})</small>`;
+      $('#fgFoot').innerHTML = '';
+      $('#fgBlade').innerHTML = chars.map((_, i) => `<span class="fg-slot hz" data-s="${i}">?</span>`).join('');
+      $('#fgIngots').innerHTML = pool.map((c, i) => `<button type="button" class="fg-ingot hz" data-i="${i}"><kbd>${i + 1}</kbd>${esc(c)}</button>`).join('');
+    },
+    strike(s, idx, btn) {
+      const fg = s.fg; if (!fg || fg.done || s.paused || btn.disabled) return;
+      const want = fg.chars[fg.at], got = fg.pool[idx], arena = $('#fgArena'), ham = $('#fgHam'), slots = $$('#fgBlade .fg-slot');
+      ham.classList.remove('hit'); void ham.offsetWidth; ham.classList.add('hit');
+      if (got === want) {
+        btn.disabled = true; btn.classList.add('used');
+        const slot = slots[fg.at]; slot.textContent = got; slot.classList.add('forged');
+        const [sx, sy] = GX.at(slot, arena);
+        GX.quake(arena, 7);
+        GX.burst(arena, sx, sy, { n: 26, color: '#ff922b', dist: 85 });
+        GX.burst(arena, sx, sy, { n: 12, color: '#ffd27a', dist: 50 });
+        fg.at++;
+        if (fg.at >= fg.chars.length) {
+          fg.done = true;
+          GX.flash(arena, 'rgba(255,160,50,.45)', 240);
+          GX.text(arena, arena.clientWidth / 2, sy - 34, `神兵出世! ตีดาบ ${fg.w.zh} สำเร็จ`, 'big');
+          if (S().autoSpeak) speakWord(fg.w);
+          Mini.mark(fg.w, fg.ok, performance.now() - fg.t, $('#fgBlade'));
+          Mini.advance(fg.ok, $('#fgFoot'), () => this.next(s));
+        }
+      } else {
+        fg.ok = false; GX.shake(btn, 7); Mini.slip();
+      }
+    },
+    key(s, e) { const n = +e.key; if (n >= 1 && n <= 6) { e.preventDefault(); const b = $(`#fgIngots .fg-ingot[data-i="${n - 1}"]`); if (b && !b.disabled) b.click(); } }
+  },
+
+  /* ---------- J2 · ด่านตรวจป้ายหยก (Jade Plaque Odd-One-Out Inspection) ---------- */
+  jade: {
+    mount(s, el) {
+      s.i = -1;
+      el.innerHTML = `<div class="m-table jd-arena" id="jdArena">
+          <div class="pk-goal">${L('มีป้ายหยก 3 ชิ้นที่แปลถูกต้อง และ 1 ชิ้นที่เป็น "ป้ายปลอม" · แตะฟาดสายฟ้าใส่ป้ายปลอม!', '3 jade plaques are true, 1 is a FAKE impostor · Tap the fake plaque!')}</div>
+          <div class="jd-row" id="jdRow"></div>
+          <div class="jd-reveal" id="jdRev"></div>
+        </div>
+        <div class="m-panel"><div class="m-foot" id="jdFoot"></div></div>`;
+      el.onclick = e => { const b = e.target.closest('.jd-plaque'); if (b) this.inspect(s, +b.dataset.o, b); };
+      this.next(s);
+    },
+    next(s) {
+      s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
+      const w = s.words[s.i], others = distractors(w, 4);
+      const fakeMean = meaningText(others[0] || w);
+      const cards = shuffle([
+        { w, zh: w.zh, py: w.py, m: fakeMean, fake: true },
+        ...others.slice(1, 4).map(x => ({ w: x, zh: x.zh, py: x.py, m: meaningText(x), fake: false }))
+      ]);
+      s.jd = { w, cards, ok: true, t: performance.now(), done: false };
+      $('#jdRev').textContent = ''; $('#jdFoot').innerHTML = '';
+      $('#jdRow').innerHTML = cards.map((c, i) => `<button type="button" class="jd-plaque" data-o="${i}"><kbd>${i + 1}</kbd><b class="hz">${esc(c.zh)}</b><small class="pyx">${esc(c.py)}</small><span>${esc(c.m)}</span></button>`).join('');
+    },
+    inspect(s, i, btn) {
+      const jd = s.jd; if (!jd || jd.done || s.paused) return;
+      const arena = $('#jdArena'), c = jd.cards[i], [x, y] = GX.at(btn, arena);
+      if (c.fake) {
+        jd.done = true; btn.classList.add('shatter');
+        GX.flash(arena, 'rgba(180,220,255,.55)', 220); GX.quake(arena, 8);
+        GX.burst(arena, x, y, { n: 28, color: '#80e5be', dist: 90 });
+        GX.text(arena, x, y - 34, '⚡ จับป้ายหยกปลอมได้!', 'big');
+        $('#jdRev').innerHTML = `${L('คำแปลจริงของ', 'True meaning of')} <b class="hz">${esc(jd.w.zh)}</b> (${esc(jd.w.py)}) = <b>${esc(meaningText(jd.w))}</b>`;
+        if (S().autoSpeak) speakWord(jd.w);
+        Mini.mark(jd.w, jd.ok, performance.now() - jd.t, btn);
+        Mini.advance(jd.ok, $('#jdFoot'), () => this.next(s));
+      } else {
+        jd.ok = false; btn.classList.add('real'); btn.disabled = true;
+        GX.shake(btn, 6); GX.text(arena, x, y - 24, 'ป้ายนี้ของจริง!', 'bad');
+        Mini.slip();
+      }
+    },
+    key(s, e) { const n = +e.key; if (n >= 1 && n <= 4) { e.preventDefault(); const b = $(`#jdRow .jd-plaque[data-o="${n - 1}"]`); if (b && !b.disabled) b.click(); } }
+  },
+
+  /* ---------- K1 · คมดาบพู่กัน (Flying Wood Plaque Brush-Blade Slash) ---------- */
+  slice: {
+    mount(s, el) {
+      s.i = -1;
+      el.innerHTML = `<div class="m-table sl-arena" id="slArena">
+          <div class="pk-goal" id="slGoal"></div>
+          <div class="sl-sky" id="slSky"></div>
+        </div>
+        <div class="m-panel"><div class="m-foot" id="slFoot"></div></div>`;
+      el.onclick = e => { const b = e.target.closest('.sl-plaque'); if (b) this.slash(s, +b.dataset.o, b); };
+      this.next(s);
+    },
+    next(s) {
+      s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
+      const w = s.words[s.i], opts = shuffle([w, ...distractors(w, 3)]);
+      s.sl = { w, opts, ok: true, t: performance.now(), done: false };
+      $('#slGoal').innerHTML = `${L('ฟันป้ายไม้คำว่า:', 'Slice the wooden plaque for:')} <b>${esc(meaningText(w))}</b>`;
+      $('#slFoot').innerHTML = '';
+      $('#slSky').innerHTML = opts.map((x, i) => `<button type="button" class="sl-plaque" data-o="${i}" style="--d:${i * 110}ms"><kbd>${i + 1}</kbd><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small></button>`).join('');
+    },
+    slash(s, i, btn) {
+      const sl = s.sl; if (!sl || sl.done || s.paused) return;
+      const arena = $('#slArena'), [x, y] = GX.at(btn, arena);
+      if (sl.opts[i] === sl.w) {
+        sl.done = true; btn.classList.add('cut');
+        GX.flash(arena, 'rgba(255,215,120,.42)', 190); GX.quake(arena, 7);
+        GX.burst(arena, x, y, { n: 28, color: '#ffd27a', dist: 95 });
+        GX.text(arena, x, y - 34, `一刀两断! ผ่าป้าย ${sl.w.zh}`, 'big');
+        if (S().autoSpeak) speakWord(sl.w);
+        Mini.mark(sl.w, sl.ok, performance.now() - sl.t, btn);
+        Mini.advance(sl.ok, $('#slFoot'), () => this.next(s));
+      } else {
+        sl.ok = false; btn.classList.add('no'); btn.disabled = true;
+        GX.shake(btn, 7); Mini.slip();
+      }
+    },
+    key(s, e) { const n = +e.key; if (n >= 1 && n <= 4) { e.preventDefault(); const b = $(`#slSky .sl-plaque[data-o="${n - 1}"]`); if (b && !b.disabled) b.click(); } }
+  },
+
+  /* ---------- L1 · กุญแจกลไกราชวงศ์ (Royal Brass Pinyin Lockbox) ---------- */
+  cipher: {
+    mount(s, el) {
+      s.i = -1;
+      el.innerHTML = `<div class="m-table cp-arena" id="cpArena">
+          <div class="cp-chest" id="cpChest">
+            <div class="cp-word"><b class="hz" id="cpZh"></b><span id="cpMean"></span></div>
+            <div class="cp-wheels" id="cpWheels"></div>
+          </div>
+          <div class="cp-keys" id="cpKeys"></div>
+        </div>
+        <div class="m-panel"><div class="m-foot" id="cpFoot"></div></div>`;
+      el.onclick = e => { const b = e.target.closest('.cp-key'); if (b) this.dial(s, +b.dataset.i, b); };
+      this.next(s);
+    },
+    next(s) {
+      s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
+      const w = s.words[s.i], syls = (wordSyl(w) || [{ mark: w.py }]).map(x => x.mark);
+      const extra = [];
+      for (const d of distractors(w, 4, { sound: true })) {
+        const ds = (wordSyl(d) || [{ mark: d.py }]).map(x => x.mark);
+        for (const m of ds) if (!syls.includes(m) && !extra.includes(m) && extra.length < Math.max(3, 6 - syls.length)) extra.push(m);
+      }
+      const pool = shuffle([...syls, ...extra]);
+      s.cp = { w, syls, pool, at: 0, ok: true, t: performance.now(), done: false };
+      $('#cpZh').textContent = w.zh; $('#cpMean').textContent = meaningText(w); $('#cpFoot').innerHTML = '';
+      $('#cpChest').className = 'cp-chest';
+      $('#cpWheels').innerHTML = syls.map((_, i) => `<span class="cp-wheel pyx" data-w="${i}">?</span>`).join('');
+      $('#cpKeys').innerHTML = pool.map((p, i) => `<button type="button" class="cp-key pyx" data-i="${i}"><kbd>${i + 1}</kbd>${esc(p)}</button>`).join('');
+    },
+    dial(s, idx, btn) {
+      const cp = s.cp; if (!cp || cp.done || s.paused || btn.disabled) return;
+      const want = cp.syls[cp.at], got = cp.pool[idx], arena = $('#cpArena'), wheels = $$('#cpWheels .cp-wheel');
+      if (got === want) {
+        btn.disabled = true; btn.classList.add('used');
+        const wh = wheels[cp.at]; wh.textContent = got; wh.classList.add('locked');
+        GX.pop(wh, 1.18);
+        cp.at++;
+        if (cp.at >= cp.syls.length) {
+          cp.done = true; $('#cpChest').classList.add('open');
+          const [cx, cy] = GX.at($('#cpChest'), arena);
+          GX.burst(arena, cx, cy, { n: 28, color: '#ffd27a', dist: 95 });
+          GX.text(arena, cx, cy - 36, 'ปลดสลักหีบราชวงศ์!', 'big');
+          if (S().autoSpeak) speakWord(cp.w);
+          Mini.mark(cp.w, cp.ok, performance.now() - cp.t, $('#cpChest'));
+          Mini.advance(cp.ok, $('#cpFoot'), () => this.next(s));
+        }
+      } else {
+        cp.ok = false; GX.shake(btn, 7); Mini.slip();
+      }
+    },
+    key(s, e) { const n = +e.key; if (n >= 1 && n <= 6) { e.preventDefault(); const b = $(`#cpKeys .cp-key[data-i="${n - 1}"]`); if (b && !b.disabled) b.click(); } }
+  },
+
+  /* ---------- M1 · สายพานเข่งติ่มซำ (Dim Sum Conveyor Speed Sort) ---------- */
+  dimsum: {
+    mount(s, el) {
+      s.i = -1;
+      el.innerHTML = `<div class="m-table ds-arena" id="dsArena">
+          <div class="pk-goal">${L('ตรวจเข่งติ่มซำบนสายพานว่า "แปลตรง" หรือ "แปลหลอก"!', 'Judge whether the dim sum steamer translation is TRUE or FAKE!')}</div>
+          <div class="ds-belt"><div class="ds-steamer" id="dsStm"><b class="hz" id="dsZh"></b><small class="pyx" id="dsPy"></small><span id="dsTag"></span></div></div>
+          <div class="ds-reveal" id="dsRev"></div>
+        </div>
+        <div class="m-panel">
+          <div class="ds-acts" id="dsActs">
+            <button class="btn good lg" data-ds="1">✓ ${L('รับเสิร์ฟ (แปลตรง)', 'Serve (True)')} (1/←)</button>
+            <button class="btn danger lg" data-ds="0">✗ ${L('ส่งคืนครัว (แปลหลอก)', 'Reject (Fake)')} (2/→)</button>
+          </div>
+          <div class="m-foot" id="dsFoot"></div>
+        </div>`;
+      el.onclick = e => { const b = e.target.closest('[data-ds]'); if (b) this.judge(s, b.dataset.ds === '1'); };
+      this.next(s);
+    },
+    next(s) {
+      s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
+      const w = s.words[s.i], isTrue = Math.random() < 0.5, bad = distractors(w, 1)[0];
+      const shownMean = isTrue || !bad ? meaningText(w) : meaningText(bad);
+      s.ds = { w, isTrue: isTrue || !bad, shownMean, ok: true, t: performance.now(), done: false };
+      $('#dsZh').textContent = w.zh; $('#dsPy').textContent = w.py; $('#dsTag').textContent = shownMean;
+      $('#dsRev').textContent = ''; $('#dsFoot').innerHTML = '';
+      const stm = $('#dsStm'); stm.className = 'ds-steamer';
+      stm.animate([{ transform: 'translateX(-110px)' }, { transform: 'translateX(0px)' }], { duration: 420, easing: 'cubic-bezier(.2,.85,.35,1)' });
+    },
+    judge(s, pickTrue) {
+      const ds = s.ds; if (!ds || ds.done || s.paused) return;
+      const arena = $('#dsArena'), stm = $('#dsStm'), [x, y] = GX.at(stm, arena);
+      if (pickTrue === ds.isTrue) {
+        ds.done = true; stm.classList.add('ok');
+        GX.burst(arena, x, y, { n: 24, color: '#ffd27a', dist: 80 });
+        GX.text(arena, x, y - 36, ds.isTrue ? 'รับเสิร์ฟถูกต้อง!' : 'ตาไว! จับคำแปลหลอกได้', 'big');
+        $('#dsRev').innerHTML = `<b class="hz">${esc(ds.w.zh)}</b> (${esc(ds.w.py)}) = <b>${esc(meaningText(ds.w))}</b>`;
+        if (S().autoSpeak) speakWord(ds.w);
+        Mini.mark(ds.w, ds.ok, performance.now() - ds.t, stm);
+        Mini.advance(ds.ok, $('#dsFoot'), () => this.next(s));
+      } else {
+        ds.ok = false; GX.shake(stm, 8); Mini.slip();
+      }
+    },
+    key(s, e) {
+      if (e.key === '1' || e.key === 'ArrowLeft') { e.preventDefault(); this.judge(s, true); }
+      else if (e.key === '2' || e.key === 'ArrowRight') { e.preventDefault(); this.judge(s, false); }
+    }
+  },
+
+  /* ---------- N2 · ตะเกียงส่องหมอก (Lantern Fog Word Explorer) ---------- */
+  lanternfog: {
+    mount(s, el) {
+      s.i = -1;
+      el.innerHTML = `<div class="m-table lf-arena" id="lfArena">
+          <div class="pk-goal" id="lfGoal"></div>
+          <div class="lf-grid" id="lfGrid"></div>
+        </div>
+        <div class="m-panel"><div class="m-foot" id="lfFoot"></div></div>`;
+      el.onclick = e => { const b = e.target.closest('.lf-cell'); if (b) this.light(s, +b.dataset.i, b); };
+      this.next(s);
+    },
+    next(s) {
+      s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
+      const w = s.words[s.i], chars = Array.from(w.zh).filter(c => /[㐀-鿿]/.test(c));
+      const extra = [];
+      for (const d of distractors(w, 5)) for (const c of Array.from(d.zh)) if (!chars.includes(c) && !extra.includes(c) && extra.length < 9 - chars.length) extra.push(c);
+      const pool = shuffle([...chars, ...extra]).slice(0, 9);
+      s.lf = { w, chars, pool, at: 0, ok: true, t: performance.now(), done: false };
+      $('#lfGoal').innerHTML = `🏮 ${L('ส่องตะเกียงค้นหาคำว่า:', 'Shine lantern to find:')} <b>${esc(meaningText(w))}</b> <small class="pyx">(${esc(w.py)})</small>`;
+      $('#lfFoot').innerHTML = '';
+      $('#lfGrid').innerHTML = pool.map((c, i) => `<button type="button" class="lf-cell hz" data-i="${i}"><kbd>${i + 1}</kbd>${esc(c)}</button>`).join('');
+    },
+    light(s, idx, btn) {
+      const lf = s.lf; if (!lf || lf.done || s.paused || btn.classList.contains('lit')) return;
+      const want = lf.chars[lf.at], got = lf.pool[idx], arena = $('#lfArena'), [x, y] = GX.at(btn, arena);
+      if (got === want) {
+        btn.classList.add('lit');
+        GX.burst(arena, x, y, { n: 20, color: '#ffd27a', dist: 65 });
+        lf.at++;
+        if (lf.at >= lf.chars.length) {
+          lf.done = true;
+          GX.text(arena, x, y - 30, `${lf.w.zh} · สลายหมอกสำเร็จ!`, 'big');
+          if (S().autoSpeak) speakWord(lf.w);
+          Mini.mark(lf.w, lf.ok, performance.now() - lf.t, btn);
+          Mini.advance(lf.ok, $('#lfFoot'), () => this.next(s));
+        }
+      } else {
+        lf.ok = false; GX.shake(btn, 7); Mini.slip();
+      }
+    },
+    key(s, e) { const n = +e.key; if (n >= 1 && n <= 9) { e.preventDefault(); const b = $(`#lfGrid .lf-cell[data-i="${n - 1}"]`); if (b) b.click(); } }
   }
 };

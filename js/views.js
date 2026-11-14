@@ -117,6 +117,17 @@ const Home = {
 /* ---------- LEARN: level select ---------- */
 const Learn = {
   show() {
+    const ab = $('#arcadeBox');
+    if (ab) {
+      const last = Store.d.last, lvl = last && levelWords(last.lvl).length ? last.lvl : LEVELS.find(l => levelWords(l).length) || 1;
+      const stg = Stats.suggestStage(lvl);
+      ab.innerHTML = `<div class="card"><div class="ch"><div><h3>${L('ลานประลองมินิเกม · เลือกเล่นด่วน', 'Mini-Game Arcade · Quick Play')}</h3><div class="cap">${L(`แตะเลือกมินิเกมเพื่อเริ่มเล่นทันที (${stageLabel(lvl, stg)}) หรือเลือกระดับ HSK ด้านล่าง`, `Tap any mini-game to play immediately (${stageLabel(lvl, stg)}) or pick an HSK level below`)}</div></div></div>${gamePickerHTML(S().stageGame || 'runner')}</div>`;
+      ab.onclick = e => {
+        const b = e.target.closest('[data-game]'); if (!b) return;
+        const g = b.dataset.game; S().stageGame = g; Store.save(); sfx('pop');
+        Level.play(lvl, stg, g);
+      };
+    }
     $('#lvGrid').innerHTML = LEVELS.map((l, i) => {
       const n = levelWords(l).length; if (!n) return '';
       const s = Stats.levelSummary(l);
