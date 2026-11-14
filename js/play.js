@@ -203,7 +203,8 @@ const Game = {
       if (!moved && Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
       moved = true;
       const k = this.canSwipe() ? 1 : 0.18;
-      card.style.transform = `translate(${dx * k}px,${dy * k * 0.35}px) rotate(${dx * k / 18}deg)`;
+      const rx = clamp(-dy * k * 0.05, -10, 10), ry = clamp(dx * k * 0.07, -14, 14);
+      card.style.transform = `perspective(900px) translate3d(${(dx * k).toFixed(1)}px,${(dy * k * 0.35).toFixed(1)}px,0) rotate(${(dx * k / 18).toFixed(2)}deg) rotateX(${rx.toFixed(1)}deg) rotateY(${ry.toFixed(1)}deg)`;
       if (this.canSwipe() && this.s.phase !== 'reveal') { tint.style.opacity = String(Math.min(0.32, Math.abs(dx) / 320)); tint.style.background = dx > 0 ? 'var(--good)' : 'var(--bad)'; }
     });
     const end = (e, cancelled) => {
@@ -235,11 +236,15 @@ const Game = {
     const s = this.s;
     if (s.phase === 'ask' && s.answer === 'self') this.peek();
     else if (s.phase === 'ask') { if (s.ask === 'listen') { speakWord(this.cur()); return; } s.card.animate && s.card.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-7px)' }, { transform: 'translateX(7px)' }, { transform: 'translateX(0)' }], { duration: 260 }); toast(`${T('เลือกคำตอบจากตัวเลือก')}`, { ms: 1500 }); }
-    else if (s.phase === 'peek' || s.phase === 'reveal') { this.holdAuto(); s.card.classList.toggle('flipped'); sfx('flip'); }
+    else if (s.phase === 'peek' || s.phase === 'reveal') { this.holdAuto(); this.flip(!s.card.classList.contains('flipped'), false); }
   },
 
   /* ---------- answering ---------- */
-  flip(show = true) { const s = this.s; s.card.classList.toggle('flipped', show); sfx('flip'); if (show && S().autoSpeak) setTimeout(() => { if (this.alive(s) && s.card) speakWord(this.cur()); }, 180); },
+  flip(show = true, speak = true) {
+    const s = this.s; s.card.classList.toggle('flipped', show); sfx('flip');
+    if (s.card.animate && !reducedMotion()) s.card.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-14px) scale(1.055)', offset: .42 }, { transform: 'translateY(0) scale(1)' }], { duration: 520, easing: 'cubic-bezier(.25,.9,.35,1)' });
+    if (show && speak && S().autoSpeak) setTimeout(() => { if (this.alive(s) && s.card) speakWord(this.cur()); }, 180);
+  },
   /** right / wrong: coloured frame + a small badge in the top row + a bounce or a shake (never covers the answer) */
   stamp(ok) {
     const card = this.s.card, v = card.querySelector('.verd');
@@ -666,6 +671,7 @@ const Pad = {
         if (this.pen && e.pointerType === 'touch') return;
         if (this.cur) return;
         e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (er) { }
+        if (cv.getAnimations) cv.getAnimations().forEach(a => a.finish());
         const p = this.pt(c, e, null);
         this.cur = { cell: i, pts: [p], pid: e.pointerId };
         ctx.beginPath(); ctx.arc(p[0], p[1], p[2] / 2, 0, Math.PI * 2); ctx.fill();
@@ -717,6 +723,17 @@ const Pad = {
     const n = pts.length; if (n < 2) return;
     const a = pts[n - 2], b = pts[n - 1], m = this.mid(a, b);
     ctx.lineWidth = b[2] * 0.85; ctx.beginPath(); ctx.moveTo(m[0], m[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+    const vx = b[0] - a[0], vy = b[1] - a[1], d = Math.hypot(vx, vy);
+    if (d > 1.2) {
+      const ext = Math.min(d * 0.65, b[2] * 1.6), ux = vx / d * ext, uy = vy / d * ext;
+      let px = b[0], py = b[1];
+      for (let i = 1; i <= 4; i++) {
+        const t = i / 4, nx = b[0] + ux * t, ny = b[1] + uy * t;
+        ctx.lineWidth = Math.max(0.6, b[2] * (0.78 - t * 0.68));
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(nx, ny); ctx.stroke();
+        px = nx; py = ny;
+      }
+    }
   },
   redraw(c) {
     const { ctx, size } = c; ctx.clearRect(0, 0, size, size);
@@ -727,7 +744,15 @@ const Pad = {
     });
   },
   undo() { const s = this.strokes.pop(); if (s) { this.redraw(this.cells[s.cell]); sfx('tap'); } },
-  clear() { this.strokes = []; this.cells.forEach(c => this.redraw(c)); },
+  clear() {
+    if (!this.strokes.length) return;
+    this.strokes = []; sfx('swoosh');
+    this.cells.forEach(c => {
+      if (c.cv.animate && !reducedMotion()) {
+        c.cv.animate([{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(4px) scale(1.03)' }], { duration: 200, easing: 'ease-out' }).onfinish = () => this.redraw(c);
+      } else this.redraw(c);
+    });
+  },
   isEmpty() { return !this.strokes.length; },
   /** combine all cells into one small image (with the red grid) for the answer sheet */
   snapshot() {

@@ -529,8 +529,12 @@ const MG = {
       }
       const from = good.querySelector('.dm2').getBoundingClientRect();
       good.style.visibility = 'hidden'; sfx('tap');
-      const d = this.lay(s, c.target, from), host = $('#mgStage');
-      setTimeout(() => { if (!Mini.alive(s)) return; GX.burst(host, ...GX.at(d.querySelector('.l'), host), { n: ok ? 14 : 5, dist: 44, color: ok ? '#e6b54e' : '#aaa' }); d.querySelector('.l').classList.add('lit'); GX.pop(d, 1.12); }, 440);
+      const d = this.lay(s, c.target, from), host = $('#mgStage'), prev = d.previousElementSibling;
+      setTimeout(() => {
+        if (!Mini.alive(s)) return;
+        if (prev && prev.animate) prev.animate([{ transform: 'none' }, { transform: 'translateX(-6px) rotate(-2deg)', offset: .35 }, { transform: 'none' }], { duration: 240, easing: 'ease-out' });
+        GX.burst(host, ...GX.at(d.querySelector('.l'), host), { n: ok ? 16 : 6, dist: 48, color: ok ? '#e6b54e' : '#aaa' }); d.querySelector('.l').classList.add('lit'); GX.pop(d, 1.12);
+      }, 430);
       if (ok) Mini.mark(c.target, true, ms, d);
       c.cur = c.target; c.used.add(c.target.zh); c.step++;
       setTimeout(() => { if (Mini.alive(s)) this.showCur(s); }, 460);
@@ -573,16 +577,17 @@ const MG = {
     },
     recipes(s) {
       const f = s.f;
-      $('#fuR').innerHTML = f.targets.map(w => f.done.has(w.id) ? `<span class="fu-rc done"><b class="hz">${esc(w.zh)}</b><em class="pyx">${esc(w.py || '')}</em>${esc(meaningText(w))}</span>` : `<span class="fu-rc">${'<i>?</i>'.repeat(w._len)} ${esc(meaningText(w))}</span>`).join('');
+      $('#fuR').innerHTML = f.targets.map(w => f.done.has(w.id) ? `<span class="fu-rc done" data-wid="${esc(w.id)}"><b class="hz">${esc(w.zh)}</b><em class="pyx">${esc(w.py || '')}</em>${esc(meaningText(w))}</span>` : `<span class="fu-rc" data-wid="${esc(w.id)}">${'<i>?</i>'.repeat(w._len)} ${esc(meaningText(w))}</span>`).join('');
     },
+    pos(o, x, y) { o.x = x; o.y = y; o.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) translate(-50%,-50%)`; },
     spin(s, now) {
       const f = s.f, F = $('#fuF'); if (!F) return;
       const dt = clamp(now - f.last, 0, 80); f.last = now; if (!s.paused) f.clock += dt;
-      const W = F.clientWidth, H = F.clientHeight, free = f.orbs.filter(o => !o.held && !o.gone), n = f.orbs.length;
+      const W = F.clientWidth, H = F.clientHeight, n = f.orbs.length;
       f.orbs.forEach((o, i) => {
         if (o.held || o.gone || o.drag) return;
         const a = f.clock / 1000 * .42 + i / n * Math.PI * 2;
-        o.style.left = (W / 2 + Math.cos(a) * W * .38) + 'px'; o.style.top = (H / 2 + Math.sin(a) * H * .38) + 'px';
+        this.pos(o, W / 2 + Math.cos(a) * W * .38, H / 2 + Math.sin(a) * H * .38);
       });
     },
     /* pointer: a short press = tap, moving past a few px = drag; drop it on the ink-stone to add it */
@@ -592,12 +597,15 @@ const MG = {
       e.preventDefault();
       const F = $('#fuF'), pot = $('#fuPot'), d = { x0: e.clientX, y0: e.clientY, moved: false };
       try { o.setPointerCapture(e.pointerId); } catch (_) {}
-      const overPot = ev => { const r = pot.getBoundingClientRect(); return Math.hypot(ev.clientX - (r.left + r.width / 2), ev.clientY - (r.top + r.height / 2)) < r.width * .62; };
+      const overPot = ev => { const r = pot.getBoundingClientRect(); return Math.hypot(ev.clientX - (r.left + r.width / 2), ev.clientY - (r.top + r.height / 2)) < r.width * .66; };
       const move = ev => {
         if (ev.pointerId !== e.pointerId) return;
         if (!d.moved) { if (o.held || Math.hypot(ev.clientX - d.x0, ev.clientY - d.y0) < 8) return; d.moved = true; o.drag = true; o.classList.add('drag'); }
-        const r = F.getBoundingClientRect();
-        o.style.left = clamp(ev.clientX - r.left, 0, r.width) + 'px'; o.style.top = clamp(ev.clientY - r.top, 0, r.height) + 'px';
+        const r = F.getBoundingClientRect(), cx = r.width / 2, cy = r.height / 2, pr = pot.offsetWidth * .92;
+        let x = clamp(ev.clientX - r.left, 0, r.width), y = clamp(ev.clientY - r.top, 0, r.height);
+        const dist = Math.hypot(cx - x, cy - y);
+        if (dist < pr) { const pull = Math.pow(1 - dist / pr, 1.35) * .38; x += (cx - x) * pull; y += (cy - y) * pull; }
+        this.pos(o, x, y);
         pot.classList.toggle('near', overPot(ev));
       };
       const up = ev => {
@@ -616,7 +624,7 @@ const MG = {
       const f = s.f, F = $('#fuF'), n = f.built.length, rows = Math.ceil(n / 4);
       f.built.forEach((o, k) => {
         const row = Math.floor(k / 4), inRow = Math.min(4, n - row * 4), col = k % 4, step = o.offsetWidth * .72;
-        o.style.left = (F.clientWidth / 2 + (col - (inRow - 1) / 2) * step) + 'px'; o.style.top = (F.clientHeight / 2 + (row - (rows - 1) / 2) * o.offsetHeight * .85) + 'px';
+        this.pos(o, F.clientWidth / 2 + (col - (inRow - 1) / 2) * step, F.clientHeight / 2 + (row - (rows - 1) / 2) * o.offsetHeight * .85);
       });
     },
     drop(s, o) {      // tap a character already in the ink-stone to send it back out
@@ -649,6 +657,14 @@ const MG = {
       born.animate([{ transform: 'translate(-50%,-50%) scale(.3)', opacity: 0 }, { transform: 'translate(-50%,-115%) scale(1.15)', opacity: 1, offset: .45 }, { transform: 'translate(-50%,-125%) scale(1)', opacity: 1, offset: .8 }, { transform: 'translate(-50%,-140%) scale(1)', opacity: 0 }], { duration: 1500, easing: 'cubic-bezier(.3,1.2,.5,1)' });
       if (S().autoSpeak) speakWord(w);
       Mini.mark(w, !f.err, performance.now() - f.t, pot); f.err = false; f.t = performance.now(); f.done.add(w.id); this.recipes(s);
+      const rc = $(`#fuR .fu-rc[data-wid="${CSS.escape ? CSS.escape(w.id) : w.id}"]`);
+      if (rc && rc.animate && !reducedMotion()) {
+        const a = pot.getBoundingClientRect(), b = rc.getBoundingClientRect(), sp = document.createElement('i');
+        sp.className = 'gx-pt'; sp.style.cssText = 'position:fixed;left:0;top:0;width:16px;height:16px;background:radial-gradient(circle,#fff,#e6b54e 70%);box-shadow:0 0 18px 4px rgba(230,181,78,.85);z-index:80';
+        document.body.appendChild(sp);
+        const ax = a.left + a.width / 2, ay = a.top + a.height / 2, bx = b.left + b.width / 2, by = b.top + b.height / 2;
+        sp.animate([{ transform: `translate3d(${ax}px,${ay}px,0) translate(-50%,-50%) scale(1.2)`, opacity: 1 }, { transform: `translate3d(${(ax + bx) / 2}px,${Math.min(ay, by) - 44}px,0) translate(-50%,-50%) scale(1.5)`, opacity: 1, offset: .5 }, { transform: `translate3d(${bx}px,${by}px,0) translate(-50%,-50%) scale(.4)`, opacity: 0 }], { duration: 480, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }).onfinish = () => { sp.remove(); GX.pop(rc, 1.14); };
+      }
       setTimeout(() => { if (!Mini.alive(s)) return; pot.classList.remove('hot'); if (f.done.size >= f.targets.length) this.ready(s); else f.lock = false; }, 900);
     },
     /* all words forged: the stone turns white and glows; tap it to move on, or it moves on by itself after 8 s */
@@ -935,15 +951,17 @@ const MG = {
       r.gt += dt;
       const live = r.drops.filter(d => !d.gone);
       if (r.queue.length && (!live.length || (live.length < 3 && r.gt >= r.spawnAt))) {
-        const w = r.queue.shift(), d = { id: ++r.id, w, born: r.gt, dur: this.speed(s), p: 0, missed: false, gone: false };
+        const w = r.queue.shift(), d = { id: ++r.id, w, born: r.gt, dur: this.speed(s), p: 0, missed: false, gone: false, ph: Math.random() * 6.28, amp: 6 + Math.random() * 6 };
         const el = document.createElement('button'); el.className = 'lantern'; el.dataset.id = d.id; el.innerHTML = `<span class="lt-body hz">${esc(w.zh)}</span>`;
-        field.appendChild(el); d.el = el; el.style.left = (14 + Math.random() * Math.max(0, W - el.offsetWidth - 28)) + 'px';
+        field.appendChild(el); d.el = el; el.style.left = (18 + Math.random() * Math.max(0, W - el.offsetWidth - 36)) + 'px';
         r.drops.push(d); r.spawnAt = r.gt + Math.max(1400, d.dur * .42);
         if (!r.target) this.aim(s, d);
       }
       for (const d of r.drops) {
         if (d.gone) continue;
-        d.p = (r.gt - d.born) / d.dur; d.el.style.transform = `translateY(${(H + 10 - d.p * (H + 100)).toFixed(1)}px)`;
+        d.p = (r.gt - d.born) / d.dur;
+        const sx = Math.sin(r.gt / 680 + d.ph) * d.amp, sy = H + 10 - d.p * (H + 100);
+        d.el.style.transform = `translate3d(${sx.toFixed(1)}px,${sy.toFixed(1)}px,0)`;
         if (d.p >= 1) this.escape(s, d);
       }
       if (r.target && !r.target.gone) { const hi = live.filter(d => !d.gone).sort((a, b) => b.p - a.p)[0]; if (hi && hi !== r.target && hi.p - r.target.p > .25) this.aim(s, hi); }
