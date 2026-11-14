@@ -1,10 +1,30 @@
 'use strict';
 /* =====================================================================
-   Library of Limu · new offy v3 — core
+   Library of Limu · new offy v4 — core
    utilities · pinyin · vocabulary · storage · stats / spaced review
    sound · speech · UI helpers · router · charts · effects
    © 2026 李牧飞 Aphisit Kaewnet
    ===================================================================== */
+
+/* ---------- 0. menu language ----------
+   Thai is the source language. L(th, en) picks a wording in new code; T(th) looks older strings up
+   in js/i18n-en.js. The language is fixed for the page: changing it in settings reloads. */
+const LANG = (() => { try { for (const k of ['offy.v4', 'offy.v3', 'offy.v2']) { const d = JSON.parse(localStorage.getItem(k) || 'null'); if (d && d.settings) return d.settings.lang === 'en' ? 'en' : 'th'; } } catch (e) { } return 'th'; })();
+const EN_DICT = window.OFFY_EN || {};
+const L = (th, en) => LANG === 'en' ? en : th;
+const T = s => (LANG === 'en' && EN_DICT[s]) || s;
+document.documentElement.lang = LANG;
+const I18n = {
+  /** translate the Thai written directly in index.html: the run from the first to the last Thai letter of each text / label */
+  scan() {
+    if (LANG !== 'en') return;
+    const thai = /[฀-๿]/, tr = v => v.replace(/[฀-๿](?:[^]*[฀-๿])?/, m => EN_DICT[m] || m);
+    const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), nodes = []; let n;
+    while ((n = w.nextNode())) if (thai.test(n.data) && !n.parentElement.closest('script,style')) nodes.push(n);
+    nodes.forEach(x => { x.data = tr(x.data); });
+    document.querySelectorAll('[aria-label],[placeholder],[title],[data-tip]').forEach(el => ['aria-label', 'placeholder', 'title', 'data-tip'].forEach(a => { const v = el.getAttribute(a); if (v && thai.test(v)) el.setAttribute(a, tr(v)); }));
+  }
+};
 
 /* ---------- 1. tiny utilities ---------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -21,17 +41,17 @@ const dayStart = (d = new Date()) => { const x = new Date(d); x.setHours(0, 0, 0
 const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const DAY = 864e5;
 const fmtClock = ms => { const s = Math.max(0, Math.floor(ms / 1000)); const h = Math.floor(s / 3600); return h ? `${h}:${pad2(Math.floor(s % 3600 / 60))}:${pad2(s % 60)}` : `${pad2(Math.floor(s / 60))}:${pad2(s % 60)}`; };
-const fmtDur = ms => { const m = Math.round(ms / 60000); if (m < 1) return ms > 0 ? '< 1 นาที' : '0 นาที'; if (m < 60) return `${m} นาที`; return `${Math.floor(m / 60)} ชม. ${m % 60} นาที`; };
+const fmtDur = ms => { const m = Math.round(ms / 60000); if (m < 1) return ms > 0 ? `< 1 ${T('นาที')}` : `0 ${T('นาที')}`; if (m < 60) return `${m} ${T('นาที')}`; return `${Math.floor(m / 60)} ${T('ชม')}. ${m % 60} ${T('นาที')}`; };
 const fmtNum = n => Number(n || 0).toLocaleString('en-US');
-const TH_MONTH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-const TH_DAY = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'];
-const TH_DAY_FULL = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
-const fmtDate = ts => { const d = new Date(ts); return `${d.getDate()} ${TH_MONTH[d.getMonth()]} ${d.getFullYear() + 543} · ${pad2(d.getHours())}:${pad2(d.getMinutes())}`; };
+const TH_MONTH = [`${T('ม.ค')}.`, `${T('ก.พ')}.`, `${T('มี.ค')}.`, `${T('เม.ย')}.`, `${T('พ.ค')}.`, `${T('มิ.ย')}.`, `${T('ก.ค')}.`, `${T('ส.ค')}.`, `${T('ก.ย')}.`, `${T('ต.ค')}.`, `${T('พ.ย')}.`, `${T('ธ.ค')}.`];
+const TH_DAY = [`${T('อา')}`, `${T('จ')}`, `${T('อ')}`, `${T('พ')}`, `${T('พฤ')}`, `${T('ศ')}`, `${T('ส')}`];
+const TH_DAY_FULL = [`${T('วันอาทิตย์')}`, `${T('วันจันทร์')}`, `${T('วันอังคาร')}`, `${T('วันพุธ')}`, `${T('วันพฤหัสบดี')}`, `${T('วันศุกร์')}`, `${T('วันเสาร์')}`];
+const fmtDate = ts => { const d = new Date(ts); return `${d.getDate()} ${TH_MONTH[d.getMonth()]} ${d.getFullYear() + (LANG === 'en' ? 0 : 543)} · ${pad2(d.getHours())}:${pad2(d.getMinutes())}`; };
 const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const isWide = () => matchMedia('(min-width: 900px)').matches;
 const ic = (name, cls = '') => `<svg class="ic ${cls}" aria-hidden="true"><use href="#i-${name}"/></svg>`;
-const starsHTML = (n, size = 12, max = 3) => `<span class="stars" style="--sz:${size}px" aria-label="${n} ดาว">${Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`;
+const starsHTML = (n, size = 12, max = 3) => `<span class="stars" style="--sz:${size}px" aria-label="${n} ${T('ดาว')}">${Array.from({ length: max }, (_, i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</span>`;
 const rateTxt = r => (+r).toFixed(2).replace(/0$/, '') + '×';
 
 /* ---------- 2. pinyin helpers ---------- */
@@ -72,12 +92,12 @@ const LEVELS = [1, 2, 3, 4, 5, 6];
 const STAGE_SIZE = 10;
 const POS_ABBR = { noun: 'N', verb: 'V', adjective: 'Adj', adverb: 'Adv', pronoun: 'Pron', number: 'Num', classifier: 'CL', preposition: 'Prep', conjunction: 'Conj', auxiliary: 'Aux', particle: 'Part', interjection: 'Int', phrase: 'Phr', prefix: 'Pref', suffix: 'Suf', custom: 'My' };
 const POS_KEY = { noun: 'n', verb: 'v', adjective: 'adj', adverb: 'adv', pronoun: 'pron', number: 'num', classifier: 'm', preposition: 'prep', conjunction: 'conj', auxiliary: 'part', particle: 'part', interjection: 'int' };
-const POS_NAME = { n: 'คำนาม', v: 'คำกริยา', adj: 'คุณศัพท์', adv: 'วิเศษณ์', pron: 'สรรพนาม', num: 'จำนวน', m: 'ลักษณนาม', prep: 'บุพบท', conj: 'สันธาน', part: 'คำช่วย', int: 'อุทาน', other: 'อื่น ๆ' };
+const POS_NAME = { n: `${T('คำนาม')}`, v: `${T('คำกริยา')}`, adj: `${T('คุณศัพท์')}`, adv: `${T('วิเศษณ์')}`, pron: `${T('สรรพนาม')}`, num: `${T('จำนวน')}`, m: `${T('ลักษณนาม')}`, prep: `${T('บุพบท')}`, conj: `${T('สันธาน')}`, part: `${T('คำช่วย')}`, int: `${T('อุทาน')}`, other: `${T('อื่น ๆ')}` };
 const posParts = pos => String(pos || '').split(',').map(x => x.trim().toLowerCase()).filter(Boolean);
 const posKey = pos => POS_KEY[posParts(pos)[0]] || 'other';
 const posBadge = w => w.pos ? `<span class="pos-b p-${posKey(w.pos)}" title="${esc(w.pos)}">${esc(posParts(w.pos).map(p => POS_ABBR[p] || p).join(' · '))}</span>` : '';
 const lvlColor = l => `var(--hsk${l === 'C' ? 'C' : l})`;
-const lvlName = l => l === 'C' ? 'คำของฉัน' : `HSK ${l}`;
+const lvlName = l => l === 'C' ? `${T('คำของฉัน')}` : `HSK ${l}`;
 const lvlBadge = l => `<span class="badge lvl-b" style="--c:${lvlColor(l)}">${esc(lvlName(l))}</span>`;
 
 const RAW_WORDS = (window.OFFY_WORDS || []).map(r => ({ lvl: r[0], zh: r[1], py: r[2], pos: r[3], en: r[4], th: r[5], ex_zh: r[6], ex_py: r[7], ex_en: r[8], ex_th: r[9] }));
@@ -135,17 +155,19 @@ const Color = {
 };
 
 /* ---------- 4. storage ---------- */
-const DEFAULT_SETTINGS = { theme: null, showPinyin: true, showTh: true, showEn: true, answer: 'quiz', ask: 'zh', timer: 'countdown', sec: 10, autoNext: true, autoSpeak: false, rate: 0.8, voiceURI: '', sfx: true, vol: 60, haptic: true, goal: 30, scale: { hz: 100, mean: 100, ex: 100, dict: 100 },
+const DEFAULT_SETTINGS = { theme: null, showPinyin: true, showTh: true, showEn: true, answer: 'quiz', ask: 'zh', timer: 'countdown', sec: 10, autoNext: true, autoSpeak: false, rate: 0.8, voiceURI: '', sfx: true, vol: 60, haptic: true, goal: 30, lang: 'th', afterOk: 'auto', afterBad: 'manual', stageGame: 'flash', scale: { hz: 100, mean: 100, ex: 100, dict: 100 },
   front: { s1: 100, s2: 100, s3: 100, s4: 100, rows4: true },          // hanzi size on the card front, by number of characters
   colors: { accent: '', felt: '', paper: '', ink: '', pinyin: '' } };   // '' = built-in colour
 const Store = {
-  KEY: 'offy.v3', d: null, migrated: '',
-  defaults() { return { v: 3, created: Date.now(), settings: clone(DEFAULT_SETTINGS), sessions: [], ws: {}, stages: {}, review: [], customWords: [], legacy: { days: {} }, last: null, customCfg: null }; },
+  KEY: 'offy.v4', d: null, migrated: '',
+  defaults() { return { v: 4, created: Date.now(), settings: clone(DEFAULT_SETTINGS), sessions: [], ws: {}, stages: {}, review: [], customWords: [], legacy: { days: {} }, last: null, customCfg: null, xp: null, seals: {}, quests: null }; },
   read(k) { try { const d = JSON.parse(localStorage.getItem(k) || 'null'); return d && typeof d === 'object' ? d : null; } catch (e) { return null; } },
   /** make any saved / imported object safe to use (also upgrades v1 data) */
   normalize(d) {
-    d = Object.assign(this.defaults(), d); d.v = 3;
+    const old = (d && d.settings) || {};
+    d = Object.assign(this.defaults(), d); d.v = 4;
     d.settings = Object.assign(clone(DEFAULT_SETTINGS), d.settings || {});
+    if (old.afterOk === undefined && old.autoNext === false) d.settings.afterOk = 'manual';      // v2/v3 had a single on/off switch
     ['scale', 'front', 'colors'].forEach(k => { d.settings[k] = Object.assign({ ...DEFAULT_SETTINGS[k] }, d.settings[k] && typeof d.settings[k] === 'object' ? d.settings[k] : {}); });
     ['sessions', 'review', 'customWords'].forEach(k => { if (!Array.isArray(d[k])) d[k] = []; });
     ['ws', 'stages'].forEach(k => { if (!d[k] || typeof d[k] !== 'object') d[k] = {}; });
@@ -156,7 +178,7 @@ const Store = {
   load() {
     let d = this.read(this.KEY);
     // first run of this version: carry progress over from new offy v2, else v1 (their own keys are left untouched)
-    if (!d) for (const old of ['v2', 'v1']) { const o = this.read('offy.' + old); if (o && o.settings && Array.isArray(o.sessions)) { d = o; this.migrated = old; break; } }
+    if (!d) for (const old of ['v3', 'v2', 'v1']) { const o = this.read('offy.' + old); if (o && o.settings && Array.isArray(o.sessions)) { d = o; this.migrated = old; break; } }
     const fresh = !d;
     this.d = this.normalize(d || {});
     if (fresh && this.migrateOld()) this.migrated = 'old';
@@ -166,7 +188,7 @@ const Store = {
   flush() {
     clearTimeout(this._t);
     try { localStorage.setItem(this.KEY, JSON.stringify(this.d)); }
-    catch (e) { if (!this._warned) { this._warned = true; toast('บันทึกข้อมูลไม่สำเร็จ พื้นที่เบราว์เซอร์อาจเต็ม ลองสำรองข้อมูลในหน้าตั้งค่า', { icon: 'info', ms: 5000 }); } }
+    catch (e) { if (!this._warned) { this._warned = true; toast(`${T('บันทึกข้อมูลไม่สำเร็จ พื้นที่เบราว์เซอร์อาจเต็ม ลองสำรองข้อมูลในหน้าตั้งค่า')}`, { icon: 'info', ms: 5000 }); } }
   },
   /** import progress from the original single-file version (keys hskStats, hskForgotten, …). */
   migrateOld() {
@@ -191,7 +213,7 @@ const Store = {
           const m = /^(\d+)\/(\d+)\/(\d{4}) (\d+):(\d+)/.exec(h.date || '');
           if (!m) return;
           const ts = new Date(+m[3], +m[2] - 1, +m[1], +m[4], +m[5]).getTime();
-          d.sessions.push({ id: 'lg' + ts, lg: 1, mode: 'flash', kind: 'legacy', label: String(h.name || 'เวอร์ชันเก่า'), ts, dur: 0, total: +h.total || 0, correct: +h.know || 0, stars: 0, words: [] });
+          d.sessions.push({ id: 'lg' + ts, lg: 1, mode: 'flash', kind: 'legacy', label: String(h.name || `${T('เวอร์ชันเก่า')}`), ts, dur: 0, total: +h.total || 0, correct: +h.know || 0, stars: 0, words: [] });
           any = true;
         });
         d.sessions.sort((a, b) => a.ts - b.ts);
@@ -362,6 +384,7 @@ const Sfx = {
   play(name, arg) { if (!this.enabled() || !this.ensure()) return; try { this.lib[name].call(this, arg); } catch (e) { } },
   lib: {
     tap() { this.tone(740, { dur: .05, gain: .05, type: 'triangle' }); },
+    thump(n = 1) { for (let i = 0; i < Math.min(n, 3); i++) this.tone(120, { t: i * .07, to: 60, dur: .05, gain: .22 }); },
     pop() { this.tone(520, { to: 780, dur: .07, gain: .07 }); },
     on() { this.tone(587, { dur: .07, gain: .07 }); this.tone(880, { t: .06, dur: .1, gain: .07 }); },
     off() { this.tone(660, { dur: .07, gain: .06 }); this.tone(440, { t: .06, dur: .1, gain: .06 }); },
@@ -384,7 +407,13 @@ const Sfx = {
   }
 };
 const sfx = (name, arg) => Sfx.play(name, arg);
-const buzz = p => { if (!S().haptic || !navigator.vibrate || (navigator.userActivation && !navigator.userActivation.hasBeenActive)) return; try { navigator.vibrate(p); } catch (e) { } };
+/* iPhone / iPad have no vibration API: there the "haptic" switch plays a short, low "thump" you feel more than hear */
+const CAN_VIBRATE = typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function' && !/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
+const buzz = p => {
+  if (!S().haptic || (navigator.userActivation && !navigator.userActivation.hasBeenActive)) return;
+  if (!CAN_VIBRATE) { Sfx.play('thump', Array.isArray(p) ? p.length : 1); return; }
+  try { navigator.vibrate(p); } catch (e) { }
+};
 
 /* ---------- 7. speech (Web Speech API) ---------- */
 const TTS = {
@@ -441,7 +470,7 @@ function toast(msg, { icon = '', ms = 2600 } = {}) {
   setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 320); }, ms);
 }
 let modalResolve = null;
-function modal({ title, msg = '', html = '', buttons = [{ label: 'ตกลง', cls: 'primary', value: true }], dismiss = null }) {
+function modal({ title, msg = '', html = '', buttons = [{ label: `${T('ตกลง')}`, cls: 'primary', value: true }], dismiss = null }) {
   if (modalResolve) { modalResolve(dismiss); modalResolve = null; }
   $('#mTitle').textContent = title; const m = $('#mMsg');
   if (html) m.innerHTML = html; else m.textContent = msg;
@@ -455,7 +484,7 @@ function modal({ title, msg = '', html = '', buttons = [{ label: 'ตกลง',
     setTimeout(() => { const b = $('#mActs .btn.primary') || $('#mActs .btn'); b && b.focus({ preventScroll: true }); }, 30);
   });
 }
-const confirmDlg = (title, msg, ok = 'ยืนยัน', danger = false) => modal({ title, msg, buttons: [{ label: ok, cls: danger ? 'bad' : 'primary', value: true }, { label: 'ยกเลิก', cls: 'ghost', value: false }], dismiss: false });
+const confirmDlg = (title, msg, ok = `${T('ยืนยัน')}`, danger = false) => modal({ title, msg, buttons: [{ label: ok, cls: danger ? 'bad' : 'primary', value: true }, { label: `${T('ยกเลิก')}`, cls: 'ghost', value: false }], dismiss: false });
 const modalOpen = () => $('#modalWrap').classList.contains('show');
 
 /* bottom sheet on phones / iPad portrait, side drawer on wide screens */
@@ -526,49 +555,137 @@ const Router = {
   start() { addEventListener('hashchange', () => this.onChange()); if (!location.hash) history.replaceState(null, '', '#/home'); this.onChange(); },
   onChange() {
     const h = location.hash || '#/home';
+    const back = this._restoring; this._restoring = null;
+    if (back && h === back) return;                 // we are only stepping back onto the page a guard kept open
     if (this.guard && this.guard(h) === false) return;
     const s = this.stack;
-    if (this._replacing) { this._replacing = false; if (s.length) s[s.length - 1] = h; else s.push(h); }
-    else if (s.length > 1 && s[s.length - 2] === h) s.pop();
-    else if (s[s.length - 1] !== h) s.push(h);
+    // dir tells renderRoute how to animate: deeper = push (slide in from the right), back = pop, swap = replace in place
+    if (this._replacing) { this._replacing = false; this.dir = 'swap'; if (s.length) s[s.length - 1] = h; else s.push(h); }
+    else if (s.length > 1 && s[s.length - 2] === h) { this.dir = 'pop'; s.pop(); }
+    else if (s[s.length - 1] !== h) { this.dir = 'push'; s.push(h); }
+    else this.dir = 'none';
     if (s.length > 60) s.splice(0, s.length - 60);
     renderRoute(h);
   },
   go(path) { const h = '#' + path; if (location.hash === h) renderRoute(h); else location.hash = h; },
   replace(path) { const h = '#' + path; if (location.hash === h) { renderRoute(h); return; } this._replacing = true; location.replace(h); },
   up(path) { const h = '#' + path; const s = this.stack; if (s.length > 1 && s[s.length - 2] === h) history.back(); else this.replace(path); },
-  /** re-insert current hash after the browser already moved away (used by guards) */
-  restore(h) { history.pushState(null, '', h); }
+  /** a guard refused to leave page h, but the browser already moved: undo that move without adding a history entry
+      (an extra entry used to make the next "back" skip the page you came from) */
+  restore(h) {
+    const went = location.hash, s = this.stack;
+    if (went === h) return;
+    if (this._replacing) { this._replacing = false; history.replaceState(null, '', h); return; }      // it was a replace: put the old address back in place
+    this._restoring = h;
+    if (s.length > 1 && s[s.length - 2] === went) history.forward(); else history.back();         // browser Back → step forward again; a link → step back
+  }
 };
 
 /* ---------- 10. charts (plain SVG) ---------- */
 const Charts = {
-  nice(max) { if (max <= 5) return 5; const p = Math.pow(10, Math.floor(Math.log10(max))); const n = max / p; return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10) * p; },
-  frame(el, labels, h, max, suffix = '') {
-    const W = Math.max(240, el.clientWidth || 300), padL = suffix ? 38 : 30, padB = 22, padT = 8, iw = W - padL - 4, ih = h - padB - padT, n = labels.length;
-    const step = iw / n;
-    let g = '';
-    [0, .5, 1].forEach(f => { const y = padT + ih - f * ih; g += `<line class="gl" x1="${padL}" x2="${W - 4}" y1="${y}" y2="${y}"/><text class="ax" x="${padL - 7}" y="${y + 3.5}" text-anchor="end">${Math.round(max * f)}${suffix}</text>`; });
-    const every = Math.ceil(n / Math.max(1, Math.floor(iw / 44)));
-    labels.forEach((t, i) => { if ((n - 1 - i) % every === 0) g += `<text class="ax" x="${padL + step * i + step / 2}" y="${h - 5}" text-anchor="middle">${esc(t)}</text>`; });
-    return { W, padL, padT, iw, ih, step, g, y: v => padT + ih - v / max * ih, x: i => padL + step * i + step / 2 };
+  /** a round top for the value axis, chosen so that the half-way gridline is a whole number too */
+  nice(max) { if (max <= 2) return 2; const p = Math.pow(10, Math.floor(Math.log10(max))), n = max / p; return (p === 1 ? [2, 4, 6, 8, 10] : [1, 2, 3, 4, 5, 6, 8, 10]).find(x => n <= x) * p; },
+  /** Layout of one chart. The value axis is drawn apart from the plot (see mount): when the columns would get thinner than
+      minStep the plot grows wider than the card and scrolls sideways instead. Plot coordinates start at x = 0. */
+  frame(el, labels, h, max, suffix = '', { minStep = 0, padT = 8, widths = null, prio = null, ticks = [0, .5, 1] } = {}) {
+    const full = Math.max(240, el.clientWidth || 300), padL = suffix ? 38 : 30, padB = 22, padR = 18, view = full - padL, ih = h - padB - padT, n = labels.length;
+    let ws, zoom = 1;
+    if (widths) { zoom = Math.max(1, (view - padR) / widths.reduce((a, w) => a + w, 0)); ws = widths.map(w => w * zoom); }      // columns of their own widths; stretched when they would not fill the card
+    else { const fit = (view - padR) / n, step = minStep > fit * 1.18 ? minStep : fit; ws = labels.map(() => step); }             // equal columns; a near miss just fits: no point scrolling a few pixels
+    const xs = []; let end = 0; ws.forEach(w => { xs.push(end); end += w; });
+    const W = Math.max(view, Math.ceil(end + padR - .01)), x = i => xs[i] + ws[i] / 2;
+    let g = '', ax = '';
+    ticks.forEach(f => { const y = padT + ih - f * ih; g += `<line class="gl" x1="0" x2="${W}" y1="${y}" y2="${y}"/>`; ax += `<text class="ax" x="${padL - 7}" y="${y + 3.5}" text-anchor="end">${Math.round(max * f)}${suffix}</text>`; });
+    // labels: columns that hold something first, then the rest, each time from the newest backwards; one that would touch another is left out
+    const order = labels.map((_, i) => n - 1 - i), shown = [];
+    (prio ? order.filter(i => prio[i]).concat(order.filter(i => !prio[i])) : order).forEach(i => {
+      const c = x(i); if (shown.some(p => Math.abs(p - c) < 39.5)) return; shown.push(c);
+      g += c < 16 ? `<text class="ax" x="1" y="${h - 5}">${esc(labels[i])}</text>` : `<text class="ax" x="${c}" y="${h - 5}" text-anchor="middle">${esc(labels[i])}</text>`;
+    });
+    return { W, h, view, padL, padT, ih, step: Math.min(...ws), ws, xs, zoom, g, ax, scroll: W > view + 1, y: v => padT + ih - v / max * ih, x };
   },
-  hits(f, tips) { return tips.map((t, i) => t ? `<rect class="hit" x="${f.padL + f.step * i}" y="${f.padT}" width="${f.step}" height="${f.ih}" rx="6" data-tip="${esc(t)}"/>` : '').join(''); },
+  hits(f, tips) { return tips.map((t, i) => t ? `<rect class="hit" x="${f.xs[i]}" y="${f.padT}" width="${f.ws[i]}" height="${f.ih}" rx="6" data-tip="${esc(t)}"/>` : '').join(''); },
+  /** puts the chart on the page: fixed value axis on the left, the plot beside it. A plot wider than the card starts at its
+      newest column and can be swiped, scrolled, dragged with the mouse or moved with the arrow keys. */
+  mount(el, f, inner) {
+    const old = el.querySelector('.ch-scroll'), fromEnd = old ? old.scrollWidth - old.clientWidth - old.scrollLeft : 0;
+    el.innerHTML = `<svg class="ch-y" width="${f.padL}" height="${f.h}" viewBox="0 0 ${f.padL} ${f.h}" aria-hidden="true">${f.ax}</svg>
+      <div class="ch-scroll" style="margin-left:${f.padL}px"${f.scroll ? ' tabindex="0"' : ''}><svg width="${f.W}" height="${f.h}" viewBox="0 0 ${f.W} ${f.h}" role="img">${f.g}${inner}</svg></div>`;
+    if (!f.scroll) return;
+    const sc = el.querySelector('.ch-scroll');
+    const edge = () => { const end = sc.scrollWidth - sc.clientWidth; sc.classList.toggle('more-l', sc.scrollLeft > 2); sc.classList.toggle('more-r', sc.scrollLeft < end - 2); };
+    sc.scrollLeft = Math.max(0, sc.scrollWidth - sc.clientWidth - fromEnd); edge();
+    sc.addEventListener('scroll', () => { edge(); Tip.hide(); }, { passive: true });
+    sc.addEventListener('keydown', e => { const d = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : 0; if (!d) return; e.preventDefault(); sc.scrollLeft += d * 96; });
+    let drag = null;
+    sc.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && e.button === 0) drag = { x: e.clientX, l: sc.scrollLeft, on: false }; });
+    sc.addEventListener('pointermove', e => {
+      if (!drag) return; const dx = e.clientX - drag.x;
+      if (!drag.on && Math.abs(dx) > 4) { drag.on = true; sc.classList.add('drag'); try { sc.setPointerCapture(e.pointerId); } catch (err) { } }
+      if (drag.on) sc.scrollLeft = drag.l - dx;
+    });
+    const end = () => { drag = null; sc.classList.remove('drag'); };
+    sc.addEventListener('pointerup', end); sc.addEventListener('pointercancel', end);
+    sc.addEventListener('pointerleave', () => { if (drag && !drag.on) drag = null; });
+  },
   rbar(x, y, w, h, r, base) { r = Math.min(r, w / 2, h); return `M${x},${base} V${y + r} Q${x},${y} ${x + r},${y} H${x + w - r} Q${x + w},${y} ${x + w},${y + r} V${base} Z`; },
   /** data: [{label, v, tip}] */
-  bars(el, data, { h = 150, color = '' } = {}) {
+  bars(el, data, { h = 150, color = '', minStep = 0 } = {}) {
     const max = this.nice(Math.max(1, ...data.map(d => d.v)));
-    const f = this.frame(el, data.map(d => d.label), h, max);
+    const f = this.frame(el, data.map(d => d.label), h, max, '', { minStep });
     const bw = Math.max(2, Math.min(30, f.step * .68)), base = f.padT + f.ih;
     let b = '';
     data.forEach((d, i) => { if (!d.v) return; const bh = Math.max(3, d.v / max * f.ih); b += `<path class="barm" style="--i:${i}${color ? `;--c:${color}` : ''}" d="${this.rbar(f.x(i) - bw / 2, base - bh, bw, bh, 5, base)}"/>`; });
-    el.innerHTML = `<svg viewBox="0 0 ${f.W} ${h}" height="${h}" role="img">${f.g}${b}${this.hits(f, data.map(d => d.tip))}</svg>`;
+    this.mount(el, f, b + this.hits(f, data.map(d => d.tip)));
+  },
+  /** the name tag shown over a pointed-at / tapped mark: just the series' name (in its colour) and its value */
+  TAG: '<g class="bl"><rect rx="9"/><text class="bl-a" text-anchor="middle"></text><text class="bl-b" text-anchor="middle"></text></g>',
+  tag(svg, f) {
+    const lab = svg.querySelector('.bl'), [box, ta, tb] = lab.children;
+    return d => {
+      lab.classList.toggle('on', !!d); if (!d) return;
+      lab.style.setProperty('--c', d.color); ta.textContent = d.a; tb.textContent = d.b;
+      const w = Math.max(ta.getComputedTextLength(), tb.getComputedTextLength()) + 26, H = 44, cx = clamp(d.x, w / 2 + 2, f.W - w / 2 - 2);
+      let y = d.y - H - (d.gap || 8); if (y < 0) y = d.y + (d.gap || 8);
+      box.setAttribute('x', cx - w / 2); box.setAttribute('y', y); box.setAttribute('width', w); box.setAttribute('height', H);
+      ta.setAttribute('x', cx); ta.setAttribute('y', y + 18); tb.setAttribute('x', cx); tb.setAttribute('y', y + 36);
+    };
+  },
+  /** buckets: [{label, full}], series: [{color, name, values[], notes[]}] — grouped columns: every series keeps its own place in
+      every period (a stub marks an empty one), so a level is found in the same spot from month to month. Pointing at a column,
+      or tapping it, lights it up and names it above the bar. */
+  grouped(el, buckets, series, { h = 200, max = 0, suffix = '', bar = 11, gap = 3, pad = 24, minStep = 0, ticks } = {}) {
+    const k = Math.max(1, series.length), top = max || this.nice(Math.max(1, ...series.flatMap(s => s.values.map(v => v || 0))));
+    const want = Math.max(minStep, k * bar + (k - 1) * gap + pad);
+    const f = this.frame(el, buckets.map(b => b.label), h, top, suffix, { minStep: want, padT: 54, ticks });
+    const bw = Math.min(24, bar * f.step / want), gw = k * bw + (k - 1) * gap, base = f.padT + f.ih, info = [];
+    let b = '', hit = '';
+    buckets.forEach((bk, i) => series.forEach((s, j) => {
+      const v = s.values[i] || 0, bh = v > 0 ? Math.max(3, Math.min(v, top) / top * f.ih) : 3, x = f.x(i) - gw / 2 + j * (bw + gap);
+      b += `<path class="barm${v > 0 ? '' : ' stub'}" style="--i:${i};--c:${s.color}" d="${this.rbar(x, base - bh, bw, bh, 3.5, base)}"/>`;
+      hit += `<rect class="bhit" x="${x - gap / 2}" y="${f.padT - 8}" width="${bw + gap}" height="${f.ih + 8}" data-b="${info.length}"/>`;
+      info.push({ x: x + bw / 2, y: base - bh, a: s.name, b: s.notes ? s.notes[i] : fmtNum(v) + suffix, color: s.color });
+    }));
+    this.mount(el, f, b + this.TAG + hit);
+    const sc = el.querySelector('.ch-scroll'), svg = sc.firstElementChild, tag = this.tag(svg, f), marks = svg.querySelectorAll('.barm');
+    let cur = -1, timer = 0;
+    const show = n => {
+      if (cur >= 0 && marks[cur]) marks[cur].classList.remove('hot');
+      cur = n; clearTimeout(timer); tag(n >= 0 ? info[n] : null);
+      if (n >= 0) marks[n].classList.add('hot');
+    };
+    sc.addEventListener('pointerover', e => { const t = e.target.closest('.bhit'); if (t && e.pointerType === 'mouse') show(+t.dataset.b); });
+    sc.addEventListener('pointerout', e => { if (e.pointerType === 'mouse' && e.target.closest('.bhit')) show(-1); });
+    sc.addEventListener('click', e => {
+      const t = e.target.closest('.bhit'), n = t ? +t.dataset.b : -1, touch = !matchMedia('(hover: hover)').matches;
+      show(touch && n === cur ? -1 : n); if (touch && cur >= 0) timer = setTimeout(() => show(-1), 3600);
+    });
   },
   /** buckets: [{label, tip}], series: [{color, values[]}] — stacked columns */
-  stacked(el, buckets, series, { h = 170 } = {}) {
+  stacked(el, buckets, series, { h = 170, minStep = 0 } = {}) {
     const sums = buckets.map((_, i) => series.reduce((a, s) => a + (s.values[i] || 0), 0));
     const max = this.nice(Math.max(1, ...sums));
-    const f = this.frame(el, buckets.map(b => b.label), h, max);
+    const f = this.frame(el, buckets.map(b => b.label), h, max, '', { minStep });
     const bw = Math.max(2, Math.min(30, f.step * .68)), base = f.padT + f.ih;
     let b = '';
     buckets.forEach((_, i) => {
@@ -576,19 +693,21 @@ const Charts = {
       series.forEach(s => { const v = s.values[i] || 0; if (!v) return; const y0 = f.y(acc), y1 = f.y(acc + v); acc += v; const top = acc === sums[i];
         b += top ? `<path class="barm" style="--i:${i};--c:${s.color}" d="${this.rbar(f.x(i) - bw / 2, y1, bw, y0 - y1, 5, y0)}"/>` : `<rect class="barm" style="--i:${i};--c:${s.color}" x="${f.x(i) - bw / 2}" y="${y1}" width="${bw}" height="${y0 - y1}"/>`; });
     });
-    el.innerHTML = `<svg viewBox="0 0 ${f.W} ${h}" height="${h}" role="img">${f.g}${b}${this.hits(f, buckets.map(x => x.tip))}</svg>`;
+    this.mount(el, f, b + this.hits(f, buckets.map(x => x.tip)));
   },
   path(pts) {
     let d = '', pen = false;
     pts.forEach(p => { if (!p) { pen = false; return; } d += `${pen ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)} `; pen = true; });
     return d;
   },
-  /** buckets: [{label, tip}], series: [{color, values[] (null = gap)}] */
-  lines(el, buckets, series, { h = 170, max = 100, suffix = '', area = false, dots = true } = {}) {
-    const f = this.frame(el, buckets.map(b => b.label), h, max, suffix);
+  /** buckets: [{label, tip}], series: [{color, values[] (null = gap), name?, notes[]?}]
+      pick: instead of one tip for the whole column, pointing at / tapping a point names just that series and its value */
+  lines(el, buckets, series, { h = 170, max = 100, suffix = '', area = false, dots = true, minStep = 0, ticks, pick = false } = {}) {
+    const f = this.frame(el, buckets.map(b => b.label), h, max, suffix, { minStep, ticks, padT: pick ? 54 : 8 });
     let p = '';
-    series.forEach(s => {
-      const pts = s.values.map((v, i) => v === null || v === undefined ? null : [f.x(i), f.y(Math.min(v, max))]);
+    const all = series.map(s => s.values.map((v, i) => v === null || v === undefined ? null : [f.x(i), f.y(Math.min(v, max))]));
+    series.forEach((s, si) => {
+      const pts = all[si];
       const real = pts.filter(Boolean); if (!real.length) return;
       const c = `style="--c:${s.color}"`;
       if (area && real.length > 1) p += `<path class="area" ${c} d="${this.path(real)}L${real[real.length - 1][0]},${f.padT + f.ih} L${real[0][0]},${f.padT + f.ih} Z"/>`;
@@ -596,10 +715,32 @@ const Charts = {
       let run = [];
       const flush = () => { if (run.length > 1) p += `<path class="ln" ${c} pathLength="1" d="${this.path(run)}"/>`; run = []; };
       pts.forEach(q => { if (q) run.push(q); else flush(); }); flush();
-      if (dots) pts.forEach((q, i) => { if (q && (pts.length <= 16 || i === pts.length - 1 || !pts[i - 1] || !pts[i + 1])) p += `<circle class="dotm" ${c} cx="${q[0]}" cy="${q[1]}" r="3.6"/>`; });
+      if (dots) pts.forEach((q, i) => { if (q && (pts.length <= 16 || f.step >= 24 || i === pts.length - 1 || !pts[i - 1] || !pts[i + 1])) p += `<circle class="dotm" ${c} cx="${q[0]}" cy="${q[1]}" r="3.6"/>`; });
     });
-    if (!series.some(s => s.values.some(v => v !== null && v !== undefined))) p += `<text class="ax" x="${f.W / 2}" y="${h / 2}" text-anchor="middle">ยังไม่มีข้อมูลในช่วงนี้</text>`;
-    el.innerHTML = `<svg viewBox="0 0 ${f.W} ${h}" height="${h}" role="img">${f.g}${p}${this.hits(f, buckets.map(x => x.tip))}</svg>`;
+    if (!series.some(s => s.values.some(v => v !== null && v !== undefined))) p += `<text class="ax" x="${f.W - f.view / 2}" y="${h / 2}" text-anchor="middle">${T('ยังไม่มีข้อมูลในช่วงนี้')}</text>`;
+    if (!pick) { this.mount(el, f, p + this.hits(f, buckets.map(x => x.tip))); return; }
+    // pick mode: one hit area per column; the point nearest to the pointer inside it is the one named
+    const hit = buckets.map((_, i) => `<rect class="bhit" x="${f.xs[i]}" y="0" width="${f.ws[i]}" height="${f.padT + f.ih + 6}" data-c="${i}"/>`).join('');
+    this.mount(el, f, p + `<circle class="hotdot" r="7"/>` + this.TAG + hit);
+    const sc = el.querySelector('.ch-scroll'), svg = sc.firstElementChild, tag = this.tag(svg, f), ring = svg.querySelector('.hotdot');
+    let cur = '', timer = 0;
+    const nearest = (i, y) => { let best = -1, dist = Infinity; all.forEach((pts, si) => { const q = pts[i]; if (!q) return; const d = Math.abs(q[1] - y); if (d <= dist) { dist = d; best = si; } }); return best; };
+    const show = (i, si) => {
+      clearTimeout(timer); cur = si < 0 ? '' : i + ':' + si;
+      ring.classList.toggle('on', si >= 0);
+      if (si < 0) { tag(null); return; }
+      const s = series[si], q = all[si][i], v = s.values[i];
+      ring.setAttribute('cx', q[0]); ring.setAttribute('cy', q[1]); ring.style.setProperty('--c', s.color);
+      tag({ x: q[0], y: q[1], gap: 12, color: s.color, a: s.name || '', b: s.notes ? s.notes[i] : fmtNum(Math.round(v * 10) / 10) + suffix });
+    };
+    const at = e => { const t = e.target.closest && e.target.closest('.bhit'); if (!t) return null; const i = +t.dataset.c; return [i, nearest(i, e.clientY - svg.getBoundingClientRect().top)]; };
+    sc.addEventListener('pointermove', e => { if (e.pointerType !== 'mouse') return; const r = at(e); if (!r) { show(0, -1); return; } if (r.join(':') !== cur) show(r[0], r[1]); });
+    sc.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') show(0, -1); });
+    sc.addEventListener('click', e => {
+      const r = at(e), touch = !matchMedia('(hover: hover)').matches;
+      if (!r || r[1] < 0 || (touch && r.join(':') === cur)) { show(0, -1); return; }
+      show(r[0], r[1]); if (touch) timer = setTimeout(() => show(0, -1), 3600);
+    });
   }
 };
 
@@ -635,7 +776,7 @@ const Fx = {
     if (reducedMotion()) return;
     const cv = $('#confetti'), ctx = cv.getContext('2d'), dpr = Math.min(devicePixelRatio || 1, 2);
     const W = innerWidth, H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; cv.style.display = 'block'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const colors = ['#1f6f54', '#5ec69b', '#d6981b', '#f3c65a', '#cf4a35', '#2f7fd6', '#fffdf8'];
+    const colors = ['#24507a', '#7fb2e0', '#c23b22', '#e6b54e', '#c08a1e', '#23805a', '#fffdf8'];
     const ps = Array.from({ length: n }, (_, i) => { const left = i % 2 === 0, a = (left ? -Math.PI / 3 : -Math.PI * 2 / 3) + (Math.random() - .5) * .9, sp = 9 + Math.random() * 11;
       return { x: left ? -10 : W + 10, y: H * .72, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, w: 6 + Math.random() * 6, h: 9 + Math.random() * 8, r: Math.random() * 6.28, vr: (Math.random() - .5) * .35, c: colors[i % colors.length], life: 1 }; });
     const tok = (this._ctok = (this._ctok || 0) + 1); let last = performance.now();

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Library of Limu · new offy v3 — © 2026 李牧飞 Aphisit Kaewnet -->
+<!-- Library of Limu · new offy v4 — © 2026 李牧飞 Aphisit Kaewnet -->
 <html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f4f2ec">
+<meta name="theme-color" content="#f1ede3">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -15,23 +15,102 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
+<!-- launch screens (home-screen app on iPad / iPhone), light and dark -->
+<link rel="apple-touch-startup-image" media="(device-width: 744px) and (device-height: 1133px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1488x2266.png">
+<link rel="apple-touch-startup-image" media="(device-width: 744px) and (device-height: 1133px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1488x2266.png">
+<link rel="apple-touch-startup-image" media="(device-width: 744px) and (device-height: 1133px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2266x1488.png">
+<link rel="apple-touch-startup-image" media="(device-width: 744px) and (device-height: 1133px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2266x1488.png">
+<link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1536x2048.png">
+<link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1536x2048.png">
+<link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2048x1536.png">
+<link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2048x1536.png">
+<link rel="apple-touch-startup-image" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1620x2160.png">
+<link rel="apple-touch-startup-image" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1620x2160.png">
+<link rel="apple-touch-startup-image" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2160x1620.png">
+<link rel="apple-touch-startup-image" media="(device-width: 810px) and (device-height: 1080px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2160x1620.png">
+<link rel="apple-touch-startup-image" media="(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1640x2360.png">
+<link rel="apple-touch-startup-image" media="(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1640x2360.png">
+<link rel="apple-touch-startup-image" media="(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2360x1640.png">
+<link rel="apple-touch-startup-image" media="(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2360x1640.png">
+<link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1668x2224.png">
+<link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1668x2224.png">
+<link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2224x1668.png">
+<link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2224x1668.png">
+<link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1668x2388.png">
+<link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1668x2388.png">
+<link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2388x1668.png">
+<link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2388x1668.png">
+<link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1210px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1668x2420.png">
+<link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1210px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1668x2420.png">
+<link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1210px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2420x1668.png">
+<link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1210px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2420x1668.png">
+<link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-2048x2732.png">
+<link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-2048x2732.png">
+<link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2732x2048.png">
+<link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2732x2048.png">
+<link rel="apple-touch-startup-image" media="(device-width: 1032px) and (device-height: 1376px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-2064x2752.png">
+<link rel="apple-touch-startup-image" media="(device-width: 1032px) and (device-height: 1376px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-2064x2752.png">
+<link rel="apple-touch-startup-image" media="(device-width: 1032px) and (device-height: 1376px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2752x2064.png">
+<link rel="apple-touch-startup-image" media="(device-width: 1032px) and (device-height: 1376px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2752x2064.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-750x1334.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-750x1334.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-1334x750.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-1334x750.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1125x2436.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1125x2436.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2436x1125.png">
+<link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2436x1125.png">
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1170x2532.png">
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1170x2532.png">
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2532x1170.png">
+<link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2532x1170.png">
+<link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1179x2556.png">
+<link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1179x2556.png">
+<link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2556x1179.png">
+<link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2556x1179.png">
+<link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1206x2622.png">
+<link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1206x2622.png">
+<link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2622x1206.png">
+<link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2622x1206.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-828x1792.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-828x1792.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-1792x828.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-1792x828.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1242x2688.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1242x2688.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2688x1242.png">
+<link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2688x1242.png">
+<link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1284x2778.png">
+<link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1284x2778.png">
+<link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2778x1284.png">
+<link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2778x1284.png">
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1290x2796.png">
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1290x2796.png">
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2796x1290.png">
+<link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2796x1290.png">
+<link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: light)" href="icons/splash/light-1320x2868.png">
+<link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) and (prefers-color-scheme: dark)" href="icons/splash/dark-1320x2868.png">
+<link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: light)" href="icons/splash/light-2868x1320.png">
+<link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: landscape) and (prefers-color-scheme: dark)" href="icons/splash/dark-2868x1320.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="fonts/PinyinSans.woff" as="font" type="font/woff" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-lite-webfont@1.1.0/style.css" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=3.0.0">
+<link rel="stylesheet" href="css/app.css?v=4.4.2">
+<link rel="stylesheet" href="css/v4.css?v=4.4.5">
 <script>
 /* apply the saved / system theme before first paint */
 (function () {
   var t = null;
-  try { var d = JSON.parse(localStorage.getItem('offy.v3') || localStorage.getItem('offy.v2') || localStorage.getItem('offy.v1') || 'null'); t = d && d.settings && d.settings.theme; } catch (e) {}
+  try { var d = JSON.parse(localStorage.getItem('offy.v4') || localStorage.getItem('offy.v3') || localStorage.getItem('offy.v2') || localStorage.getItem('offy.v1') || 'null'); t = d && d.settings && d.settings.theme; } catch (e) {}
   if (t !== 'dark' && t !== 'light') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', t);
 })();
 </script>
 </head>
 <body>
+<div id="splash" aria-hidden="true"><div class="sp-seal">文</div><div class="sp-name">Library of Limu</div></div>
 
 <!-- ================= icon sprite ================= -->
 <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -82,21 +161,36 @@
   <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9.500 18h5M10.500 21h3"/><path d="M12 3a6 6 0 0 0-3.800 10.600c.6.600.9 1.400 1 2.400h5.600c.1-1 .4-1.800 1-2.400A6 6 0 0 0 12 3z"/></symbol>
   <symbol id="i-skip" viewBox="0 0 24 24"><path d="M6 5.500v13l9-6.500z"/><path d="M18.500 5.500v13"/></symbol>
   <symbol id="i-mastered" viewBox="0 0 24 24"><path d="M6.500 3.500h11v17l-5.500-3.500-5.500 3.500z"/><path d="m9.500 10 2 2 3.500-3.500"/></symbol>
+  <symbol id="i-g-duel" viewBox="0 0 24 24"><rect x="3.500" y="6" width="8" height="12" rx="1.800" transform="rotate(-12 7.500 12)"/><rect x="12.500" y="6" width="8" height="12" rx="1.800" transform="rotate(12 16.500 12)"/><path d="M12 2.500v2.500M9.500 3.500l1 1.800M14.500 3.500l-1 1.800"/></symbol>
+  <symbol id="i-g-chain" viewBox="0 0 24 24"><ellipse cx="6" cy="15.500" rx="3.500" ry="2.200"/><ellipse cx="12.500" cy="11" rx="3.500" ry="2.200"/><ellipse cx="18.500" cy="15.500" rx="3.200" ry="2"/><path d="M5 9.500c.8-2.800 3.200-4.500 5.500-4.500M14 6l1.500-1.500L17 6"/></symbol>
+  <symbol id="i-g-merge" viewBox="0 0 24 24"><path d="M4.500 13.500h15a7.500 7 0 0 1-15 0z"/><path d="M8 9.500a2 2 0 0 1 0-4M16 9.500a2 2 0 0 0 0-4M12 9V4"/></symbol>
+  <symbol id="i-g-match" viewBox="0 0 24 24"><rect x="3.500" y="3.500" width="7" height="7" rx="1.800"/><rect x="13.500" y="13.500" width="7" height="7" rx="1.800"/><rect x="13.500" y="3.500" width="7" height="7" rx="1.800" stroke-dasharray="2.200 2"/><rect x="3.500" y="13.500" width="7" height="7" rx="1.800" stroke-dasharray="2.200 2"/><path d="m10.500 10.500 3 3"/></symbol>
+  <symbol id="i-g-order" viewBox="0 0 24 24"><rect x="3" y="5" width="5" height="5" rx="1.300"/><rect x="9.500" y="5" width="5" height="5" rx="1.300"/><rect x="16" y="5" width="5" height="5" rx="1.300"/><path d="M5.500 14.500v2.500a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-2.500"/><path d="m16.500 16.500 2-2 2 2"/></symbol>
+  <symbol id="i-g-gap" viewBox="0 0 24 24"><path d="M3 12h3.500M17.500 12H21"/><rect x="8.500" y="7.500" width="7" height="9" rx="1.800" stroke-dasharray="2.300 2"/><path d="M3 7.500h3M18 7.500h3M3 16.500h3M18 16.500h3"/></symbol>
+  <symbol id="i-g-tone" viewBox="0 0 24 24"><path d="M3.500 6h4M3.500 18.500l4-6M10 8l2 3 2.500-4M17 7l3.500 5.500"/><circle cx="6" cy="21" r=".600" fill="currentColor"/></symbol>
+  <symbol id="i-g-rain" viewBox="0 0 24 24"><path d="M7 16.500a4.500 4.500 0 0 1-.4-9A6 6 0 0 1 18 8.300a4 4 0 0 1-.5 8.200"/><path d="m9 19-1 2.500M13 18l-1 3M17 19l-1 2.500"/></symbol>
   <symbol id="i-brush" viewBox="0 0 24 24"><path d="M4 20c2.500 0 4.500-.5 5.500-2.500.8-1.600-.3-3.400-2-3.500C5.500 14 4.800 15.500 5 17c.1 1.200-.3 2.300-1 3z"/><path d="M10 14 19.500 3.500M12.500 16.500 21 6"/></symbol>
+  <symbol id="i-pad" viewBox="0 0 24 24"><path d="M7.600 6.500h8.800a4.600 4.600 0 0 1 4.500 3.700l.9 4.900a2.600 2.600 0 0 1-4.500 2.200L15.700 15.300H8.300l-1.600 2a2.600 2.600 0 0 1-4.500-2.200l.9-4.900a4.600 4.600 0 0 1 4.500-3.700z"/><path d="M8.300 9.300v3.400M6.600 11h3.400"/><circle cx="15.400" cy="9.900" r=".9" fill="currentColor" stroke="none"/><circle cx="17.600" cy="12.100" r=".9" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-wand" viewBox="0 0 24 24"><path d="m4.500 19.500 12-12 2 2-12 12z"/><path d="m14.500 9.500 2 2"/><path d="M9 3.500c.3 1.300.9 1.900 2.200 2.200-1.300.3-1.900.9-2.200 2.200-.3-1.300-.9-1.900-2.200-2.200C8.100 5.400 8.700 4.800 9 3.500zM18.500 13.500c.3 1.300.9 1.900 2.200 2.200-1.300.3-1.900.9-2.200 2.200-.3-1.300-.9-1.900-2.200-2.200 1.300-.3 1.900-.9 2.200-2.200z"/></symbol>
+  <symbol id="i-vocab" viewBox="0 0 24 24"><path d="M10 19.500H4a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1h6a2 2 0 0 1 2 2 2 2 0 0 1 2-2h6a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-6a2 2 0 0 0-2 2 2 2 0 0 0-2-2z"/><path d="M12 5.500v15.500M6.500 7.500h2M6.500 11h2M15.500 7.500h2M15.500 11h2M15.500 14.500h2"/></symbol>
+  <symbol id="i-trend" viewBox="0 0 24 24"><path d="M4 19.500h16"/><path d="m4 15 4-6 4 2 4-5.500 4 4"/></symbol>
+  <symbol id="i-books" viewBox="0 0 24 24"><rect x="4" y="4" width="4.500" height="16" rx="1"/><rect x="8.500" y="4" width="4.500" height="16" rx="1"/><path d="M4 8h4.500M8.500 16H13"/><path d="m13.900 5.200 2.300-.6a1 1 0 0 1 1.200.7l3.400 13a1 1 0 0 1-.7 1.200l-2.300.6a1 1 0 0 1-1.200-.7l-3.400-13a1 1 0 0 1 .7-1.200z"/><path d="m14.700 9.300 3.600-.9M16.600 16.300l3.300-.8"/></symbol>
+  <!-- rough ink edge + speckle for the seals -->
+  <filter id="rough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="d"/><feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="1" seed="9" result="s"/><feColorMatrix in="s" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3.2 2.6" result="m"/><feComposite in="d" in2="m" operator="in"/></filter>
 </svg>
 
 <div class="shell" id="shell">
 
   <!-- ================= navigation: rail (wide) / tab bar (narrow) ================= -->
   <nav class="nav" id="nav" aria-label="เมนูหลัก">
-    <button class="nav-brand" id="brandBtn" aria-label="เกี่ยวกับ Library of Limu"><span class="seal hz">词</span></button>
+    <button class="nav-brand" id="brandBtn" aria-label="เกี่ยวกับ Library of Limu"><span class="seal hz">文</span></button>
     <div class="nav-items">
-      <a href="#/home" data-nav="home"><svg class="ic"><use href="#i-home"/></svg><span>หน้าแรก</span></a>
-      <a href="#/learn" data-nav="learn"><svg class="ic"><use href="#i-learn"/></svg><span>เรียน</span></a>
-      <a href="#/practice" data-nav="practice"><svg class="ic"><use href="#i-sliders"/></svg><span>จัดสำรับ</span></a>
-      <a href="#/dict" data-nav="dict"><svg class="ic"><use href="#i-search"/></svg><span>คลังคำ</span></a>
-      <a href="#/stats" data-nav="stats"><svg class="ic"><use href="#i-chart"/></svg><span>สถิติ</span></a>
-      <a href="#/library" data-nav="library" class="rail-only"><svg class="ic"><use href="#i-book"/></svg><span>หนังสือ</span></a>
+      <a href="#/home" data-nav="home"><i class="ng"><svg class="ic"><use href="#i-home"/></svg></i><span>หน้าแรก</span></a>
+      <a href="#/learn" data-nav="learn"><i class="ng"><svg class="ic"><use href="#i-pad"/></svg></i><span>มินิเกม</span></a>
+      <a href="#/practice" data-nav="practice"><i class="ng"><svg class="ic"><use href="#i-wand"/></svg></i><span>ฝึกเอง</span></a>
+      <a href="#/dict" data-nav="dict"><i class="ng"><svg class="ic"><use href="#i-vocab"/></svg></i><span>คลังคำ</span></a>
+      <a href="#/stats" data-nav="stats"><i class="ng"><svg class="ic"><use href="#i-trend"/></svg></i><span>สถิติ</span></a>
+      <a href="#/library" data-nav="library" class="rail-only"><i class="ng"><svg class="ic"><use href="#i-books"/></svg></i><span>หนังสือ</span></a>
     </div>
     <div class="nav-foot rail-only">
       <button class="ibtn js-pinyin" aria-label="แสดง/ซ่อนพินอิน" data-tip="พินอิน"><svg class="ic"><use href="#i-eye"/></svg></button>
@@ -118,16 +212,18 @@
           <a class="ibtn" href="#/settings" aria-label="ตั้งค่า"><svg class="ic"><use href="#i-gear"/></svg></a>
         </div>
       </header>
+      <div id="homeHero"></div>
       <div class="home-grid">
         <div class="col">
-          <div id="homeHero"></div>
           <div class="trio" id="homeTrio"></div>
+          <div class="card" id="homeQuests"></div>
           <div class="card" id="homeWeek"></div>
         </div>
         <div class="col">
           <div id="homeWord"></div>
+          <div class="card" id="homeSeals"></div>
           <div class="card list" id="homeLinks"></div>
-          <p class="fine">ข้อมูลทั้งหมดอาจไม่ถูกต้อง 100% เพราะจัดทำคนเดียว<br><span lang="en">All information may not be 100% accurate as this is a solo project.</span></p>
+          <p class="fine">ข้อมูลทั้งหมดอาจไม่ถูกต้อง 100% เพราะจัดทำคนเดียว</p>
         </div>
       </div>
     </section>
@@ -135,7 +231,7 @@
     <!-- ================= LEARN (levels) ================= -->
     <section class="view" id="v-learn">
       <header class="ph">
-        <div class="ph-t"><p class="eyebrow">HSK 3.0 · แฟลชการ์ดตามระดับ</p><h1>เรียนตามระดับ</h1></div>
+        <div class="ph-t"><p class="eyebrow">HSK 3.0 · เลือกระดับ แล้วเลือกด่านและเกม</p><h1>มินิเกม</h1></div>
       </header>
       <div class="lv-grid" id="lvGrid"></div>
       <p class="fine">แต่ละระดับแบ่งเป็นด่าน ด่านละ 10 คำ · เร็ว ๆ นี้: คำศัพท์ตามบทเรียนในหนังสือ HSK และ 部首 214 ตัว</p>
@@ -150,7 +246,7 @@
       <div class="trio" id="lvSummary"></div>
       <div class="row wrap" id="lvActions"></div>
       <div class="card stage-card">
-        <div class="stage-grid" id="stageGrid"></div>
+        <div class="pmap" id="stageMap"></div>
         <div class="stage-legend">
           <span><i class="k fresh"></i>ยังไม่เล่น</span><span><i class="k done"></i>เล่นแล้ว</span><span><i class="k gold"></i>3 ดาว</span><span><i class="k next"></i>ด่านแนะนำ</span>
         </div>
@@ -160,17 +256,14 @@
     <!-- ================= PRACTICE (custom deck builder) ================= -->
     <section class="view" id="v-practice">
       <header class="ph">
-        <div class="ph-t"><p class="eyebrow">Custom</p><h1>จัดสำรับเอง</h1></div>
+        <div class="ph-t"><p class="eyebrow">Free play</p><h1>ฝึกเอง</h1></div>
         <div class="ph-a"><button class="btn sm" id="cRandomize"><svg class="ic"><use href="#i-shuffle"/></svg>สุ่มให้</button></div>
       </header>
       <div class="pr-grid">
         <div class="col">
           <div class="card">
-            <h3 class="ct">รูปแบบ</h3>
-            <div class="seg" id="cType">
-              <button data-v="flash"><svg class="ic"><use href="#i-cards"/></svg>แฟลชการ์ด</button>
-              <button data-v="tingxie"><svg class="ic"><use href="#i-pen"/></svg><span class="hz">听写</span> เขียนตามคำบอก</button>
-            </div>
+            <h3 class="ct">เกม</h3>
+            <div id="cType"></div>
             <h3 class="ct">ที่มาของคำ</h3>
             <div class="seg" id="cMode">
               <button data-v="manual">เลือกเอง</button>
@@ -192,6 +285,12 @@
             </div>
             <div class="sr-list" id="cSearchRes"></div>
             <div class="wchips" id="cPicked"></div>
+            <details class="more" id="cPasteBox">
+              <summary><svg class="ic"><use href="#i-file"/></svg>วางรายการคำ (เช่น ศัพท์จากครู)</summary>
+              <textarea class="input" id="cPaste" rows="3" placeholder="包子 吃 喝茶 苹果 — วางทีละหลายคำ คั่นด้วยเว้นวรรค จุลภาค หรือขึ้นบรรทัดใหม่ก็ได้"></textarea>
+              <button class="btn soft block" id="cPasteAdd">ใส่ลงสำรับ</button>
+              <p class="hint-p" id="cPasteMsg"></p>
+            </details>
             <details class="more">
               <summary><svg class="ic"><use href="#i-plus"/></svg>คำของฉัน (นอก HSK)</summary>
               <div class="grid2">
@@ -278,6 +377,21 @@
       </div>
     </section>
 
+    <!-- ================= MINI-GAMES (match · order · cloze · tone · rain · listen) ================= -->
+    <section class="view immersive" id="v-mini">
+      <div class="g-top">
+        <button class="ibtn" id="mgQuit" aria-label="ออก"><svg class="ic"><use href="#i-x"/></svg></button>
+        <div class="g-title"><b id="mgTitle">—</b><small id="mgProg">0 / 0</small></div>
+        <div class="combo" id="mgCombo" aria-live="polite"></div>
+        <div class="clock" id="mgClock">00:00</div>
+      </div>
+      <div class="g-bar"><i id="mgBar"></i></div>
+      <div class="g-body">
+        <div class="mstage" id="mgStage"></div>
+        <div class="result" id="mgResult" hidden></div>
+      </div>
+    </section>
+
     <!-- ================= DICTATION ================= -->
     <section class="view immersive" id="v-dictation">
       <div class="g-top">
@@ -345,9 +459,10 @@
     <!-- ================= STATS ================= -->
     <section class="view" id="v-stats">
       <header class="ph">
-        <div class="ph-t"><p class="eyebrow">Dashboard</p><h1>สถิติการเรียน</h1></div>
+        <div class="ph-t"><p class="eyebrow">ภาพรวม</p><h1>สถิติการเรียน</h1></div>
         <div class="ph-a"><div class="seg sm" id="stRange"><button data-r="7">7 วัน</button><button data-r="30">30 วัน</button><button data-r="90">90 วัน</button><button data-r="0">ทั้งหมด</button></div></div>
       </header>
+      <div class="seg dtabs" id="stTabs"><button data-v="over">ภาพรวม</button><button data-v="levels">ระดับ</button><button data-v="memory">ความจำ</button><button data-v="words">คำศัพท์</button><button data-v="history">ประวัติ</button></div>
       <div id="stBody"></div>
     </section>
 
@@ -390,6 +505,7 @@
         <div class="col">
           <h3 class="st">การแสดงผล</h3>
           <div class="card rows">
+            <div class="set-row"><div class="lbl"><b>ภาษาเมนู</b><small>Menu language</small></div><div class="seg sm" id="sLang"><button data-v="th">ไทย</button><button data-v="en">English</button></div></div>
             <div class="set-row"><div class="lbl"><b>ธีม</b></div><div class="seg sm" id="sTheme"><button data-v="light">สว่าง</button><button data-v="dark">มืด</button><button data-v="auto">ตามระบบ</button></div></div>
             <div class="set-row"><div class="lbl"><b>แสดงพินอิน</b><small>บนการ์ด รายการคำ และคำใบ้</small></div><label class="switch"><input type="checkbox" id="sPinyin"><span></span></label></div>
             <div class="set-row"><div class="lbl"><b>คำแปลภาษาไทย</b></div><label class="switch"><input type="checkbox" id="sTh"><span></span></label></div>
@@ -400,7 +516,7 @@
           <div class="card rows">
             <div class="set-row"><div class="lbl"><b>เสียงเอฟเฟกต์</b><small>เสียงพลิกการ์ด ตอบถูก/ผิด และจบด่าน</small></div><label class="switch"><input type="checkbox" id="sSfx"><span></span></label></div>
             <div class="set-row col"><div class="lbl"><b>ระดับเสียงเอฟเฟกต์ <span class="val" id="sVolVal">60%</span></b></div><input type="range" id="sVol" min="0" max="100" step="5"></div>
-            <div class="set-row"><div class="lbl"><b>การสั่นตอบสนอง</b><small>เฉพาะอุปกรณ์ที่รองรับ</small></div><label class="switch"><input type="checkbox" id="sHaptic"><span></span></label></div>
+            <div class="set-row"><div class="lbl"><b>การสั่นตอบสนอง</b><small id="sHapticNote">เฉพาะอุปกรณ์ที่รองรับ</small></div><label class="switch"><input type="checkbox" id="sHaptic"><span></span></label></div>
             <div class="set-row col"><div class="lbl"><b>เสียงอ่านภาษาจีน</b><small id="sVoiceNote"></small></div><select class="input" id="sVoice"></select></div>
             <div class="set-row col"><div class="lbl"><b>ความเร็วเสียงอ่าน <span class="val" id="sRateVal">0.8×</span></b></div><input type="range" id="sRate" min="0.5" max="1.2" step="0.05"></div>
             <div class="set-row"><button class="btn soft block" id="sTest"><svg class="ic"><use href="#i-vol"/></svg>ทดสอบเสียง <span class="hz">你好，欢迎来到 Library of Limu</span></button></div>
@@ -411,7 +527,8 @@
             <div class="set-row col"><div class="lbl"><b>โจทย์</b></div><div class="seg sm" id="sAsk"><button data-v="zh"><span class="hz">字</span> → ความหมาย</button><button data-v="mean">ความหมาย → <span class="hz">字</span></button><button data-v="listen">ฟัง</button></div></div>
             <div class="set-row col"><div class="lbl"><b>การตอบ</b></div><div class="seg sm" id="sQuiz"><button data-v="quiz">4 ตัวเลือก</button><button data-v="self">พลิกการ์ดตรวจเอง</button></div></div>
             <div class="set-row col"><div class="lbl"><b>เวลา</b><small>เมื่อนับถอยหลังหมดจะนับว่าตอบผิด</small></div><div class="seg sm" id="sTimer"><button data-v="countdown">นับถอยหลัง</button><button data-v="stopwatch">จับเวลาเฉย ๆ</button></div><div class="chips" id="sSec"></div></div>
-            <div class="set-row"><div class="lbl"><b>ไปใบถัดไปเองเมื่อตอบถูก</b><small>แตะการ์ดเพื่อหยุดอ่านเฉลยได้</small></div><label class="switch"><input type="checkbox" id="sAutoNext"><span></span></label></div>
+            <div class="set-row col"><div class="lbl"><b>หลังตอบถูก ไปใบถัดไปเมื่อไร</b><small>ระหว่างรอ กดปุ่มถัดไปเพื่อข้ามได้เลย หรือแตะการ์ดเพื่อหยุดนับ</small></div><div class="seg sm" id="sAfterOk"><button data-v="auto">ทันที</button><button data-v="3">3 วิ</button><button data-v="5">5 วิ</button><button data-v="10">10 วิ</button><button data-v="manual">กดเอง</button></div></div>
+            <div class="set-row col"><div class="lbl"><b>หลังตอบผิด ไปใบถัดไปเมื่อไร</b><small>เผื่อเวลาอ่านเฉลยก่อนไปต่อ</small></div><div class="seg sm" id="sAfterBad"><button data-v="auto">ทันที</button><button data-v="3">3 วิ</button><button data-v="5">5 วิ</button><button data-v="10">10 วิ</button><button data-v="manual">กดเอง</button></div></div>
             <div class="set-row"><div class="lbl"><b>อ่านออกเสียงเมื่อเฉลย</b></div><label class="switch"><input type="checkbox" id="sAutoSpeak"><span></span></label></div>
           </div>
         </div>
@@ -476,7 +593,7 @@
               <button class="btn danger solid" data-reset="all">ล้างทั้งหมด</button>
             </div>
           </div>
-          <p class="fine">new offy v3 · Library of Limu<br>© 2026 李牧飞 Aphisit Kaewnet</p>
+          <p class="fine">new offy v4 · Library of Limu<br>© 2026 李牧飞 Aphisit Kaewnet</p>
         </div>
       </div>
     </section>
@@ -498,10 +615,15 @@
 <div class="edge-pull" id="edgeL"><svg class="ic"><use href="#i-chev-l"/></svg></div>
 <canvas id="confetti" aria-hidden="true"></canvas>
 
-<script src="data/words.js?v=3.0.0"></script>
-<script src="data/books.js?v=3.0.0"></script>
-<script src="js/core.js?v=3.0.0"></script>
-<script src="js/play.js?v=3.0.0"></script>
-<script src="js/app.js?v=3.0.0"></script>
+<script src="data/words.js?v=4.4.2"></script>
+<script src="data/books.js?v=4.4.2"></script>
+<script src="js/i18n-en.js?v=4.4.2"></script>
+<script src="js/core.js?v=4.4.2"></script>
+<script src="js/play.js?v=4.4.2"></script>
+<script src="js/games.js?v=4.4.6"></script>
+<script src="js/app.js?v=4.4.2"></script>
+<script src="js/gami.js?v=4.4.2"></script>
+<script src="js/scene.js?v=4.4.2"></script>
+<script src="js/views.js?v=4.4.2"></script>
 </body>
 </html>

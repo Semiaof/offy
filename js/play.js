@@ -1,6 +1,6 @@
 'use strict';
 /* =====================================================================
-   Library of Limu · new offy v3 — play
+   Library of Limu · new offy v4 — play
    flashcard game on the card table · 听写 dictation · writing pad · answer sheet
    ===================================================================== */
 
@@ -12,16 +12,16 @@ const Game = {
 
   start(cfg) {
     const words = (cfg.words || []).filter(Boolean);
-    if (!words.length) { toast('ไม่มีคำศัพท์ให้เล่น'); return; }
+    if (!words.length) { toast(`${T('ไม่มีคำศัพท์ให้เล่น')}`); return; }
     const st = S();
     this.teardown();
     let ask = cfg.ask || st.ask || 'zh';
-    if (ask === 'listen' && !TTS.ok) { ask = 'zh'; toast('เบราว์เซอร์นี้อ่านออกเสียงไม่ได้ จึงเปลี่ยนเป็นโจทย์ตัวอักษร', { icon: 'info' }); }
+    if (ask === 'listen' && !TTS.ok) { ask = 'zh'; toast(`${T('เบราว์เซอร์นี้อ่านออกเสียงไม่ได้ จึงเปลี่ยนเป็นโจทย์ตัวอักษร')}`, { icon: 'info' }); }
     this.s = {
       cfg: { ...cfg, words }, title: cfg.title || 'Flashcards', kind: cfg.kind || 'custom', back: cfg.back || '/home',
       answer: cfg.answer || st.answer, ask, timer: cfg.timer || st.timer, sec: +(cfg.sec || st.sec) || 10,
       deck: shuffle(words), idx: 0, results: [], phase: 'deal', paused: false, finished: false, saved: false,
-      ts: Date.now(), total: 0, cardMs: 0, mounted: false, backs: [], card: null, opts: null, chosen: null, combo: 0, bestCombo: 0, auto: 0, lastTick: 0
+      ts: Date.now(), total: 0, cardMs: 0, mounted: false, backs: [], card: null, opts: null, chosen: null, combo: 0, bestCombo: 0, auto: 0, xp: 0, lastTick: 0
     };
     if (location.hash === '#/play') this.mount(); else Router.go('/play');
   },
@@ -45,8 +45,8 @@ const Game = {
     $('#gTitle').textContent = s.title;
     this.setPile('L', 0, false); this.setPile('R', 0, false);
     $('#gTimer').classList.toggle('watch', s.timer !== 'countdown'); $('#gTimer').classList.remove('done');
-    $('#gPause use').setAttribute('href', '#i-pause'); $('#gPause').setAttribute('aria-label', 'พัก');
-    $('#gSwipe').innerHTML = s.answer === 'self' ? 'ปัดซ้าย ยังไม่รู้ · ปัดขวา รู้แล้ว' : '';
+    $('#gPause use').setAttribute('href', '#i-pause'); $('#gPause').setAttribute('aria-label', `${T('พัก')}`);
+    $('#gSwipe').innerHTML = s.answer === 'self' ? `${T('ปัดซ้าย ยังไม่รู้ · ปัดขวา รู้แล้ว')}` : '';
     $('#gAnswer').innerHTML = ''; $('#gCombo').className = 'combo';
     this.updateHeader(); this._lastTimerTxt = null;
     requestAnimationFrame(() => { if (!this.alive(s)) return; this.fit(); this.loop(); this.deal(); });
@@ -68,13 +68,13 @@ const Game = {
   updateHeader() {
     const s = this.s; if (!s) return;
     const total = s.deck.length, done = s.results.length;
-    $('#gProg').textContent = `การ์ด ${Math.min(done + (s.finished ? 0 : 1), total)} / ${total}`;
+    $('#gProg').textContent = `${T('การ์ด')} ${Math.min(done + (s.finished ? 0 : 1), total)} / ${total}`;
     $('#gBar').style.width = (done / total * 100) + '%';
-    $('#gDeck').textContent = s.finished ? '' : `เหลือ ${Math.max(0, total - s.idx - (s.phase === 'deal' ? 0 : 1))} ใบ`;
+    $('#gDeck').textContent = s.finished ? '' : `${T('เหลือ')} ${Math.max(0, total - s.idx - (s.phase === 'deal' ? 0 : 1))} ${T('ใบ')}`;
   },
   setCombo(n) {
     const s = this.s, el = $('#gCombo'); s.combo = n; s.bestCombo = Math.max(s.bestCombo, n);
-    if (n >= 2) { el.textContent = `ต่อเนื่อง ×${n}`; el.classList.add('show'); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+    if (n >= 2) { el.textContent = `${T('ต่อเนื่อง')} ×${n}`; el.classList.add('show'); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
     else el.classList.remove('show', 'bump');
   },
 
@@ -160,15 +160,15 @@ const Game = {
     const ex = w.ex_zh ? `<div class="ex"><div class="expy pyx">${esc(w.ex_py)}</div><div class="exzh">${esc(w.ex_zh)}</div><div class="exth lang-th">${esc(w.ex_th)}</div><div class="exen lang-en">${esc(w.ex_en)}</div></div>` : '';
     let front;
     if (s.ask === 'mean') { const th = S().showTh && w.th; front = `<div class="q-mean">${esc(th ? w.th : (w.en || w.th))}</div>${th && S().showEn && w.en ? `<div class="q-en">${esc(w.en)}</div>` : ''}`; }
-    else if (s.ask === 'listen') front = `<button class="q-spk" data-say aria-label="ฟังอีกครั้ง">${ic('vol')}</button>`;
+    else if (s.ask === 'listen') front = `<button class="q-spk" data-say aria-label="${T('ฟังอีกครั้ง')}">${ic('vol')}</button>`;
     else front = hzFront(w.zh);
-    const tap = s.answer === 'self' ? 'แตะการ์ดเพื่อพลิกดูคำตอบ' : s.ask === 'listen' ? 'แตะลำโพงเพื่อฟังอีกครั้ง' : '';
+    const tap = s.answer === 'self' ? `${T('แตะการ์ดเพื่อพลิกดูคำตอบ')}` : s.ask === 'listen' ? `${T('แตะลำโพงเพื่อฟังอีกครั้ง')}` : '';
     el.innerHTML = `<div class="flip">
       <div class="face front">${front}${tap ? `<div class="tap">${tap}</div>` : ''}</div>
-      <div class="face back"><div class="top">${lvlBadge(w.lvl)}<button class="spk" data-say aria-label="ฟังเสียง">${ic('vol')}</button></div>
+      <div class="face back"><div class="top">${lvlBadge(w.lvl)}<span class="verd" aria-live="polite"></span><button class="spk" data-say aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></div>
         <div class="py pyx">${esc(w.py)}</div><div class="zh">${esc(w.zh)}</div><div class="pos">${posBadge(w)}</div>
         <div class="th lang-th">${esc(w.th)}</div><div class="en lang-en">${esc(w.en)}</div>${ex}</div>
-    </div><div class="stamp"></div><div class="tint"></div>`;
+    </div><div class="tint"></div>`;
     return el;
   },
   /** 1 correct + 3 distractors with different meanings, preferring same level & part of speech */
@@ -218,25 +218,43 @@ const Game = {
   },
   canSwipe() { const s = this.s; return !!s && !s.paused && ((s.answer === 'self' && (s.phase === 'ask' || s.phase === 'peek')) || s.phase === 'reveal'); },
   swipe(right) { const s = this.s; if (s.phase === 'reveal') this.next(); else this.grade(right); },
-  /** stop the automatic jump to the next card (the learner wants to read the answer) */
-  holdAuto() { const s = this.s; if (s && s.auto) { clearTimeout(s.auto); s.auto = 0; } },
+  /** stop the countdown to the next card (the learner wants to read the answer) */
+  holdAuto() { const s = this.s; if (s && s.auto) { clearTimeout(s.auto); s.auto = 0; const b = $('#gAnswer [data-act="next"]'); if (b) b.classList.remove('count'); } },
+  /** after an answer: go on at once, after 3 / 5 / 10 seconds, or wait for "next" — chosen separately for right and wrong
+      answers in settings. The Next button shows the wait filling up; pressing it skips the rest. */
+  armAdvance(ok) {
+    const s = this.s, mode = ok ? S().afterOk : S().afterBad, ms = mode === 'auto' ? 1100 : (+mode > 0 ? +mode * 1000 : 0);
+    if (!ms) return;
+    const b = $('#gAnswer [data-act="next"]');
+    if (b) { b.style.setProperty('--wait', ms + 'ms'); b.classList.remove('count'); void b.offsetWidth; b.classList.add('count'); }
+    clearTimeout(s.auto);
+    s.auto = setTimeout(() => { s.auto = 0; if (this.alive(s) && s.phase === 'reveal' && !s.paused) this.next(); }, ms);
+  },
+  xpFloat(n) { const el = document.createElement('div'); el.className = 'xp-float'; el.textContent = `+${n} XP`; $('#gStage').appendChild(el); setTimeout(() => el.remove(), 1150); },
   tapCard() {
     const s = this.s;
     if (s.phase === 'ask' && s.answer === 'self') this.peek();
-    else if (s.phase === 'ask') { if (s.ask === 'listen') { speakWord(this.cur()); return; } s.card.animate && s.card.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-7px)' }, { transform: 'translateX(7px)' }, { transform: 'translateX(0)' }], { duration: 260 }); toast('เลือกคำตอบจากตัวเลือก', { ms: 1500 }); }
+    else if (s.phase === 'ask') { if (s.ask === 'listen') { speakWord(this.cur()); return; } s.card.animate && s.card.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-7px)' }, { transform: 'translateX(7px)' }, { transform: 'translateX(0)' }], { duration: 260 }); toast(`${T('เลือกคำตอบจากตัวเลือก')}`, { ms: 1500 }); }
     else if (s.phase === 'peek' || s.phase === 'reveal') { this.holdAuto(); s.card.classList.toggle('flipped'); sfx('flip'); }
   },
 
   /* ---------- answering ---------- */
   flip(show = true) { const s = this.s; s.card.classList.toggle('flipped', show); sfx('flip'); if (show && S().autoSpeak) setTimeout(() => { if (this.alive(s) && s.card) speakWord(this.cur()); }, 180); },
+  /** right / wrong: coloured frame + a small badge in the top row + a bounce or a shake (never covers the answer) */
   stamp(ok) {
-    const card = this.s.card, st = card.querySelector('.stamp');
-    st.className = 'stamp ' + (ok ? 'good' : 'bad'); st.textContent = ok ? 'ถูกต้อง' : 'ยังไม่ถูก';
-    card.classList.add(ok ? 'res-ok' : 'res-no'); requestAnimationFrame(() => st.classList.add('show'));
+    const card = this.s.card, v = card.querySelector('.verd');
+    card.classList.remove('res-ok', 'res-no'); card.classList.add(ok ? 'res-ok' : 'res-no');
+    if (v) { v.className = 'verd ' + (ok ? 'good' : 'bad'); v.innerHTML = ic(ok ? 'check' : 'x') + `<span>${ok ? T('ถูก') : T('ผิด')}</span>`; }
+    const back = card.querySelector('.face.back');
+    if (back && back.animate && !reducedMotion()) {
+      const k = ok ? [{ transform: 'rotateY(180deg) scale(1)' }, { transform: 'rotateY(180deg) scale(1.045)', offset: .35 }, { transform: 'rotateY(180deg) scale(.99)', offset: .7 }, { transform: 'rotateY(180deg) scale(1)' }]
+        : [0, -9, 8, -6, 4, -2, 0].map(x => ({ transform: `rotateY(180deg) translateX(${x}px)` }));
+      setTimeout(() => back.animate(k, { duration: ok ? 420 : 460, easing: 'ease-out' }), 260);
+    }
   },
   feedback(ok) {
     const s = this.s;
-    if (ok) { this.setCombo(s.combo + 1); sfx('correct', s.combo); buzz(14); }
+    if (ok) { this.setCombo(s.combo + 1); sfx('correct', s.combo); buzz(14); const gain = 10 + Math.min(10, (s.combo - 1) * 2); s.xp += gain; this.xpFloat(gain); }
     else { this.setCombo(0); sfx('wrong'); buzz([24, 50, 24]); }
   },
   record(ok) { const s = this.s; s.results.push({ id: this.cur().id, ok, ms: Math.round(s.cardMs) }); this.updateHeader(); },
@@ -246,7 +264,7 @@ const Game = {
     const w = this.cur(), ok = id === w.id;
     s.chosen = id; this.record(ok); s.phase = 'reveal';
     this.flip(true); this.stamp(ok); if (id !== null) this.feedback(ok); this.renderAnswer();
-    if (ok && S().autoNext) s.auto = setTimeout(() => { s.auto = 0; if (this.alive(s) && s.phase === 'reveal' && !s.paused) this.next(); }, 1250);
+    this.armAdvance(ok);
   },
   grade(ok) {
     const s = this.s; if (s.answer !== 'self' || !(s.phase === 'ask' || s.phase === 'peek')) return;
@@ -255,9 +273,9 @@ const Game = {
   timeout() {
     const s = this.s; if (s.phase !== 'ask') return;
     s._remFrozen = 0; this.setCombo(0); sfx('timeout'); buzz([24, 50, 24]);
-    toast('หมดเวลา', { icon: 'clock', ms: 1400 });
+    toast(`${T('หมดเวลา')}`, { icon: 'clock', ms: 1400 });
     if (s.answer === 'quiz') { this.choose(null); return; }
-    this.record(false); s.phase = 'reveal'; this.flip(true); this.stamp(false); this.renderAnswer();
+    this.record(false); s.phase = 'reveal'; this.flip(true); this.stamp(false); this.renderAnswer(); this.armAdvance(false);
   },
   next() { const s = this.s; if (s.phase !== 'reveal') return; this.holdAuto(); const r = s.results[s.results.length - 1]; this.fly(r ? r.ok : false); },
   async fly(ok) {
@@ -288,8 +306,8 @@ const Game = {
   },
   renderAnswer() {
     const s = this.s, w = this.cur(), box = $('#gAnswer');
-    const nextRow = `<div class="ans-row"><button class="btn fix" data-act="say" aria-label="ฟังเสียง">${ic('vol')}</button><button class="btn primary" data-act="next">ถัดไป${ic('arrow-r')}</button></div>`;
-    const hint = s.answer === 'quiz' ? '1–4 เลือกคำตอบ · Enter ถัดไป · Esc พัก' : 'Space พลิก · ← ยังไม่รู้ · → รู้แล้ว · Esc พัก';
+    const nextRow = `<div class="ans-row"><button class="btn fix" data-act="say" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button><button class="btn primary" data-act="next">${T('ถัดไป')}${ic('arrow-r')}</button></div>`;
+    const hint = s.answer === 'quiz' ? `1–4 ${T('เลือกคำตอบ · Enter ถัดไป · Esc พัก')}` : `Space ${T('พลิก · ← ยังไม่รู้ · → รู้แล้ว · Esc พัก')}`;
     let html = '';
     if (s.answer === 'quiz') {
       const rev = s.phase !== 'ask';
@@ -298,11 +316,11 @@ const Game = {
         return `<button class="choice ${cls}" style="--i:${i}" data-opt="${esc(o.id)}" ${rev ? 'disabled' : ''}><kbd>${i + 1}</kbd>${this.choiceHTML(o, rev)}</button>`;
       }).join('')}</div>`;
       // the row under the choices is always there, so the table never changes size mid-card
-      html += s.phase === 'reveal' ? nextRow : `<div class="ans-row"><button class="btn ghost skip" data-act="skip">ไม่รู้ · ดูเฉลย</button></div>`;
+      html += s.phase === 'reveal' ? nextRow : `<div class="ans-row"><button class="btn ghost skip" data-act="skip">${T('ไม่รู้ · ดูเฉลย')}</button></div>`;
     } else if (s.phase === 'ask') {
-      html = `<div class="ans-row"><button class="btn bad" data-act="no">${ic('x')}ยังไม่รู้</button><button class="btn" data-act="peek">${ic('eye')}พลิกดู</button><button class="btn good" data-act="yes">${ic('check')}รู้แล้ว</button></div>`;
+      html = `<div class="ans-row"><button class="btn bad" data-act="no">${ic('x')}${T('ยังไม่รู้')}</button><button class="btn" data-act="peek">${ic('eye')}${T('พลิกดู')}</button><button class="btn good" data-act="yes">${ic('check')}${T('รู้แล้ว')}</button></div>`;
     } else if (s.phase === 'peek') {
-      html = `<div class="ans-row"><button class="btn bad" data-act="no">${ic('x')}จำไม่ได้</button><button class="btn good" data-act="yes">${ic('check')}จำได้</button></div>`;
+      html = `<div class="ans-row"><button class="btn bad" data-act="no">${ic('x')}${T('จำไม่ได้')}</button><button class="btn good" data-act="yes">${ic('check')}${T('จำได้')}</button></div>`;
     } else if (s.phase === 'reveal') html = nextRow;
     box.innerHTML = html + `<div class="kbd-hint">${hint}</div>`;
   },
@@ -338,36 +356,37 @@ const Game = {
   async pause() {
     const s = this.s; if (!s || s.finished || s.paused) return;
     s.paused = true; TTS.stop(); const hadAuto = !!s.auto; this.holdAuto();
-    const btns = [{ label: 'เล่นต่อ', cls: 'primary', icon: 'play', value: 'resume' }, { label: 'เริ่มรอบนี้ใหม่', icon: 'retry', value: 'restart' }];
-    if (s.results.length) btns.push({ label: `บันทึก ${s.results.length} การ์ดที่ทำแล้ว และออก`, icon: 'down', value: 'save' });
-    btns.push({ label: 'ออกโดยไม่บันทึก', cls: 'danger', value: 'quit' });
-    const v = await modal({ title: 'พักเกม', msg: `${s.title} · ทำไปแล้ว ${s.results.length}/${s.deck.length} การ์ด เวลาหยุดเดินอยู่`, buttons: btns, dismiss: 'resume' });
+    const btns = [{ label: `${T('เล่นต่อ')}`, cls: 'primary', icon: 'play', value: 'resume' }, { label: `${T('เริ่มรอบนี้ใหม่')}`, icon: 'retry', value: 'restart' }];
+    if (s.results.length) btns.push({ label: `${T('บันทึก')} ${s.results.length} ${T('การ์ดที่ทำแล้ว และออก')}`, icon: 'down', value: 'save' });
+    btns.push({ label: `${T('ออกโดยไม่บันทึก')}`, cls: 'danger', value: 'quit' });
+    const v = await modal({ title: `${T('พักเกม')}`, msg: `${s.title} · ${T('ทำไปแล้ว')} ${s.results.length}/${s.deck.length} ${T('การ์ด เวลาหยุดเดินอยู่')}`, buttons: btns, dismiss: 'resume' });
     if (!this.alive(s)) return;
     if (v === 'restart') this.start(s.cfg);
     else if (v === 'save') this.quit(true);
     else if (v === 'quit') this.quit(false);
-    else { s.paused = false; if (hadAuto && s.phase === 'reveal') s.auto = setTimeout(() => { s.auto = 0; if (this.alive(s) && s.phase === 'reveal') this.next(); }, 700); }
+    else { s.paused = false; if (hadAuto && s.phase === 'reveal') { const r = s.results[s.results.length - 1]; this.armAdvance(!!(r && r.ok)); } }
   },
   quit(save) {
     const s = this.s; if (!s) return;
-    if (save && s.results.length && !s.saved) { this.save(true); toast('บันทึกผลแล้ว', { icon: 'check' }); }
+    if (save && s.results.length && !s.saved) { this.save(true); toast(`${T('บันทึกผลแล้ว')}`, { icon: 'check' }); }
     const back = s.back; this.teardown(); this.s = null;
     Router.up(back);
   },
   save(partial) {
     const s = this.s; if (s.saved) return null;
     const total = s.results.length, correct = s.results.filter(r => r.ok).length;
-    const sess = { mode: 'flash', kind: s.kind, label: s.title, lvl: s.cfg.lvl, stage: s.cfg.stage, ts: s.ts, dur: Math.round(s.total), total, correct, stars: Stats.starsFor(correct, total), words: s.results.map(r => [r.id, r.ok]), ask: s.ask };
+    const sess = { mode: 'flash', kind: s.kind, label: s.title, lvl: s.cfg.lvl, stage: s.cfg.stage, ts: s.ts, dur: Math.round(s.total), total, correct, stars: Stats.starsFor(correct, total), words: s.results.map(r => [r.id, r.ok, r.ms]), ask: s.ask, answer: s.answer, mc: s.bestCombo, xp: s.xp };
     if (partial) sess.partial = true;
     s.saved = true;
-    return Stats.record(sess);
+    const best = Stats.record(sess); s.gain = Gami.onSession(sess);
+    return best;
   },
 
   /* ---------- end of round ---------- */
   async end() {
     const s = this.s; s.phase = 'end'; s.finished = true; this.updateHeader(); this.setCombo(0);
     $('#gAnswer').innerHTML = ''; $('#gTimer').classList.add('done');
-    $('#gPause use').setAttribute('href', '#i-x'); $('#gPause').setAttribute('aria-label', 'ปิด');
+    $('#gPause use').setAttribute('href', '#i-x'); $('#gPause').setAttribute('aria-label', `${T('ปิด')}`);
     const best = this.save(false);
     // the cards from both piles fly back to the middle
     const table = $('#gStage'), rect = table.getBoundingClientRect();
@@ -391,44 +410,45 @@ const Game = {
   showResult(best) {
     const s = this.s, total = s.results.length, correct = s.results.filter(r => r.ok).length, wrong = total - correct;
     const pct = total ? Math.round(correct / total * 100) : 0, stars = Stats.starsFor(correct, total);
-    const head = pct === 100 ? 'สมบูรณ์แบบ' : pct >= 70 ? 'เก่งมาก' : pct >= 30 ? 'สู้ต่อไป' : 'ลองอีกครั้งนะ';
+    const head = pct === 100 ? `${T('สมบูรณ์แบบ')}` : pct >= 70 ? `${T('เก่งมาก')}` : pct >= 30 ? `${T('สู้ต่อไป')}` : `${T('ลองอีกครั้งนะ')}`;
     const nextStage = s.kind === 'stage' && s.cfg.stage < stageCount(s.cfg.lvl) ? s.cfg.stage + 1 : null;
     let bestTag = '';
-    if (best && best.first) bestTag = '<span class="newbest">ผ่านด่านนี้ครั้งแรก</span>';
-    else if (best && best.improved) bestTag = `<span class="newbest">สถิติใหม่ · เดิม ${best.prevPct}%</span>`;
+    if (best && best.first) bestTag = `<span class="newbest">${T('ผ่านด่านนี้ครั้งแรก')}</span>`;
+    else if (best && best.improved) bestTag = `<span class="newbest">${T('สถิติใหม่ · เดิม')} ${best.prevPct}%</span>`;
     const avg = total ? (s.results.reduce((a, r) => a + r.ms, 0) / total / 1000).toFixed(1) : '0';
     const words = s.results.map(r => { const w = BY_ID.get(r.id); return w ? `<button class="wchip ${r.ok ? 'ok' : 'no'}" data-speak="${esc(w.id)}" title="${esc(w.py)} · ${esc(meaningText(w))}"><span class="hz">${esc(w.zh)}</span><small class="pyx">${esc(w.py)}</small></button>` : ''; }).join('');
     const toMap = s.kind === 'stage' || String(s.back).startsWith('/level');
     const res = $('#gResult');
-    res.innerHTML = `<div class="panel" role="dialog" aria-label="ผลการเล่น">
+    res.innerHTML = `<div class="panel" role="dialog" aria-label="${T('ผลการเล่น')}">
       <div class="res-stars">${[0, 1, 2].map(i => `<i class="${i < stars ? 'on' : ''}" style="--i:${i}"></i>`).join('')}</div>
       ${bestTag}
       <div class="res-title">${head}</div>
-      <div class="res-sub">${esc(s.title)}${s.bestCombo >= 3 ? ` · ต่อเนื่องสูงสุด ×${s.bestCombo}` : ''}</div>
+      <div class="res-sub">${esc(s.title)}${s.bestCombo >= 3 ? ` · ${T('ต่อเนื่องสูงสุด')} ×${s.bestCombo}` : ''}</div>
       <div class="res-stats">
-        <div><b style="color:var(--good)">${correct}</b><span>จำได้</span></div>
-        <div><b style="color:var(--bad)">${wrong}</b><span>จำไม่ได้</span></div>
-        <div><b>${pct}%</b><span>แม่นยำ</span></div>
-        <div><b>${fmtClock(s.total)}</b><span>${avg} วิ/ใบ</span></div>
+        <div><b style="color:var(--good)">${correct}</b><span>${T('จำได้')}</span></div>
+        <div><b style="color:var(--bad)">${wrong}</b><span>${T('จำไม่ได้')}</span></div>
+        <div><b>${pct}%</b><span>${T('แม่นยำ')}</span></div>
+        <div><b>${fmtClock(s.total)}</b><span>${avg} ${T('วิ/ใบ')}</span></div>
       </div>
+      ${Gami.resultHTML(s.gain)}
       <div class="wchips">${words}</div>
       <div class="res-acts">
-        ${nextStage ? `<button class="btn primary wide lg" data-r="next">ด่านถัดไป (${nextStage})${ic('arrow-r')}</button>` : ''}
-        ${wrong ? `<button class="btn ${nextStage ? '' : 'primary'}" data-r="wrong">${ic('repeat')}ฝึกคำที่ผิด (${wrong})</button>` : ''}
-        <button class="btn" data-r="again">${ic('retry')}เล่นอีกครั้ง</button>
-        <button class="btn" data-r="back">${toMap ? 'กลับแผนที่ด่าน' : 'กลับ'}</button>
-        <button class="btn ghost" data-r="home">หน้าแรก</button>
+        ${nextStage ? `<button class="btn primary wide lg" data-r="next">${T('ด่านถัดไป')} (${nextStage})${ic('arrow-r')}</button>` : ''}
+        ${wrong ? `<button class="btn ${nextStage ? '' : 'primary'}" data-r="wrong">${ic('repeat')}${T('ฝึกคำที่ผิด')} (${wrong})</button>` : ''}
+        <button class="btn" data-r="again">${ic('retry')}${T('เล่นอีกครั้ง')}</button>
+        <button class="btn" data-r="back">${toMap ? `${T('กลับแผนที่ด่าน')}` : `${T('กลับ')}`}</button>
+        <button class="btn ghost" data-r="home">${T('หน้าแรก')}</button>
       </div></div>`;
-    res.hidden = false;
+    res.hidden = false; Fx.settle(res); Gami.celebrate(s.gain, 1500);
     for (let i = 0; i < stars; i++) setTimeout(() => { if (this.alive(s)) sfx('star', i); }, 380 + i * 220);
     setTimeout(() => { if (!this.alive(s)) return; if (stars === 3) { sfx('complete'); Fx.confetti(); buzz([18, 40, 18, 40, 30]); } else if (stars === 0) sfx('fail'); }, 380 + stars * 220 + 80);
     res.onclick = e => {
       const sp = e.target.closest('[data-speak]'); if (sp) { speakWord(BY_ID.get(sp.dataset.speak)); return; }
       const b = e.target.closest('[data-r]'); if (!b) return;
       const r = b.dataset.r, cfg = s.cfg;
-      if (r === 'wrong') this.start({ ...cfg, words: s.results.filter(x => !x.ok).map(x => BY_ID.get(x.id)).filter(Boolean), title: 'ฝึกคำที่ผิด · ' + s.title.replace(/^ฝึกคำที่ผิด · /, ''), kind: 'retry', lvl: undefined, stage: undefined });
+      if (r === 'wrong') this.start({ ...cfg, words: s.results.filter(x => !x.ok).map(x => BY_ID.get(x.id)).filter(Boolean), base: cfg.base || s.title, title: `${T('ฝึกคำที่ผิด')} · ` + (cfg.base || s.title), kind: 'retry', lvl: undefined, stage: undefined });
       else if (r === 'again') this.start(cfg);
-      else if (r === 'next') Level.play(cfg.lvl, nextStage);
+      else if (r === 'next') Level.play(cfg.lvl, nextStage, 'flash');
       else if (r === 'back') { const back = s.back; this.teardown(); this.s = null; Router.up(back); }
       else if (r === 'home') { this.teardown(); this.s = null; Router.up('/home'); }
     };
@@ -443,7 +463,7 @@ const Dicta = {
   s: null, clock: 0,
   start(cfg) {
     const words = (cfg.words || []).filter(Boolean);
-    if (!words.length) { toast('ไม่มีคำศัพท์'); return; }
+    if (!words.length) { toast(`${T('ไม่มีคำศัพท์')}`); return; }
     this.stop();
     this.s = {
       cfg: { ...cfg, words }, title: cfg.title || '听写', ans: cfg.ans || 'draw', repeat: clamp(+cfg.repeat || 2, 1, 3), rate: +cfg.rate || S().rate,
@@ -453,7 +473,17 @@ const Dicta = {
     this.s.items = this.s.words.map(w => ({ id: w.id, ok: null, img: null, typed: '', hint: false, revealed: false }));
     if (location.hash === '#/dictation') this.mount(); else Router.go('/dictation');
   },
-  stop() { clearInterval(this.clock); this.clock = 0; TTS.stop(); },
+  stop() { clearInterval(this.clock); this.clock = 0; this.holdAuto(); TTS.stop(); },
+  /** the same "when to move on" setting as the flashcards, used after a typed answer has been checked */
+  holdAuto() { const s = this.s; if (s && s.auto) { clearTimeout(s.auto); s.auto = 0; const b = $('#dReveal [data-d="next"]'); if (b) b.classList.remove('count'); } },
+  armAdvance(ok) {
+    const s = this.s, mode = ok ? S().afterOk : S().afterBad, ms = mode === 'auto' ? 1500 : (+mode > 0 ? +mode * 1000 : 0);
+    if (!ms) return;
+    const b = $('#dReveal [data-d="next"]');
+    if (b) { b.style.setProperty('--wait', ms + 'ms'); b.classList.add('count'); }
+    clearTimeout(s.auto);
+    s.auto = setTimeout(() => { s.auto = 0; if (this.s === s && !s.done && location.hash === '#/dictation' && !modalOpen()) this.next(); }, ms);
+  },
   onShow() { if (!this.s || this.s.done) { Router.replace('/home'); return; } if (!this.s.mounted) this.mount(); },
   mount() {
     const s = this.s; s.mounted = true;
@@ -463,36 +493,36 @@ const Dicta = {
     this.clock = setInterval(() => { const now = Date.now(); if (!document.hidden && !modalOpen()) s.ms += Math.min(now - last, 2000); last = now; $('#dClock').textContent = fmtClock(s.ms); }, 500);
     $('#dClock').textContent = fmtClock(0);
     const noVoice = !TTS.ok || (TTS.loaded && !TTS.voices.length);
-    $('#dNotice').innerHTML = noVoice ? `<div class="notice">${ic('info')}<div>${TTS.ok ? 'ไม่พบเสียงภาษาจีนในเครื่องนี้ ระบบจะลองอ่านด้วยเสียงเริ่มต้น ถ้าไม่มีเสียงให้กดคำใบ้พินอินแทน' : 'เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียง ใช้คำใบ้พินอินหรือความหมายแทนได้'}</div></div>` : '';
+    $('#dNotice').innerHTML = noVoice ? `<div class="notice">${ic('info')}<div>${TTS.ok ? `${T('ไม่พบเสียงภาษาจีนในเครื่องนี้ ระบบจะลองอ่านด้วยเสียงเริ่มต้น ถ้าไม่มีเสียงให้กดคำใบ้พินอินแทน')}` : `${T('เบราว์เซอร์นี้ไม่รองรับการอ่านออกเสียง ใช้คำใบ้พินอินหรือความหมายแทนได้')}`}</div></div>` : '';
     this.renderWord();
   },
   cur() { return this.s.words[this.s.idx]; },
   item() { return this.s.items[this.s.idx]; },
   renderWord() {
     const s = this.s, w = this.cur(), it = this.item();
-    $('#dProg').textContent = `คำที่ ${s.idx + 1} / ${s.words.length}`;
+    $('#dProg').textContent = `${T('คำที่')} ${s.idx + 1} / ${s.words.length}`;
     $('#dBar').style.width = (s.idx / s.words.length * 100) + '%';
-    $('#dStatus').textContent = 'กำลังเตรียม…';
+    $('#dStatus').textContent = `${T('กำลังเตรียม')}…`;
     this.renderHints();
     const work = $('#dWork');
     if (s.ans === 'draw') {
       work.innerHTML = `<div class="pad-wrap"><div class="pad-cells" id="padCells"></div>
-        <div class="pad-tools"><button class="btn sm" id="padUndo">${ic('undo')}ย้อน</button><button class="btn sm" id="padClear">${ic('trash')}ล้าง</button><span class="sp"></span><button class="btn sm danger" id="dGive">ข้าม</button><button class="btn sm primary" id="dCheck">${ic('check')}ตรวจคำตอบ</button></div></div><div id="dReveal"></div>`;
+        <div class="pad-tools"><button class="btn sm" id="padUndo">${ic('undo')}${T('ย้อน')}</button><button class="btn sm" id="padClear">${ic('trash')}${T('ล้าง')}</button><span class="sp"></span><button class="btn sm danger" id="dGive">${T('ข้าม')}</button><button class="btn sm primary" id="dCheck">${ic('check')}${T('ตรวจคำตอบ')}</button></div></div><div id="dReveal"></div>`;
       Pad.mount($('#padCells'), w._len);
       $('#padUndo').onclick = () => Pad.undo(); $('#padClear').onclick = () => Pad.clear();
       $('#dCheck').onclick = () => this.reveal(); $('#dGive').onclick = () => this.reveal(true);
     } else if (s.ans === 'type') {
-      work.innerHTML = `<div class="pad-wrap"><h3 class="ct">พิมพ์พินอินของคำที่ได้ยิน</h3>
-        <div class="type-row"><input class="input" id="dType" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="ni3hao3 หรือ nǐhǎo" enterkeyhint="done"><button class="btn primary" id="dCheck">ตรวจ</button></div>
-        <div class="row" style="margin-top:12px"><small class="muted" style="flex:1;font-size:12.5px">${s.strict ? 'ตรวจวรรณยุกต์ด้วย ใช้ตัวเลข 1–4 หรือเครื่องหมายก็ได้ · ü พิมพ์เป็น v' : 'ตรวจเฉพาะตัวสะกด ไม่ตรวจวรรณยุกต์'}</small><button class="btn sm danger" id="dGive">ข้าม</button></div></div><div id="dReveal"></div>`;
+      work.innerHTML = `<div class="pad-wrap"><h3 class="ct">${T('พิมพ์พินอินของคำที่ได้ยิน')}</h3>
+        <div class="type-row"><input class="input" id="dType" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="ni3hao3 ${T('หรือ')} nǐhǎo" enterkeyhint="done"><button class="btn primary" id="dCheck">${T('ตรวจ')}</button></div>
+        <div class="row" style="margin-top:12px"><small class="muted" style="flex:1;font-size:12.5px">${s.strict ? `${T('ตรวจวรรณยุกต์ด้วย ใช้ตัวเลข 1–4 หรือเครื่องหมายก็ได้ · ü พิมพ์เป็น')} v` : `${T('ตรวจเฉพาะตัวสะกด ไม่ตรวจวรรณยุกต์')}`}</small><button class="btn sm danger" id="dGive">${T('ข้าม')}</button></div></div><div id="dReveal"></div>`;
       const inp = $('#dType');
       inp.onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); this.reveal(); } };
       $('#dCheck').onclick = () => this.reveal(); $('#dGive').onclick = () => this.reveal(true);
       setTimeout(() => { if (matchMedia('(hover:hover)').matches) inp.focus(); }, 60);
     } else {
       work.innerHTML = `<div class="pad-wrap" style="text-align:center"><div class="paper-n">${s.idx + 1}</div>
-        <p class="judge">เขียนคำที่ได้ยินลงกระดาษเป็นข้อ ${s.idx + 1} แล้วตรวจรวมทีเดียวตอนจบ</p>
-        <div class="ans-row"><button class="btn fix" id="dPrevP" ${s.idx ? '' : 'disabled'} aria-label="ก่อนหน้า">${ic('chev-l')}</button><button class="btn primary" id="dNextP">${s.idx + 1 < s.words.length ? `คำถัดไป${ic('arrow-r')}` : 'จบ แล้วไปใบตรวจ'}</button></div></div>`;
+        <p class="judge">${T('เขียนคำที่ได้ยินลงกระดาษเป็นข้อ')} ${s.idx + 1} ${T('แล้วตรวจรวมทีเดียวตอนจบ')}</p>
+        <div class="ans-row"><button class="btn fix" id="dPrevP" ${s.idx ? '' : 'disabled'} aria-label="${T('ก่อนหน้า')}">${ic('chev-l')}</button><button class="btn primary" id="dNextP">${s.idx + 1 < s.words.length ? `${T('คำถัดไป')}${ic('arrow-r')}` : `${T('จบ แล้วไปใบตรวจ')}`}</button></div></div>`;
       $('#dNextP').onclick = () => this.next();
       $('#dPrevP').onclick = () => { if (s.idx > 0) { s.idx--; this.renderWord(); } };
     }
@@ -503,9 +533,9 @@ const Dicta = {
     const s = this.s, w = this.cur(), it = this.item();
     const showMean = s.meanHint || it.showMean;
     $('#dHints').innerHTML =
-      `<span class="hint shown">${w._len} ตัวอักษร</span>` +
-      (showMean ? `<span class="hint shown">${esc(meaningText(w))}</span>` : `<button class="hint" data-h="mean">${ic('bulb')}ดูความหมาย</button>`) +
-      (it.showPy ? `<span class="hint shown" style="font-family:var(--pinyin)">${esc(w.py)}</span>` : (s.ans === 'type' ? '' : `<button class="hint" data-h="py">${ic('bulb')}ดูพินอิน</button>`));
+      `<span class="hint shown">${w._len} ${T('ตัวอักษร')}</span>` +
+      (showMean ? `<span class="hint shown">${esc(meaningText(w))}</span>` : `<button class="hint" data-h="mean">${ic('bulb')}${T('ดูความหมาย')}</button>`) +
+      (it.showPy ? `<span class="hint shown" style="font-family:var(--pinyin)">${esc(w.py)}</span>` : (s.ans === 'type' ? '' : `<button class="hint" data-h="py">${ic('bulb')}${T('ดูพินอิน')}</button>`));
   },
   async autoPlay() { const s = this.s, idx = s.idx; await sleep(380); if (this.s === s && s.mounted && s.idx === idx && !this.item().revealed) this.play(); },
   async play(slow = false) {
@@ -515,15 +545,15 @@ const Dicta = {
     const n = slow ? 1 : s.repeat; let failed = false;
     btn.classList.add('talking');
     for (let i = 0; i < n; i++) {
-      st.textContent = TTS.ok ? `กำลังอ่าน${slow ? 'ช้า ๆ' : ''}${n > 1 ? ` (${i + 1}/${n})` : ''}` : 'อ่านออกเสียงไม่ได้ในเบราว์เซอร์นี้';
+      st.textContent = TTS.ok ? `${T('กำลังอ่าน')}${slow ? `${T('ช้า ๆ')}` : ''}${n > 1 ? ` (${i + 1}/${n})` : ''}` : `${T('อ่านออกเสียงไม่ได้ในเบราว์เซอร์นี้')}`;
       const ok = await TTS.speak(w.zh, slow ? Math.max(0.45, s.rate * 0.6) : s.rate);
       if (tok !== this._ptok || !this.s || this.s.idx !== idx) return;
-      if (!ok) { failed = true; st.textContent = TTS.ok ? 'เล่นเสียงไม่สำเร็จ แตะปุ่มอีกครั้งหรือดูคำใบ้' : 'ใช้คำใบ้แทนเสียง'; break; }
+      if (!ok) { failed = true; st.textContent = TTS.ok ? `${T('เล่นเสียงไม่สำเร็จ แตะปุ่มอีกครั้งหรือดูคำใบ้')}` : `${T('ใช้คำใบ้แทนเสียง')}`; break; }
       if (i < n - 1) await sleep(900);
       if (tok !== this._ptok || !this.s || this.s.idx !== idx) return;
     }
     btn.classList.remove('talking');
-    if (!failed) st.textContent = 'แตะปุ่มเพื่อฟังอีกครั้ง';
+    if (!failed) st.textContent = `${T('แตะปุ่มเพื่อฟังอีกครั้ง')}`;
   },
   hint(kind) {
     const it = this.item();
@@ -535,13 +565,13 @@ const Dicta = {
     const s = this.s, it = this.item(), w = this.cur();
     if (it.revealed) return;
     if (s.ans === 'draw') {
-      if (!giveUp && Pad.isEmpty()) { toast('เขียนคำตอบในช่องก่อน หรือกดข้าม'); return; }
+      if (!giveUp && Pad.isEmpty()) { toast(`${T('เขียนคำตอบในช่องก่อน หรือกดข้าม')}`); return; }
       it.img = Pad.isEmpty() ? null : Pad.snapshot();
       it.ok = giveUp ? false : null;
       if (giveUp) sfx('wrong'); else sfx('flip');
     } else if (s.ans === 'type') {
       const v = $('#dType').value.trim();
-      if (!giveUp && !v) { toast('พิมพ์พินอินก่อน หรือกดข้าม'); return; }
+      if (!giveUp && !v) { toast(`${T('พิมพ์พินอินก่อน หรือกดข้าม')}`); return; }
       it.typed = v;
       const r = giveUp ? { ok: false, letters: false } : pyCompare(v, w.py, s.strict);
       it.ok = r.ok; it.near = !r.ok && r.letters;
@@ -551,6 +581,7 @@ const Dicta = {
     it.revealed = true;
     $$('#dWork .pad-tools .btn, #dCheck, #dGive').forEach(b => b.disabled = true);
     this.showReveal();
+    if (s.ans === 'type') this.armAdvance(!!it.ok);
     TTS.stop(); this._ptok = (this._ptok || 0) + 1; $('#dSpeak').classList.remove('talking');
   },
   showReveal() {
@@ -558,19 +589,21 @@ const Dicta = {
     const ans = `<div class="ans-zh">${esc(w.zh)}</div><div class="ans-py">${esc(w.py)}</div><div style="font-size:14px">${esc(meaningText(w))}</div>`;
     let html = '';
     if (s.ans === 'draw') {
-      html = `<div class="cmp"><div><small>ลายมือของคุณ</small>${it.img ? `<img src="${it.img}" alt="ลายมือของคุณ">` : '<div class="muted" style="padding:18px 0">ไม่ได้เขียน</div>'}</div><div><small>เฉลย</small>${ans}</div></div>`;
-      html += it.ok === false && !it.img ? `<div class="verdict bad">${ic('x')}ข้ามคำนี้</div><button class="btn primary block" data-d="next">ถัดไป${ic('arrow-r')}</button>`
-        : `<p class="judge">เทียบลายมือกับเฉลย แล้วตัดสินเอง</p><div class="ans-row"><button class="btn bad" data-d="no">${ic('x')}เขียนผิด</button><button class="btn good" data-d="yes">${ic('check')}เขียนถูก</button></div>`;
+      html = `<div class="cmp"><div><small>${T('ลายมือของคุณ')}</small>${it.img ? `<img src="${it.img}" alt="${T('ลายมือของคุณ')}">` : `<div class="muted" style="padding:18px 0">${T('ไม่ได้เขียน')}</div>`}</div><div><small>${T('เฉลย')}</small>${ans}</div></div>`;
+      html += it.ok === false && !it.img ? `<div class="verdict bad">${ic('x')}${T('ข้ามคำนี้')}</div><button class="btn primary block" data-d="next">${T('ถัดไป')}${ic('arrow-r')}</button>`
+        : `<p class="judge">${T('เทียบลายมือกับเฉลย แล้วตัดสินเอง')}</p><div class="ans-row"><button class="btn bad" data-d="no">${ic('x')}${T('เขียนผิด')}</button><button class="btn good" data-d="yes">${ic('check')}${T('เขียนถูก')}</button></div>`;
     } else {
-      const verdict = it.ok ? `<div class="verdict good">${ic('check')}ถูกต้อง</div>` : it.typed ? `<div class="verdict bad">${ic('x')}${it.near ? 'ตัวสะกดถูก แต่วรรณยุกต์ไม่ตรง' : 'ยังไม่ถูก'}</div>` : `<div class="verdict bad">${ic('x')}ข้ามคำนี้</div>`;
-      html = `<div class="cmp"><div><small>คุณพิมพ์</small><div class="ans-typed">${esc(it.typed || '—')}</div></div><div><small>เฉลย</small>${ans}</div></div>${verdict}
-        <div class="ans-row">${it.typed ? `<button class="btn" data-d="flip" style="flex:0 1 auto">${it.ok ? 'นับว่าผิด' : 'นับว่าถูก'}</button>` : ''}<button class="btn primary" data-d="next">ถัดไป${ic('arrow-r')}</button></div>`;
+      const verdict = it.ok ? `<div class="verdict good">${ic('check')}${T('ถูกต้อง')}</div>` : it.typed ? `<div class="verdict bad">${ic('x')}${it.near ? `${T('ตัวสะกดถูก แต่วรรณยุกต์ไม่ตรง')}` : `${T('ยังไม่ถูก')}`}</div>` : `<div class="verdict bad">${ic('x')}${T('ข้ามคำนี้')}</div>`;
+      html = `<div class="cmp"><div><small>${T('คุณพิมพ์')}</small><div class="ans-typed">${esc(it.typed || '—')}</div></div><div><small>${T('เฉลย')}</small>${ans}</div></div>${verdict}
+        <div class="ans-row">${it.typed ? `<button class="btn" data-d="flip" style="flex:0 1 auto">${it.ok ? `${T('นับว่าผิด')}` : `${T('นับว่าถูก')}`}</button>` : ''}<button class="btn primary" data-d="next">${T('ถัดไป')}${ic('arrow-r')}</button></div>`;
     }
     box.innerHTML = `<div class="reveal">${html}</div>`;
     setTimeout(() => box.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
   },
   onRevealClick(e) {
-    const b = e.target.closest('[data-d]'); if (!b || !this.s) return;
+    if (!this.s) return;
+    this.holdAuto();                     // any tap on the answer stops the countdown
+    const b = e.target.closest('[data-d]'); if (!b) return;
     const it = this.item(), a = b.dataset.d;
     if (a === 'yes') { it.ok = true; sfx('correct', 1); buzz(14); this.next(); }
     else if (a === 'no') { it.ok = false; sfx('wrong'); this.next(); }
@@ -578,8 +611,8 @@ const Dicta = {
     else if (a === 'next') this.next();
   },
   next() {
-    const s = this.s; TTS.stop();
-    if (s.ans === 'draw' && this.item().revealed && this.item().ok === null) { toast('เลือกว่าเขียนถูกหรือผิดก่อน'); return; }
+    const s = this.s; this.holdAuto(); TTS.stop();
+    if (s.ans === 'draw' && this.item().revealed && this.item().ok === null) { toast(`${T('เลือกว่าเขียนถูกหรือผิดก่อน')}`); return; }
     if (s.idx + 1 < s.words.length) { s.idx++; this.renderWord(); $('.d-body').scrollTo({ top: 0, behavior: 'smooth' }); }
     else this.finish();
   },
@@ -590,16 +623,17 @@ const Dicta = {
   },
   async quitAsk() {
     const s = this.s; if (!s) return;
+    this.holdAuto();
     const answered = s.ans === 'paper' ? s.idx + 1 : s.items.filter(i => i.revealed).length;
-    const btns = [{ label: 'ทำต่อ', cls: 'primary', icon: 'play', value: 'stay' }];
-    if (answered) btns.push({ label: 'จบตอนนี้ แล้วไปใบตรวจ', icon: 'file', value: 'sheet' });
-    btns.push({ label: 'ออกโดยไม่บันทึก', cls: 'danger', value: 'quit' });
-    const v = await modal({ title: 'ออกจาก 听写?', msg: `ทำไปแล้ว ${s.idx}/${s.words.length} คำ`, buttons: btns, dismiss: 'stay' });
+    const btns = [{ label: `${T('ทำต่อ')}`, cls: 'primary', icon: 'play', value: 'stay' }];
+    if (answered) btns.push({ label: `${T('จบตอนนี้ แล้วไปใบตรวจ')}`, icon: 'file', value: 'sheet' });
+    btns.push({ label: `${T('ออกโดยไม่บันทึก')}`, cls: 'danger', value: 'quit' });
+    const v = await modal({ title: `${T('ออกจาก')} 听写?`, msg: `${T('ทำไปแล้ว')} ${s.idx}/${s.words.length} ${T('คำ')}`, buttons: btns, dismiss: 'stay' });
     if (!this.s) return;
     if (v === 'sheet') {
       // keep only the words already reached
       const upto = s.ans === 'paper' ? s.idx + 1 : (s.items[s.idx] && s.items[s.idx].revealed && s.items[s.idx].ok !== null ? s.idx + 1 : s.idx);
-      if (!upto) { toast('ยังไม่มีคำที่ตรวจแล้ว'); return; }
+      if (!upto) { toast(`${T('ยังไม่มีคำที่ตรวจแล้ว')}`); return; }
       s.words = s.words.slice(0, upto); s.items = s.items.slice(0, upto);
       this.finish();
     } else if (v === 'quit') { const back = s.back; this.stop(); this.s = null; Router.up(back); }
@@ -714,7 +748,7 @@ const Pad = {
 const DSheet = {
   show() {
     const s = Dicta.s; if (!s || !s.done) { Router.replace('/home'); return; }
-    $('#dsHint').textContent = s.ans === 'paper' ? 'ตรวจกับกระดาษของคุณ แล้วแตะถูกหรือผิดให้ครบทุกข้อ' : 'แตะเครื่องหมายเพื่อแก้ผลการตรวจได้';
+    $('#dsHint').textContent = s.ans === 'paper' ? `${T('ตรวจกับกระดาษของคุณ แล้วแตะถูกหรือผิดให้ครบทุกข้อ')}` : `${T('แตะเครื่องหมายเพื่อแก้ผลการตรวจได้')}`;
     $('#dsAllOk').hidden = s.ans !== 'paper';
     this.render();
   },
@@ -722,13 +756,13 @@ const DSheet = {
     const s = Dicta.s;
     $('#dsBody').innerHTML = s.items.map((it, i) => {
       const w = BY_ID.get(it.id); if (!w) return '';
-      const yours = s.ans === 'draw' ? (it.img ? `<img src="${it.img}" alt="">` : '<span class="muted">—</span>') : s.ans === 'type' ? `<b class="ans-typed" style="font-size:17px">${esc(it.typed || '—')}</b>` : `<span class="muted">กระดาษ ข้อ ${i + 1}</span>`;
-      return `<tr><td class="muted tn">${i + 1}</td><td>${yours}${it.hint ? '<small>ใช้คำใบ้พินอิน</small>' : ''}</td>
-        <td><div class="row" style="gap:6px"><span class="a-zh">${esc(w.zh)}</span><button class="ibtn sm" data-speak="${esc(w.id)}" aria-label="ฟังเสียง">${ic('vol')}</button></div><small class="pyx">${esc(w.py)}</small><small>${esc(meaningText(w))}</small></td>
-        <td class="c"><button class="mark ${it.ok === true ? 'ok' : ''}" data-mk="${i}" data-v="1" aria-label="ถูก">${ic('check')}</button> <button class="mark ${it.ok === false ? 'no' : ''}" data-mk="${i}" data-v="0" aria-label="ผิด">${ic('x')}</button></td></tr>`;
+      const yours = s.ans === 'draw' ? (it.img ? `<img src="${it.img}" alt="">` : '<span class="muted">—</span>') : s.ans === 'type' ? `<b class="ans-typed" style="font-size:17px">${esc(it.typed || '—')}</b>` : `<span class="muted">${T('กระดาษ ข้อ')} ${i + 1}</span>`;
+      return `<tr><td class="muted tn">${i + 1}</td><td>${yours}${it.hint ? `<small>${T('ใช้คำใบ้พินอิน')}</small>` : ''}</td>
+        <td><div class="row" style="gap:6px"><span class="a-zh">${esc(w.zh)}</span><button class="ibtn sm" data-speak="${esc(w.id)}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></div><small class="pyx">${esc(w.py)}</small><small>${esc(meaningText(w))}</small></td>
+        <td class="c"><button class="mark ${it.ok === true ? 'ok' : ''}" data-mk="${i}" data-v="1" aria-label="${T('ถูก')}">${ic('check')}</button> <button class="mark ${it.ok === false ? 'no' : ''}" data-mk="${i}" data-v="0" aria-label="${T('ผิด')}">${ic('x')}</button></td></tr>`;
     }).join('');
     const ok = s.items.filter(i => i.ok === true).length, marked = s.items.filter(i => i.ok !== null).length;
-    $('#dsScore').textContent = `ถูก ${ok} / ${s.items.length}${marked < s.items.length ? ` · เหลือตรวจ ${s.items.length - marked}` : ''}`;
+    $('#dsScore').textContent = `${T('ถูก')} ${ok} / ${s.items.length}${marked < s.items.length ? ` · ${T('เหลือตรวจ')} ${s.items.length - marked}` : ''}`;
   },
   click(e) {
     const s = Dicta.s; if (!s) return;
@@ -740,21 +774,22 @@ const DSheet = {
   save() {
     const s = Dicta.s; if (!s || s.saved) return;
     const pending = s.items.filter(i => i.ok === null).length;
-    if (pending) { toast(`ยังไม่ได้ตรวจอีก ${pending} ข้อ`, { icon: 'info' }); return; }
+    if (pending) { toast(`${T('ยังไม่ได้ตรวจอีก')} ${pending} ${T('ข้อ')}`, { icon: 'info' }); return; }
     const total = s.items.length, correct = s.items.filter(i => i.ok).length;
-    Stats.record({ mode: 'dict', kind: s.kind, label: s.title, lvl: s.cfg.lvl, stage: s.cfg.stage, ts: s.ts, dur: Math.round(s.ms), total, correct, stars: Stats.starsFor(correct, total), words: s.items.map(i => [i.id, i.ok]), sub: s.ans });
+    const dsess = { mode: 'dict', kind: s.kind, label: s.title, lvl: s.cfg.lvl, stage: s.cfg.stage, ts: s.ts, dur: Math.round(s.ms), total, correct, stars: Stats.starsFor(correct, total), words: s.items.map(i => [i.id, i.ok]), sub: s.ans };
+    Stats.record(dsess); const gain = Gami.onSession(dsess);
     s.saved = true; sfx('save');
     if (total && correct === total) Fx.confetti(80);
     const wrong = s.items.filter(i => !i.ok).map(i => BY_ID.get(i.id)).filter(Boolean);
     const back = s.back;
-    toast(`บันทึกแล้ว · ถูก ${correct}/${total} (${total ? Math.round(correct / total * 100) : 0}%)`, { icon: 'check' });
+    toast(`${T('บันทึกแล้ว · ถูก')} ${correct}/${total} (${total ? Math.round(correct / total * 100) : 0}%) · +${gain.gain} XP`, { icon: 'check' }); Gami.celebrate(gain, 700);
     if (wrong.length) {
-      modal({ title: 'ฝึกคำที่เขียนผิดต่อไหม?', msg: `${wrong.length} คำถูกเพิ่มเข้ารายการทบทวนแล้ว`, buttons: [{ label: `听写 คำที่ผิดอีกรอบ (${wrong.length})`, cls: 'primary', icon: 'repeat', value: 'again' }, { label: 'เสร็จแล้ว', cls: 'ghost', value: 'done' }], dismiss: 'done' })
-        .then(v => { const cfg = s.cfg; Dicta.s = null; if (v === 'again') { Router.replace(back); setTimeout(() => Dicta.start({ ...cfg, words: wrong, title: '听写 · คำที่ผิด', kind: 'retry', lvl: undefined, stage: undefined }), 40); } else Router.replace(back); });
+      modal({ title: `${T('ฝึกคำที่เขียนผิดต่อไหม')}?`, msg: `${wrong.length} ${T('คำถูกเพิ่มเข้ารายการทบทวนแล้ว')}`, buttons: [{ label: `听写 ${T('คำที่ผิดอีกรอบ')} (${wrong.length})`, cls: 'primary', icon: 'repeat', value: 'again' }, { label: `${T('เสร็จแล้ว')}`, cls: 'ghost', value: 'done' }], dismiss: 'done' })
+        .then(v => { const cfg = s.cfg; Dicta.s = null; if (v === 'again') { Router.replace(back); setTimeout(() => Dicta.start({ ...cfg, words: wrong, title: `听写 · ${T('คำที่ผิด')}`, kind: 'retry', lvl: undefined, stage: undefined }), 40); } else Router.replace(back); });
     } else { Dicta.s = null; Router.replace(back); }
   },
   async discard() {
-    if (!(await confirmDlg('ทิ้งผลการตรวจ?', 'ผลรอบนี้จะไม่ถูกบันทึก', 'ทิ้งผล', true))) return;
+    if (!(await confirmDlg(`${T('ทิ้งผลการตรวจ')}?`, `${T('ผลรอบนี้จะไม่ถูกบันทึก')}`, `${T('ทิ้งผล')}`, true))) return;
     const back = Dicta.s ? Dicta.s.back : '/home'; Dicta.s = null; Router.replace(back);
   }
 };
