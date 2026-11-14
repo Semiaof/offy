@@ -171,16 +171,116 @@
   .paper-sheet .hz { font-size: 38px; color: var(--seal); filter: url(#rough); opacity: 0; transform: scale(.8); transition: opacity .3s, transform .35s; }
   .paper-sheet.stamped .hz { opacity: 1; transform: scale(1); }
   .paper-sheet small { font: 600 12.5px var(--ui); color: #6c675e; }
+
+  /* ===== RUNNER SHOWCASE STYLES (R, P) ===== */
+  .run-persp { position: absolute; inset: 0; perspective: 260px; overflow: hidden; }
+  .run-road { position: absolute; left: 12%; right: 12%; top: 38px; bottom: -18px; background: linear-gradient(180deg, rgba(25,22,28,.9) 0%, rgba(52,44,50,.96) 100%); transform: rotateX(42deg); transform-origin: 50% 100%; border-left: 3px solid rgba(255,210,122,.4); border-right: 3px solid rgba(255,210,122,.4); display: grid; grid-template-columns: repeat(3, 1fr); }
+  .run-road > i { border-right: 1.5px dashed rgba(255,255,255,.18); }
+  .run-gate-row { position: absolute; left: 10%; right: 10%; top: 64px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; z-index: 14; transform-origin: 50% 50%; }
+  .run-sign { height: 54px; border-radius: 11px; background: linear-gradient(180deg, #4a2e1b, #28170c); border: 2px solid #d4a056; color: #fff4d6; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 8px 18px rgba(0,0,0,.55); font-size: 22px; }
+  .run-sign small { font: 700 10px var(--ui); color: #ffd27a; }
+  .run-hero { position: absolute; left: 50%; bottom: 38px; width: 52px; height: 58px; border-radius: 14px; background: linear-gradient(180deg, #c23b22, #6e170d); border: 2px solid #ffd27a; color: #fff; display: grid; place-items: center; font: 700 26px var(--hz); transform: translate(-50%, 0); z-index: 22; box-shadow: 0 10px 20px rgba(0,0,0,.6); transition: left .26s cubic-bezier(.25,.95,.3,1), transform .24s; }
+  .run-chaser { position: absolute; left: 50%; bottom: -26px; width: 170px; height: 56px; border-radius: 50% 50% 0 0; background: radial-gradient(circle at 50% 30%, #ff6b35, #7a1414 70%, #1a0808); border-top: 3px solid #ffd27a; transform: translateX(-50%); z-index: 26; display: flex; align-items: flex-start; justify-content: center; padding-top: 6px; font: 800 12px var(--ui); color: #fff; box-shadow: 0 -8px 28px rgba(255,60,30,.75); }
+  .run-obs { position: absolute; left: 16%; right: 16%; height: 32px; z-index: 16; display: flex; align-items: center; justify-content: center; font: 700 13px var(--ui); border-radius: 8px; }
+  .run-obs.spike { background: repeating-linear-gradient(90deg, #adb5bd 0 12px, #343a40 12px 24px); border: 2px solid #ff4d3b; color: #fff; box-shadow: 0 6px 16px rgba(0,0,0,.6); }
+  .run-obs.beam { background: linear-gradient(180deg, #7f1d1d, #450a0a); border: 2px solid #fbbf24; color: #fde68a; height: 38px; }
+
+  /* ===== INTERACTIVE PLAYABLE RUNNER GAME STAGE ===== */
+  .play-runner-card { margin: 22px 0 32px; background: linear-gradient(180deg, #1b151e, #0e0b12); border: 2px solid #c23b22; border-radius: 26px; padding: 18px; color: #fff; box-shadow: 0 18px 46px rgba(0,0,0,.45), 0 0 0 4px rgba(194,59,34,.18); }
+  .pr-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .pr-head h2 { font-family: var(--display); font-size: 22px; display: flex; align-items: center; gap: 10px; color: #fff6ea; }
+  .pr-head .live-pill { background: #c23b22; color: #fff; font: 700 12px var(--ui); padding: 4px 10px; border-radius: 99px; box-shadow: 0 0 14px rgba(255,60,40,.7); }
+  .pr-themes { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pr-themes button { padding: 6px 12px; border-radius: 99px; font: 600 12.5px var(--ui); background: rgba(255,255,255,.09); color: #e2d9c8; border: 1px solid rgba(255,255,255,.16); cursor: pointer; }
+  .pr-themes button.on { background: #e6b54e; color: #1c140a; border-color: #fff; font-weight: 700; }
+  .pr-stage { position: relative; height: 360px; border-radius: 20px; overflow: hidden; background: radial-gradient(120% 100% at 50% 15%, #3d1e24 0%, #140d16 70%); border: 1.5px solid rgba(255,210,122,.28); user-select: none; -webkit-user-select: none; touch-action: none; }
+  .pr-stage[data-theme="roof"] { background: radial-gradient(120% 100% at 50% 10%, #233052 0%, #0d1222 75%); }
+  .pr-stage[data-theme="horse"] { background: linear-gradient(180deg, #522116 0%, #24100e 65%, #120909 100%); }
+  .pr-hud { position: absolute; left: 14px; right: 14px; top: 12px; z-index: 30; display: flex; align-items: center; justify-content: space-between; gap: 10px; pointer-events: none; }
+  .pr-stat { background: rgba(0,0,0,.58); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,.18); padding: 6px 14px; border-radius: 99px; font: 700 13.5px var(--ui); display: flex; align-items: center; gap: 10px; }
+  .pr-stat b { color: #ffd27a; font-size: 15px; }
+  .pr-prompt { position: absolute; left: 50%; top: 54px; transform: translateX(-50%); z-index: 30; background: rgba(15,12,18,.86); border: 2px solid #ffd27a; padding: 7px 20px; border-radius: 99px; font: 700 15px var(--ui); color: #fff; white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,.6); text-align: center; }
+  .pr-prompt b { color: #ffd27a; font-size: 17px; margin: 0 4px; }
+  .pr-world { position: absolute; inset: 0; perspective: 320px; overflow: hidden; }
+  .pr-track { position: absolute; left: 50%; bottom: -30px; width: min(560px, 92%); height: 310px; transform: translateX(-50%) rotateX(46deg); transform-origin: 50% 100%; background: linear-gradient(180deg, rgba(20,16,24,.35) 0%, rgba(46,36,42,.95) 35%, #241c22 100%); border-left: 4px solid #e6b54e; border-right: 4px solid #e6b54e; display: grid; grid-template-columns: repeat(3, 1fr); box-shadow: 0 0 50px rgba(0,0,0,.8); }
+  .pr-lane-col { position: relative; border-right: 2px dashed rgba(255,210,122,.25); cursor: pointer; transition: background .15s; }
+  .pr-lane-col:last-child { border-right: none; }
+  .pr-lane-col:hover { background: rgba(255,210,122,.06); }
+  .pr-entities { position: absolute; inset: 0; pointer-events: none; z-index: 20; }
+  .pr-gate { position: absolute; transform: translate(-50%, -50%); width: 112px; height: 68px; border-radius: 14px; background: linear-gradient(180deg, #52321c, #2b180b); border: 2.5px solid #e6b54e; color: #fff6ea; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 24px rgba(0,0,0,.65); pointer-events: auto; cursor: pointer; }
+  .pr-gate .hz { font-size: 27px; line-height: 1.05; }
+  .pr-gate small { font: 700 10.5px var(--ui); color: #ffd27a; opacity: .9; }
+  .pr-hazard { position: absolute; left: 50%; transform: translate(-50%, -50%); width: min(440px, 82%); height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 10px; font: 800 15px var(--ui); box-shadow: 0 12px 28px rgba(0,0,0,.75); pointer-events: auto; cursor: pointer; }
+  .pr-hazard.jump { background: repeating-linear-gradient(135deg, #9e1c1c 0 14px, #2b2d38 14px 28px); border: 2.5px solid #ff5a4d; color: #fff; }
+  .pr-hazard.slide { background: linear-gradient(180deg, #ffd27a 0 18%, #7a2419 18% 100%); border: 2.5px solid #ffd27a; color: #fff; height: 64px; }
+  .pr-hazard.rope { background: radial-gradient(ellipse at center, #09060c 0%, #3b1111 75%, #ff4d3b 100%); border: 2.5px dashed #ff9d3b; color: #ffd27a; height: 56px; }
+  .pr-player { position: absolute; bottom: 54px; width: 64px; height: 74px; transform: translate(-50%, 0); z-index: 25; transition: left .2s cubic-bezier(.22,.95,.3,1), transform .22s cubic-bezier(.2,.9,.3,1); pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .pr-player-body { width: 58px; height: 62px; border-radius: 16px; background: linear-gradient(180deg, #d94126, #7a180cb8); border: 2.5px solid #ffd27a; box-shadow: 0 12px 24px rgba(0,0,0,.75), 0 0 18px rgba(255,100,50,.45); display: grid; place-items: center; font: 700 30px var(--hz); color: #fff; position: relative; }
+  .pr-player.jumping .pr-player-body { transform: translateY(-68px) rotate(-360deg) scale(1.18); transition: transform .48s cubic-bezier(.2,.85,.35,1); box-shadow: 0 38px 32px rgba(0,0,0,.5), 0 0 26px #ffd27a; }
+  .pr-player.sliding .pr-player-body { transform: translateY(18px) scaleY(.52) scaleX(1.22); transition: transform .22s ease-out; border-color: #63e6be; }
+  .pr-player.roping .pr-player-body { transform: translateY(-82px) rotate(-14deg) scale(1.15); transition: transform .48s cubic-bezier(.2,.85,.35,1); border-color: #ffd27a; }
+  .pr-rope-line { position: absolute; left: 50%; bottom: 56px; width: 3px; height: 0; background: #ffd27a; transform-origin: bottom center; opacity: 0; box-shadow: 0 0 10px #ffd27a; }
+  .pr-player.roping .pr-rope-line { height: 140px; opacity: 1; transform: rotate(12deg); }
+  .pr-player-state { font: 800 11px var(--ui); background: #ffd27a; color: #1c1208; padding: 1px 8px; border-radius: 99px; margin-top: -8px; z-index: 2; }
+  .pr-monster { position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%); width: min(480px, 90%); height: 48px; border-radius: 50% 50% 0 0; background: radial-gradient(circle at 50% 20%, #ff5a36, #7a1111 70%, #1a0505); border-top: 3px solid #ffd27a; z-index: 28; display: flex; align-items: center; justify-content: center; gap: 10px; font: 800 13px var(--ui); color: #fff; box-shadow: 0 -10px 34px rgba(255,50,20,.85); transition: height .3s; }
+  .pr-controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .pr-btns { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; justify-content: center; }
+  .pr-btns button { height: 44px; padding: 0 16px; border-radius: 14px; font: 700 14px var(--ui); background: #2a222e; color: #fff; border: 1.5px solid rgba(255,210,122,.35); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: transform .1s, background .15s; }
+  .pr-btns button:active, .pr-btns button.flash-btn { transform: scale(.94); background: #c23b22; border-color: #ffd27a; }
+  .pr-btns button.act-btn { background: #3b2316; border-color: #e6b54e; color: #ffd27a; }
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="rough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
 <div class="wrap">
   <div class="top">
-    <h1>เสนอมินิเกมใหม่ · สายบู๊ / ยิง / ต่อสู้ดิบ ๆ (Wuxia & Battlefield)</h1>
-    <p>ด้านบนสุดคือ <b>5 เกมสายบู๊-ยิง-ต่อสู้ดุดัน (W, X, Y, Z, V)</b> พร้อมเอฟเฟกต์จอสั่น หมึกโลหิต คมดาบ และดินปืน ส่วนด้านล่างเป็น 5 เกมแนวโรงเตี๊ยม/ปริศนา กด <b>"เลือกแบบนี้"</b> ในแบบที่ชอบ แล้วกด <b>"คัดลอกตัวเลือก"</b> ด้านล่างส่งในแชตได้เลยครับ</p>
+    <h1>เสนอมินิเกมใหม่ · สายวิ่งรันเนอร์ (Runner / Parkour) & สายบู๊ดุดัน</h1>
+    <p>ใหม่ล่าสุด! <b>ลองเล่นมินิเกมวิ่งรันเนอร์แบบสด ๆ ได้ที่กล่องด้านล่างนี้เลย</b> (ปัดซ้าย-ขวาเปลี่ยนเลนเข้าป้ายคำศัพท์ · กดโดดหลบหนาม · สไลด์ลอดคานใบมีด · โหนเชือกข้ามเหว) หรือเลื่อนดูตัวอย่างมินิเกมสายรันเนอร์ <b>(R, P)</b> และสายบู๊ <b>(W, X, Y, Z, V)</b> ด้านล่างครับ</p>
     <nav class="toc" id="toc"></nav>
   </div>
+
+  <!-- INTERACTIVE PLAYABLE RUNNER STAGE -->
+  <div class="play-runner-card" id="playRunnerCard">
+    <div class="pr-head">
+      <h2>🏃‍♂️ ลองเล่นสด: วิ่งหนีทะลวงด่านคำศัพท์ (Interactive Wuxia Runner) <span class="live-pill">PLAYABLE LIVE</span></h2>
+      <div class="pr-themes" id="prThemes">
+        <button class="on" data-th="boulder">🪨 วิ่งหนีหินเพลิงยักษ์</button>
+        <button data-th="roof">🏮 ไต่หลังคาหนีเงาสังหาร</button>
+        <button data-th="horse">🐎 ควบม้าศึกฝ่าค่ายกล</button>
+      </div>
+    </div>
+    <div class="pr-stage" id="prStage" data-theme="boulder">
+      <div class="pr-hud">
+        <div class="pr-stat">คะแนน <b id="prScore">0</b> · คอมโบ <b id="prCombo">×0</b></div>
+        <div class="pr-stat">ระยะห่างศัตรูไล่หลัง <b id="prDist">80m</b></div>
+      </div>
+      <div class="pr-prompt" id="prPrompt">เตรียมวิ่ง! เลือกเลนให้ตรงคำแปล หรือ โดด/สไลด์/โหนเชือกหลบกับดัก</div>
+      <div class="pr-world">
+        <div class="pr-track" id="prTrack">
+          <div class="pr-lane-col" data-lane="0"></div>
+          <div class="pr-lane-col" data-lane="1"></div>
+          <div class="pr-lane-col" data-lane="2"></div>
+        </div>
+      </div>
+      <div class="pr-entities" id="prEntities"></div>
+      <div class="pr-player" id="prPlayer" style="left:50%">
+        <div class="pr-rope-line"></div>
+        <div class="pr-player-body" id="prHeroIcon">侠</div>
+        <div class="pr-player-state" id="prStateTxt">วิ่ง</div>
+      </div>
+      <div class="pr-monster" id="prMonster">🔥 หินเพลิงยักษ์กำลังกลิ้งไล่หลังมา! (อย่าให้ระยะเหลือ 0m)</div>
+    </div>
+    <div class="pr-controls">
+      <div class="pr-btns">
+        <button id="btnL" title="ปุ่มซ้าย / A">⬅️ เลนซ้าย (A/←)</button>
+        <button id="btnR" title="ปุ่มขวา / D">➡️ เลนขวา (D/→)</button>
+        <button id="btnJump" class="act-btn" title="ปุ่มขึ้น / W / Space">⬆️ กระโดด (W/↑)</button>
+        <button id="btnSlide" class="act-btn" title="ปุ่มลง / S">⬇️ สไลด์หลบ (S/↓)</button>
+        <button id="btnRope" class="act-btn" title="ปุ่ม E">🪝 โหนสลิง (E)</button>
+      </div>
+    </div>
+  </div>
+
   <div id="secs"></div>
 </div>
 <div class="out"><span id="outTxt">ยังไม่ได้เลือก</span><button id="outCopy">คัดลอกตัวเลือก</button></div>
@@ -215,6 +315,16 @@ function stamp(host, text, { color = '#9e1c1c', size = 82 } = {}) {
 }
 
 const SECTIONS = [
+  { id: 'runner', act: true, name: 'R. วิ่งรันเนอร์ทางแยกคำศัพท์ 3 เลน (3-Lane Signpost Runner)', desc: 'วิ่งหนีภัยพิบัติหรือปีศาจไล่หลัง ดูโจทย์ด้านบนแล้วปัดซ้าย-ขวา (左 / 中 / 右) เลือกพุ่งเข้าช่องทางแยกที่มีป้ายคำศัพท์ถูกต้อง ถ้าระบุถูกจะเร่งความเร็วทิ้งห่าง ถ้าชนป้ายผิดจะเสียจังหวะ!', vars: [
+    { k: 'R1', name: 'วิ่งหนีหินเพลิงยักษ์ถล่มสุสาน', bg: 'war', d: 'ลูกหินเพลิงยักษ์กลิ้งไล่บี้มาข้างหลัง! มองป้ายคำศัพท์ 3 ทางแยกข้างหน้าแล้วปัดเปลี่ยนเลนพุ่งทะลุซุ้มประตูที่ถูกให้ทัน' },
+    { k: 'R2', name: 'ควบม้าศึกฝ่าด่านค่ายกล 3 แยก', bg: 'blood', d: 'ควบม้าศึกทะยานฝ่าค่ายกลไฟ เลือกพุ่งชนธงรบคำศัพท์ที่ตรงกับความหมายให้ธงขาดสะบั้นและเร่งสปีดม้าศึก' },
+    { k: 'R3', name: 'ล่องแก่งไม้ไผ่หนีน้ำป่าเชี่ยว', bg: 'water', d: 'พายแพไม้ไผ่หนีน้ำป่าไหลหลาก เลือกคัดท้ายแพเข้าช่องน้ำซ้าย-กลาง-ขวาตามป้ายหินคำศัพท์หลบโขดหินมรณะ' }
+  ]},
+  { id: 'parkour', act: true, name: 'P. รันเนอร์ปาร์กัวร์ โดด · สไลด์ · โหนสลิง (Parkour Action Runner)', desc: 'วิ่งไต่หลังคาและฝ่าด่านกลไกสังหาร นอกจากเปลี่ยนเลนแล้วยังต้อง กระโดดตีลังกาข้ามหนาม (↑) · สไลด์ลอดคานใบมีด (↓) · และยิงตะขอเหล็กโหนข้ามเหว (🪝) พร้อมเก็บป้ายคำศัพท์กลางอากาศ!', vars: [
+    { k: 'P1', name: 'วิชาตัวเบาไต่หลังคาโรงเตี๊ยม', bg: 'night', d: 'วิ่งหนีมือสังหารเงาบนหลังคายามค่ำคืน กระโดดตีลังกาข้ามกับดักหนามเหล็กและสไลด์ลอดคานไม้พร้อมฟันป้ายคำศัพท์กลางอากาศ' },
+    { k: 'P2', name: 'ตะขอเหล็กโหนข้ามเหวภูเขาไฟ', bg: 'blood', d: 'สะพานหินขาดเป็นเหวลาวา! ต้องกดยิงตะขอโซ่เหล็ก (飞爪) เกี่ยวคานป้ายคำศัพท์ที่ถูกเพื่อโหนตัวเหินข้ามเหวนรก' },
+    { k: 'P3', name: 'รถรางเหมืองทองคำทะลวงราง', bg: 'iron', d: 'รถรางเหล็กแล่นด้วยความเร็วสูง ต้องก้มหลบคานเหล็ก กระโดดเปลี่ยนราง และสับรางเข้าอุโมงค์คำศัพท์ที่ถูกต้อง' }
+  ]},
   { id: 'sniper', act: true, name: 'W. ซุ่มยิง & ปืนใหญ่ถล่มค่าย (Sniper & Artillery)', desc: 'เล็งเป้ายิงสังหารศัตรูที่ถือคำศัพท์ตรงกับโจทย์ ถ้ายิงเข้าเป้าจะระเบิดเกราะแตกกระจาย (一击必杀! Headshot) ถ้ายิงพลาดศัตรูจะบุกประชิดกำแพงเมือง', vars: [
     { k: 'W1', name: 'ซุ่มยิงเกาทัณฑ์เหล็ก (Crosshair)', bg: 'iron', d: 'มองผ่านศูนย์เล็งสีแดง ล็อกเป้าทหารเกราะดำที่ถือป้ายคำศัพท์ตรงโจทย์ ยิงลูกศรเหล็กเจาะเกราะแตกพร้อมหมึกโลหิตสาดและจอสั่นสะเทือน' },
     { k: 'W2', name: 'ปืนใหญ่ไฟพยัคฆ์', bg: 'war', d: 'ปืนใหญ่สำริดตั้งหน้าค่ายศึก เลือกยิงถล่มเรือรบศัตรูที่แล่นเข้ามา กระสุนปืนใหญ่ไฟพุ่งไประเบิดเรือรบแตกเป็นเสี่ยง ๆ ไฟลุกท่วมจอ' },
@@ -772,6 +882,293 @@ DEMOS.N3 = async (el, W) => {
   floatText(el, x, y - 40, 'พิมพ์สำเร็จ! +20', 'big');
   await W(1400);
 };
+
+/* ===== R1: 3-Lane Boulder Temple Signpost Runner ===== */
+DEMOS.R1 = async (el, W) => {
+  el.innerHTML = `<div class="goal-b">หินยักษ์ไล่หลัง! ปัดเข้าช่องทางแยก <b>"สนามบิน" (fēijīchǎng)</b></div>
+    <div class="run-persp"><div class="run-road"><i></i><i></i><i></i></div></div>
+    <div class="run-gate-row" id="r1Row"><div class="run-sign hz">火车站<small>ซ้าย</small></div><div class="run-sign hz">图书馆<small>กลาง</small></div><div class="run-sign hz" id="r1Right">飞机场<small>ขวา</small></div></div>
+    <div class="run-hero" id="r1Hero">侠</div>
+    <div class="run-chaser">🪨 หินเพลิงยักษ์ไล่บี้!</div>`;
+  const row = $('#r1Row', el), hero = $('#r1Hero', el), right = $('#r1Right', el);
+  row.animate([{ top: '52px', transform: 'scale(.68)', opacity: .7 }, { top: '165px', transform: 'scale(1.08)', opacity: 1 }], { duration: 1150, easing: 'ease-in', fill: 'forwards' });
+  await W(560);
+  hero.style.left = '76%';
+  await W(520);
+  right.style.borderColor = '#5cd68d'; right.style.background = '#1d6e42';
+  const [x, y] = at(hero, el);
+  burst(el, x, y - 16, { n: 26, color: '#ffd27a', dist: 85 });
+  floatText(el, x - 20, y - 48, 'ทะลุด่าน! เร่งสปีด +25', 'crit');
+  await W(1400);
+};
+
+/* ===== R2: Warhorse Cavalry Fork ===== */
+DEMOS.R2 = async (el, W) => {
+  el.innerHTML = `<div class="goal-b">ควบม้าศึกพุ่งชนธงรบคำว่า <b>"เตรียมตัว" (zhǔnbèi)</b></div>
+    <div class="run-persp"><div class="run-road"><i></i><i></i><i></i></div></div>
+    <div class="run-gate-row" id="r2Row"><div class="run-sign hz" id="r2Left" style="background:#7a1c1c">准备<small>ธงซ้าย</small></div><div class="run-sign hz">开始<small>ธงกลาง</small></div><div class="run-sign hz">结束<small>ธงขวา</small></div></div>
+    <div class="run-hero" id="r2Hero" style="background:#8c2f1b">骑</div>
+    <div class="run-chaser">🔥 กองทัพอสูรไล่หลัง!</div>`;
+  const row = $('#r2Row', el), hero = $('#r2Hero', el), left = $('#r2Left', el);
+  row.animate([{ top: '52px', transform: 'scale(.68)' }, { top: '165px', transform: 'scale(1.08)' }], { duration: 1100, easing: 'ease-in', fill: 'forwards' });
+  await W(520);
+  hero.style.left = '24%';
+  await W(520);
+  flash(el, 'rgba(255,90,40,.45)', 200); quake(el, 8);
+  left.style.transform = 'scale(1.2) rotate(-12deg)'; left.style.opacity = '0';
+  const [x, y] = at(hero, el);
+  burst(el, x, y - 16, { n: 28, color: '#ff5a36', dist: 90 });
+  floatText(el, x + 20, y - 48, 'ทวนสะบั้นธง! +30', 'crit');
+  await W(1400);
+};
+
+/* ===== R3: Bamboo Raft Rapids Escape ===== */
+DEMOS.R3 = async (el, W) => {
+  el.innerHTML = `<div class="goal-b">คัดท้ายแพไม้ไผ่เข้าช่องน้ำ <b>"ระวัง / ปลอดภัย" (xiǎoxīn)</b></div>
+    <div class="run-persp"><div class="run-road" style="background:linear-gradient(180deg,#124e66,#0b2d3d);border-color:#74c0fc"><i></i><i></i><i></i></div></div>
+    <div class="run-gate-row" id="r3Row"><div class="run-sign hz">危险<small>น้ำวน</small></div><div class="run-sign hz" id="r3Mid" style="background:#1864ab;border-color:#74c0fc">小心<small>ร่องน้ำกลาง</small></div><div class="run-sign hz">忘记<small>โขดหิน</small></div></div>
+    <div class="run-hero" id="r3Hero" style="background:#2b8a3e;left:24%">舟</div>
+    <div class="run-chaser" style="background:radial-gradient(circle,#339af0,#1864ab)">🌊 คลื่นยักษ์สึนามิไล่หลัง!</div>`;
+  const row = $('#r3Row', el), hero = $('#r3Hero', el);
+  row.animate([{ top: '52px', transform: 'scale(.68)' }, { top: '165px', transform: 'scale(1.08)' }], { duration: 1100, easing: 'ease-in', fill: 'forwards' });
+  await W(520);
+  hero.style.left = '50%';
+  await W(520);
+  const [x, y] = at(hero, el);
+  burst(el, x, y - 16, { n: 26, color: '#74c0fc', dist: 85 });
+  floatText(el, x, y - 48, 'โต้คลื่นผ่านฉลุย! +25', 'big');
+  await W(1400);
+};
+
+/* ===== P1: Rooftop Parkour Jump & Slide ===== */
+DEMOS.P1 = async (el, W) => {
+  el.innerHTML = `<div class="goal-b">โดดข้ามหนาม (↑) & สไลด์ลอดคาน (↓) เก็บยันต์ <b>高兴 (ดีใจ)</b></div>
+    <div class="run-persp"><div class="run-road"><i></i><i></i><i></i></div></div>
+    <div class="run-obs spike" id="p1Obs" style="top:64px">⚠️ กับดักหนามเหล็ก · กดกระโดด (↑) + เก็บยันต์ 高兴</div>
+    <div class="run-hero" id="p1Hero">侠</div>
+    <div class="run-chaser">🗡️ มือสังหารเงาไล่ล่า!</div>`;
+  const obs = $('#p1Obs', el), hero = $('#p1Hero', el);
+  obs.animate([{ top: '64px', transform: 'scale(.68)' }, { top: '215px', transform: 'scale(1.12)' }], { duration: 1150, easing: 'ease-in', fill: 'forwards' });
+  await W(560);
+  hero.animate([{ transform: 'translate(-50%,0) scale(1)' }, { transform: 'translate(-50%,-72px) rotate(-360deg) scale(1.22)', offset: .5 }, { transform: 'translate(-50%,0) scale(1)' }], { duration: 540, easing: 'cubic-bezier(.2,.85,.35,1)' });
+  await W(260);
+  const [x, y] = at(hero, el);
+  burst(el, x, y - 45, { n: 26, color: '#ffd27a', dist: 85 });
+  floatText(el, x, y - 72, 'ตีลังกาคว้ายันต์! +30', 'crit');
+  await W(1350);
+};
+
+/* ===== P2: Grappling Hook Lava Chasm ===== */
+DEMOS.P2 = async (el, W) => {
+  el.innerHTML = `<div class="goal-b">สะพานขาด! ยิงตะขอเหล็ก (🪝) เกี่ยวคานคำว่า <b>"เครื่องบิน" (fēijī)</b></div>
+    <div class="run-persp"><div class="run-road" style="background:linear-gradient(180deg,#2b0909,#661414)"><i></i><i></i><i></i></div></div>
+    <div class="run-gate-row" style="top:54px"><div class="run-sign hz">火车</div><div class="run-sign hz" id="p2Beam" style="border-color:#ffd27a;background:#8c2f1b">🪝 飞机</div><div class="run-sign hz">汽车</div></div>
+    <div class="run-obs beam" style="top:155px;background:#ff3b2f;color:#fff">🔥 เหวลาวานรก! ห้ามวิ่งตกเด็ดขาด</div>
+    <div class="run-hero" id="p2Hero">侠</div>`;
+  const hero = $('#p2Hero', el), beam = $('#p2Beam', el);
+  await W(550);
+  beam.style.boxShadow = '0 0 24px #ffd27a';
+  hero.animate([{ transform: 'translate(-50%,0)' }, { transform: 'translate(-50%,-95px) rotate(-18deg) scale(1.18)', offset: .55 }, { transform: 'translate(-50%,-20px) scale(1)' }], { duration: 680, easing: 'cubic-bezier(.2,.85,.35,1)', fill: 'forwards' });
+  await W(340);
+  const [x, y] = at(beam, el);
+  burst(el, x, y + 25, { n: 28, color: '#ffd27a', dist: 90 });
+  floatText(el, x, y + 10, '飞爪! โหนสลิงข้ามเหว +35', 'crit');
+  await W(1400);
+};
+
+/* ===== P3: Minecart Duck & Switch Track ===== */
+DEMOS.P3 = async (el, W) => {
+  el.innerHTML = `<div class="goal-b">สไลด์ก้มหลบคานใบมีด (↓) พร้อมพุ่งเข้าอุโมงค์ <b>电脑 (คอมพิวเตอร์)</b></div>
+    <div class="run-persp"><div class="run-road"><i></i><i></i><i></i></div></div>
+    <div class="run-obs beam" id="p3Beam" style="top:64px">⚙️ คานใบมีดเหล็กหมุน · กดสไลด์ก้มหลบ (↓)</div>
+    <div class="run-hero" id="p3Hero" style="background:#495057">矿</div>
+    <div class="run-chaser">💥 ถ้ำกำลังถล่มไล่หลัง!</div>`;
+  const beam = $('#p3Beam', el), hero = $('#p3Hero', el);
+  beam.animate([{ top: '64px', transform: 'scale(.7)' }, { top: '205px', transform: 'scale(1.12)' }], { duration: 1100, easing: 'ease-in', fill: 'forwards' });
+  await W(520);
+  hero.animate([{ transform: 'translate(-50%,0) scaleY(1)' }, { transform: 'translate(-50%,18px) scaleY(.48) scaleX(1.25)', offset: .45 }, { transform: 'translate(-50%,0) scaleY(1)' }], { duration: 540 });
+  await W(260);
+  const [x, y] = at(hero, el);
+  burst(el, x, y, { n: 24, color: '#63e6be', dist: 80 });
+  floatText(el, x, y - 48, 'สไลด์ลอดใบมีด! +25', 'big');
+  await W(1400);
+};
+
+/* ---------- Interactive Playable Runner Engine ---------- */
+function initPlayableRunner() {
+  const stage = $('#prStage'), entBox = $('#prEntities'), player = $('#prPlayer'), stateTxt = $('#prStateTxt');
+  const scoreEl = $('#prScore'), comboEl = $('#prCombo'), distEl = $('#prDist'), promptEl = $('#prPrompt'), monsterEl = $('#prMonster'), heroIcon = $('#prHeroIcon');
+  if (!stage) return;
+
+  const WORDS = [
+    { z: '飞机场', p: 'fēijīchǎng', t: 'สนามบิน', bad: ['火车站', '图书馆'] },
+    { z: '医院', p: 'yīyuàn', t: 'โรงพยาบาล', bad: ['学校', '饭店'] },
+    { z: '准备', p: 'zhǔnbèi', t: 'เตรียมตัว', bad: ['开始', '休息'] },
+    { z: '电脑', p: 'diànnǎo', t: 'คอมพิวเตอร์', bad: ['电视', '手机'] },
+    { z: '小心', p: 'xiǎoxīn', t: 'ระวัง / อันตราย', bad: ['放心', '高兴'] },
+    { z: '欢迎', p: 'huānyíng', t: 'ยินดีต้อนรับ', bad: ['再见', '谢谢'] }
+  ];
+  const ACTIONS = [
+    { kind: 'jump', label: '⚠️ กับดักหนามเหล็ก! กด [กระโดด ⬆️] ข้ามให้ทัน', txt: '⚠️ กับดักหนามเหล็ก · กด ⬆️ กระโดด!', okTxt: 'ตีลังกาข้ามหนาม! +25' },
+    { kind: 'slide', label: '⚙️ คานใบมีดหมุนระดับหัว! กด [สไลด์ ⬇️] ลอดใต้คาน', txt: '⚙️ คานใบมีดไฟต่ำ · กด ⬇️ สไลด์หลบ!', okTxt: 'สไลด์ลอดใบมีด! +25' },
+    { kind: 'rope', label: '🔥 เหวลาวาขาด! กด [โหนสลิง 🪝] เหินข้ามเหว', txt: '🔥 เหวลาวานรก · กด 🪝 โหนสลิงข้าม!', okTxt: 'โหนสลิงเหินข้ามเหว! +30' }
+  ];
+
+  let lane = 1, actState = 'run', actTimer = 0, score = 0, combo = 0, dist = 80, waveIdx = 0;
+  let wave = null;
+
+  const LANES_X = [25, 50, 75];
+  function syncPlayer() {
+    player.style.left = LANES_X[lane] + '%';
+    player.classList.toggle('jumping', actState === 'jump');
+    player.classList.toggle('sliding', actState === 'slide');
+    player.classList.toggle('roping', actState === 'rope');
+    stateTxt.textContent = actState === 'jump' ? 'โดด!' : actState === 'slide' ? 'สไลด์!' : actState === 'rope' ? 'โหนสลิง!' : ['เลนซ้าย', 'เลนกลาง', 'เลนขวา'][lane];
+  }
+  function setLane(l) {
+    lane = Math.max(0, Math.min(2, l));
+    syncPlayer();
+  }
+  function triggerAction(kind) {
+    actState = kind;
+    clearTimeout(actTimer);
+    syncPlayer();
+    actTimer = setTimeout(() => { actState = 'run'; syncPlayer(); }, 650);
+  }
+
+  function spawnWave() {
+    entBox.innerHTML = '';
+    const isAction = (waveIdx % 2 === 1);
+    waveIdx++;
+    if (!isAction) {
+      const w = WORDS[waveIdx % WORDS.length];
+      const okLane = Math.floor(Math.random() * 3);
+      const opts = [];
+      let bIdx = 0;
+      for (let i = 0; i < 3; i++) opts.push(i === okLane ? w.z : w.bad[bIdx++]);
+      promptEl.innerHTML = `ทางแยกข้างหน้า! เลือกเลนคำว่า <b>"${w.t}" (${w.p})</b>`;
+      const els = opts.map((hz, i) => {
+        const g = document.createElement('div');
+        g.className = 'pr-gate';
+        g.innerHTML = `<b class="hz">${hz}</b><small>${['เลนซ้าย', 'เลนกลาง', 'เลนขวา'][i]}</small>`;
+        g.onclick = () => setLane(i);
+        entBox.appendChild(g);
+        return g;
+      });
+      wave = { type: 'fork', z: 0, okLane, els, word: w, resolved: false };
+    } else {
+      const a = ACTIONS[(waveIdx >> 1) % ACTIONS.length];
+      promptEl.innerHTML = a.label;
+      const h = document.createElement('div');
+      h.className = 'pr-hazard ' + a.kind;
+      h.textContent = a.txt;
+      h.onclick = () => triggerAction(a.kind);
+      entBox.appendChild(h);
+      wave = { type: 'hazard', z: 0, act: a, el: h, resolved: false };
+    }
+  }
+
+  let last = performance.now();
+  function tick(now) {
+    const dt = Math.min((now - last) / 1000, 0.1);
+    last = now;
+    if (!wave) spawnWave();
+    wave.z += dt * 0.42;
+    const p = Math.min(wave.z, 1.15);
+    const y = 92 + p * 195;
+    const sc = 0.52 + p * 0.58;
+
+    if (wave.type === 'fork') {
+      wave.els.forEach((el, i) => {
+        const spread = (i - 1) * (18 + p * 17);
+        el.style.left = (50 + spread) + '%';
+        el.style.top = y + 'px';
+        el.style.transform = `translate(-50%, -50%) scale(${sc.toFixed(2)})`;
+      });
+      if (!wave.resolved && wave.z >= 0.88) {
+        wave.resolved = true;
+        const [px, py] = at(player, stage);
+        if (lane === wave.okLane) {
+          score += 20 + combo * 5; combo++; dist = Math.min(120, dist + 10);
+          wave.els[lane].style.borderColor = '#5cd68d';
+          wave.els[lane].style.background = '#1d6e42';
+          burst(stage, px, py - 20, { n: 24, color: '#ffd27a', dist: 85 });
+          floatText(stage, px, py - 46, `${wave.word.z} ถูกต้อง! +${20 + (combo - 1) * 5}`, 'crit');
+        } else {
+          combo = 0; dist = Math.max(10, dist - 20);
+          flash(stage, 'rgba(255,40,30,.45)', 220); quake(stage, 8);
+          floatText(stage, px, py - 46, `ผิดเลน! ต้องเข้า ${wave.word.z}`, 'bad');
+        }
+      }
+    } else if (wave.type === 'hazard') {
+      wave.el.style.top = y + 'px';
+      wave.el.style.transform = `translate(-50%, -50%) scale(${sc.toFixed(2)})`;
+      if (!wave.resolved && wave.z >= 0.86) {
+        wave.resolved = true;
+        const [px, py] = at(player, stage);
+        const ok = actState === wave.act.kind || (wave.act.kind === 'rope' && actState === 'jump');
+        if (ok) {
+          score += 25 + combo * 5; combo++; dist = Math.min(120, dist + 12);
+          burst(stage, px, py - 30, { n: 26, color: '#63e6be', dist: 90 });
+          floatText(stage, px, py - 54, wave.act.okTxt, 'crit');
+        } else {
+          combo = 0; dist = Math.max(10, dist - 20);
+          flash(stage, 'rgba(255,40,30,.45)', 220); quake(stage, 8);
+          floatText(stage, px, py - 46, 'ชนกับดัก! กดปุ่มหลบให้ทัน', 'bad');
+        }
+      }
+    }
+
+    if (wave.z >= 1.08) spawnWave();
+    scoreEl.textContent = score;
+    comboEl.textContent = '×' + combo;
+    distEl.textContent = dist + 'm';
+    requestAnimationFrame(tick);
+  }
+
+  $$('.pr-lane-col', stage).forEach(col => col.addEventListener('click', () => setLane(+col.dataset.lane)));
+  $('#btnL').onclick = () => setLane(lane - 1);
+  $('#btnR').onclick = () => setLane(lane + 1);
+  $('#btnJump').onclick = () => triggerAction('jump');
+  $('#btnSlide').onclick = () => triggerAction('slide');
+  $('#btnRope').onclick = () => triggerAction('rope');
+
+  window.addEventListener('keydown', e => {
+    if (['ArrowLeft', 'KeyA', 'ArrowRight', 'KeyD', 'ArrowUp', 'KeyW', 'Space', 'ArrowDown', 'KeyS', 'KeyE'].includes(e.code)) {
+      const r = stage.getBoundingClientRect();
+      if (r.bottom < 0 || r.top > window.innerHeight) return;
+      e.preventDefault();
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') setLane(lane - 1);
+      else if (e.code === 'ArrowRight' || e.code === 'KeyD') setLane(lane + 1);
+      else if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') triggerAction('jump');
+      else if (e.code === 'ArrowDown' || e.code === 'KeyS') triggerAction('slide');
+      else if (e.code === 'KeyE') triggerAction('rope');
+    }
+  });
+
+  let sx = 0, sy = 0;
+  stage.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; });
+  stage.addEventListener('pointerup', e => {
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    if (Math.hypot(dx, dy) < 24) return;
+    if (Math.abs(dx) > Math.abs(dy)) setLane(lane + (dx > 0 ? 1 : -1));
+    else if (dy < 0) triggerAction(wave && wave.type === 'hazard' && wave.act.kind === 'rope' ? 'rope' : 'jump');
+    else triggerAction('slide');
+  });
+
+  $$('#prThemes button').forEach(b => b.onclick = () => {
+    $$('#prThemes button').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    const th = b.dataset.th;
+    stage.dataset.theme = th;
+    heroIcon.textContent = th === 'horse' ? '骑' : '侠';
+    monsterEl.textContent = th === 'roof' ? '🗡️ ฝูงมือสังหารเงากำลังไล่ล่าบนหลังคา!' : th === 'horse' ? '🔥 กองทัพม้าอสูรกำลังควบไล่กวด!' : '🪨 หินเพลิงยักษ์กำลังกลิ้งไล่หลังมา!';
+  });
+
+  syncPlayer();
+  requestAnimationFrame(tick);
+}
+initPlayableRunner();
 
 /* ---------- build page + intersection observer ---------- */
 const picks = {};
