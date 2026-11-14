@@ -556,9 +556,7 @@ html { overscroll-behavior-y: none; }
 .fu-rc.done b { font-size: 20px; color: var(--ink); }
 .fu-rc.done .pyx { font-style: normal; font-weight: 600; color: var(--accent-ink); margin-right: 2px; }
 .fu-pot.near { box-shadow: inset 0 -12px 22px rgba(0, 0, 0, .6), 0 0 0 6px #e6b54e, 0 0 30px 6px rgba(230, 181, 78, .4); }
-.fu-go { position: absolute; inset: 0; display: grid; place-items: center; padding: 14%; text-align: center; font: 700 clamp(13px, 2vmin, 18px) var(--ui); color: #2a3a52; opacity: 0; transition: opacity .4s; pointer-events: none; }
 .fu-pot.ready { cursor: pointer; background: radial-gradient(circle at 50% 38%, #ffffff, #dcecff 70%); box-shadow: inset 0 -10px 20px rgba(120, 160, 220, .35), 0 0 0 6px #f4f9ff, 0 0 50px 14px rgba(200, 225, 255, .75); animation: fuGlow 1.6s ease-in-out infinite; }
-.fu-pot.ready .fu-go { opacity: 1; }
 @keyframes fuGlow { 50% { box-shadow: inset 0 -10px 20px rgba(120, 160, 220, .35), 0 0 0 6px #ffffff, 0 0 70px 22px rgba(215, 235, 255, .95); } }
 .fu-orb { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; cursor: grab; }
 .fu-orb.drag { z-index: 10; cursor: grabbing; transition: none; box-shadow: 0 0 0 3px var(--gold), 0 12px 26px rgba(0, 0, 0, .55); scale: 1.12; }
@@ -684,12 +682,21 @@ html { overscroll-behavior-y: none; }
 .m-table.dusk { background: linear-gradient(180deg, #f3b07a 0%, #c9677a 48%, #3b2b55 100%); }
 .mstage > .m-panel { flex: none; display: flex; flex-direction: column; gap: 10px; justify-content: center; margin: 0 !important; min-width: 0; }
 .m-panel .m-hint { text-align: center; }
-@media (orientation: landscape) and (min-width: 700px) {
+@media (orientation: landscape) and (min-width: 560px) {
   .mstage { flex-direction: row; gap: 16px; max-width: none; overflow: hidden; }
   .mstage > .m-table { min-height: 0; }
   .mstage > .m-panel { width: min(40%, 430px); max-height: 100%; overflow-y: auto; scrollbar-width: none; }
 }
 @media (orientation: portrait) and (min-width: 700px) { .mstage { max-width: 860px; } }
+@media (orientation: landscape) and (max-height: 460px) {
+  .mstage > .m-panel { gap: 6px; justify-content: safe center; }
+  .du-panel .du-hand { min-height: 118px; padding: 6px 0 8px; }
+  .du-panel .du-card { width: 62px; height: 88px; font-size: calc(23px * var(--s-hz)); }
+  .m-panel .t-pad { height: 96px; }
+  .g-tone .tkey { height: 40px; }
+  .dm-cands { gap: 6px; } .dm-cand { padding: 4px; } .dm-cand .dm2 { transform: scale(.72) !important; margin: -10px -12px; }
+  .m-foot { min-height: 36px; }
+}
 
 /* the games that kept their look, moved into the table + panel */
 .g-duel { gap: 12px; overflow: hidden; }
@@ -736,7 +743,7 @@ html { overscroll-behavior-y: none; }
 .dm-cand kbd { position: absolute; left: 10px; top: 7px; font: 600 11px var(--pinyin); color: var(--faint); }
 @media (hover: none) { .dm-cand kbd { display: none; } }
 @media (max-width: 420px) { .dm-cand .dm2 { transform: scale(.66); margin: -10px -16px; } .dm2 > span { min-width: 46px; height: 64px; } }
-@media (orientation: landscape) and (min-width: 700px) { .dm-cands { grid-template-columns: 1fr; } .dm-cand .dm2 { transform: none; } }
+@media (orientation: landscape) and (min-width: 560px) { .dm-cands { grid-template-columns: 1fr; } .dm-cand .dm2 { transform: none; } }
 
 /* หน้าต่างความจำ */
 .mw-table { display: flex; padding: 14px; }
@@ -783,7 +790,7 @@ html { overscroll-behavior-y: none; }
    MINI-GAMES · round 4: everything on the table grows with the screen
    (sizes follow vmin, the shorter side, so a big monitor and a phone both look filled)
    ============================================================ */
-@media (orientation: landscape) and (min-width: 700px) { .mstage { max-width: 1560px; margin: 0 auto; } }
+@media (orientation: landscape) and (min-width: 560px) { .mstage { max-width: 1560px; margin: 0 auto; } }
 .m-panel .m-hint { font-size: clamp(13px, 1.7vmin, 16px); }
 .m-panel .m-foot .m-next { width: min(100%, 340px); }
 

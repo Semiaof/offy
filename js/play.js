@@ -689,7 +689,8 @@ const Pad = {
     const host = this.host; if (!host) return 150;
     const n = this.n, width = host.clientWidth || 320, gap = 10;
     const per = n <= 2 ? n : width < 430 ? 2 : Math.min(n, 4);
-    const size = Math.floor(clamp((width - gap * (per - 1)) / per, 96, 210));
+    const maxH = window.innerHeight < 500 ? Math.max(104, window.innerHeight - 210) : 210;
+    const size = Math.floor(clamp((width - gap * (per - 1)) / per, 96, maxH));
     host.style.setProperty('--cell', size + 'px');
     return size;
   },

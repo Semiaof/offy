@@ -557,10 +557,12 @@ const MG = {
       s.raf = requestAnimationFrame(loop);
       this.next(s);
     },
-    stop(s) { cancelAnimationFrame(s.raf); },
+    stop(s) { cancelAnimationFrame(s.raf); if (s.f) clearTimeout(s.f.adv); },
     resume(s) { s.f.last = performance.now(); },
     next(s) {
-      const f = s.f; f.r++;
+      const f = s.f; clearTimeout(f.adv); f.ready = false; f.lock = false;
+      const pot = $('#fuPot'); if (pot) pot.classList.remove('ready');
+      f.r++;
       if (f.r >= f.rounds.length) { Mini.finish(); return; }
       f.targets = f.rounds[f.r].slice(); f.done = new Set(); f.err = false; f.t = performance.now();
       const need = f.targets.flatMap(w => Array.from(w.zh)), have = new Set(need);
