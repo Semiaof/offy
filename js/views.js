@@ -105,11 +105,6 @@ const Home = {
     $('#homeSeals').innerHTML = `<div class="ch"><div><h3>${L('ตราประทับ', 'Seals')}</h3><div class="cap">${L(`สะสมแล้ว ${got.length} จาก ${SEALS.length} ดวง`, `${got.length} of ${SEALS.length} collected`)}</div></div><button class="btn sm" id="sealsBtn">${L('ดูทั้งหมด', 'See all')}</button></div>
       <div class="seal-row">${got.slice(0, 5).map(x => Gami.sealHTML(x, 56)).join('')}${nextSeal ? `<span class="seal-next">${Gami.sealHTML(nextSeal, 56, 'off')}<small>${L('ถัดไป: ', 'Next: ')}${esc(L(nextSeal[4], nextSeal[5]))}</small></span>` : ''}</div>`;
     $('#sealsBtn').onclick = () => Gami.openSeals();
-
-    $('#homeLinks').innerHTML = `
-      <a class="li" href="#/practice/tingxie" style="--c:var(--hsk5)"><span class="li-ic">${ic('brush')}</span><span class="li-t"><b><span class="hz">听写</span> ${L('เขียนตามคำบอก', 'Dictation')}</b><small>${L('ฟังเสียง แล้วเขียนบนจอ พิมพ์ หรือใช้กระดาษ', 'Listen, then write on screen, type or use paper')}</small></span>${ic('chev-r')}</a>
-      <a class="li" href="#/practice" style="--c:var(--hsk6)"><span class="li-ic">${ic('sliders')}</span><span class="li-t"><b>${L('จัดสำรับเอง', 'Build a deck')}</b><small>${L('เลือกระดับ ด่าน จำนวนคำ และรูปแบบโจทย์', 'Pick levels, stages, size and question type')}</small></span>${ic('chev-r')}</a>
-      <a class="li" href="#/library" style="--c:var(--gold)"><span class="li-ic">${ic('book')}</span><span class="li-t"><b>Only Offy · ${L('ชั้นหนังสือ', 'Bookshelf')}</b><small>${L('สรุปพินอิน การออกเสียง และชนิดของคำ', 'Notes on pinyin, pronunciation and parts of speech')}</small></span>${ic('chev-r')}</a>`;
     Fx.settle($('#v-home'));
   }
 };
@@ -117,18 +112,6 @@ const Home = {
 /* ---------- LEARN: level select ---------- */
 const Learn = {
   show() {
-    const ab = $('#arcadeBox');
-    if (ab) {
-      const last = Store.d.last, lvl = last && levelWords(last.lvl).length ? last.lvl : LEVELS.find(l => levelWords(l).length) || 1;
-      const stg = Stats.suggestStage(lvl);
-      const activeGame = GAME_BY_ID[S().stageGame] ? S().stageGame : 'flash';
-      ab.innerHTML = `<div class="card"><div class="ch"><div><h3>${L('ลานประลองมินิเกม · เลือกเล่นด่วน', 'Mini-Game Arcade · Quick Play')}</h3><div class="cap">${L(`แตะเลือกมินิเกมเพื่อเริ่มเล่นทันที (${stageLabel(lvl, stg)}) หรือเลือกระดับ HSK ด้านล่าง`, `Tap any mini-game to play immediately (${stageLabel(lvl, stg)}) or pick an HSK level below`)}</div></div></div>${gamePickerHTML(activeGame)}</div>`;
-      ab.onclick = e => {
-        const b = e.target.closest('[data-game]'); if (!b) return;
-        const g = b.dataset.game; S().stageGame = g; Store.save(); sfx('pop');
-        Level.play(lvl, stg, g);
-      };
-    }
     $('#lvGrid').innerHTML = LEVELS.map((l, i) => {
       const n = levelWords(l).length; if (!n) return '';
       const s = Stats.levelSummary(l);
