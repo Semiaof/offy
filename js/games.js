@@ -18,7 +18,8 @@ const GAME_LIST = [
   { id: 'order', icon: 'g-order', name: L('เรียงประโยค', 'Word order'), sub: L('วางบล็อกเรียงประโยค', 'Stack the blocks in order') },
   { id: 'cloze', icon: 'g-gap', name: L('ป้ายร้านทอง', 'Golden sign'), sub: L('เติมคำทองลงป้ายร้าน', 'Fill the missing gold word') },
   { id: 'tone', icon: 'g-tone', name: L('ล่าวรรณยุกต์', 'Tone hunt'), sub: L('วาดเส้นเสียงด้วยนิ้ว', 'Draw the tones') },
-  { id: 'rain', icon: 'g-rain', name: L('โคมลอย', 'Sky lanterns'), sub: L('ตอบก่อนโคมลอยพ้นฟ้า', 'Answer before they float away') },
+  { id: 'rain', icon: 'g-rain', name: L('โคมลอย', 'Sky lanterns'), sub: L('ตอบก่อนโคมลอยพ้นฟ้า', 'Answer before they float away') }
+  /* --- Disabled for now (after Sky lanterns) ---
   { id: 'listen', icon: 'ear', name: L('ระฆังฟังเสียง', 'Bells'), sub: L('ฟังแล้วตีระฆังให้ถูก', 'Hear it, ring the right bell') },
   { id: 'runner', icon: 'g-runner', name: L('วิ่งหนีหินยักษ์', 'Boulder runner'), sub: L('ปัดซ้าย-ขวาเข้าทางแยก & โดดหลบ', '3-lane signpost runner & dodge') },
   { id: 'parkour', icon: 'g-parkour', name: L('ไต่หอคอยหนีไฟ', 'Tower climb'), sub: L('กระโดดดีดกำแพงไต่หอคอยหนีไฟนรก', 'Wall-jump up the tower above rising hellfire') },
@@ -31,12 +32,14 @@ const GAME_LIST = [
   { id: 'cipher', icon: 'g-cipher', name: L('กุญแจกลไกราชวงศ์', 'Royal lockbox'), sub: L('หมุนล้อพินอินปลดสลักหีบสมบัติ', 'Dial brass pinyin wheels to unlock') },
   { id: 'dimsum', icon: 'g-dimsum', name: L('สายพานเข่งติ่มซำ', 'Dim sum belt'), sub: L('ตัดสินไว รับเสิร์ฟหรือส่งคืนครัว', 'Speed-sort true or fake pairings') },
   { id: 'lanternfog', icon: 'g-lanternfog', name: L('ตะเกียงส่องหมอก', 'Lantern fog'), sub: L('ส่องตะเกียงเชื่อมคำในม่านหมอก', 'Light up characters hidden in mist') }
+  */
 ];
 const GAME_BY_ID = Object.fromEntries(GAME_LIST.map(g => [g.id, g]));
 const gameName = id => (GAME_BY_ID[id] || GAME_BY_ID.flash).name;
 
 /** start any game (flashcards and 听写 keep their own screens) */
 function playGame(id, cfg) {
+  if (!GAME_BY_ID[id]) id = 'flash';
   if (id === 'tingxie') {
     const c = Store.d.customCfg || {};
     Dicta.start({ ans: c.ans || 'draw', repeat: +c.repeat || 2, rate: +c.rate || S().rate, meanHint: c.meanHint !== false, strict: c.strict !== false, ...cfg, title: cfg.title && !/^听写/.test(cfg.title) ? `听写 · ${cfg.title}` : cfg.title });
