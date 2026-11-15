@@ -21,7 +21,7 @@ const GAME_LIST = [
   { id: 'rain', icon: 'g-rain', name: L('โคมลอย', 'Sky lanterns'), sub: L('ตอบก่อนโคมลอยพ้นฟ้า', 'Answer before they float away') },
   { id: 'listen', icon: 'ear', name: L('ระฆังฟังเสียง', 'Bells'), sub: L('ฟังแล้วตีระฆังให้ถูก', 'Hear it, ring the right bell') },
   { id: 'runner', icon: 'g-runner', name: L('วิ่งหนีหินยักษ์', 'Boulder runner'), sub: L('ปัดซ้าย-ขวาเข้าทางแยก & โดดหลบ', '3-lane signpost runner & dodge') },
-  { id: 'parkour', icon: 'g-parkour', name: L('โหนสลิงข้ามเหว', 'Lava grapple'), sub: L('ยิงตะขอเหล็กโหนคานคำศัพท์', 'Grapple across the lava chasm') },
+  { id: 'parkour', icon: 'g-parkour', name: L('ไต่หอคอยหนีไฟ', 'Tower climb'), sub: L('กระโดดดีดกำแพงไต่หอคอยหนีไฟนรก', 'Wall-jump up the tower above rising hellfire') },
   { id: 'kunai', icon: 'g-kunai', name: L('มีดบินสังหารเงา', 'Shadow kunai'), sub: L('ปามีดสั้นสกัดมือสังหารเงา', 'Throw kunai at shadow assassins') },
   { id: 'bomb', icon: 'g-bomb', name: L('กู้ระเบิดดินปืน', 'Fuse defusal'), sub: L('ตัดสายชนวนคำแปลก่อนระเบิด', 'Cut the right fuse wire in time') },
   { id: 'siege', icon: 'g-siege', name: L('ปืนกลยันต์เพลิง', 'Talisman siege'), sub: L('รัวยันต์ไฟปราบฝูงผีดิบเจียงซี', 'Rapid-fire talismans vs Jiangshi') },
@@ -1268,32 +1268,52 @@ const MG = {
     }
   },
 
-  /* ---------- P2 · โหนสลิงข้ามเหวภูเขาไฟ (Grappling Hook Lava Chasm — 100% Showcase Faithful) ---------- */
+  /* ---------- P2 · ไต่หอคอยหนีไฟนรก (Vertical Wuxia Tower Wall-Jump — 100% Distinct from Runner) ---------- */
   parkour: {
     mount(s, el) {
-      s.i = -1;
-      el.innerHTML = `<div class="m-table pk-arena" id="pkArena">
-          <div class="pk-goal" id="pkGoal"></div>
-          <div class="rn-persp"><div class="rn-road pk-road"><i></i><i></i><i></i></div></div>
+      s.i = -1; s.alt = 10; s.wallPos = 0;
+      el.innerHTML = `<div class="m-table pk-arena pk-tower" id="pkArena">
+          <div class="rn-top"><span class="rn-goal" id="pkGoal"></span><span class="rn-dist" id="pkAlt">🏯 10m</span></div>
+          <div class="pk-wall L" id="pkWallL"></div>
+          <div class="pk-wall R" id="pkWallR"></div>
           <div class="pk-beams" id="pkBeams"></div>
-          <div class="pk-chasm">🔥 ${L('เหวลาวานรก! ยิงตะขอเหล็ก (🪝) เกี่ยวคานคำศัพท์เพื่อโหนข้ามเหว', 'Lava Chasm! Grapple the right overhead beam!')}</div>
-          <svg class="pk-rope-svg" id="pkSvg" viewBox="0 0 100 100" preserveAspectRatio="none"><line id="pkLine" x1="50" y1="82" x2="50" y2="82" stroke="#ffd27a" stroke-width="1.4" stroke-dasharray="3 1.5" opacity="0"/></svg>
+          <svg class="pk-rope-svg" id="pkSvg" viewBox="0 0 100 100" preserveAspectRatio="none"><line id="pkLine" x1="50" y1="74" x2="50" y2="74" stroke="#ffd27a" stroke-width="1.5" stroke-dasharray="3 1.5" opacity="0"/></svg>
           <div class="pk-hero" id="pkHero"><span class="hz">侠</span></div>
+          <div class="pk-lava-rise" id="pkLava">🔥 ${L('ทะเลเพลิงนรกกำลังไล่ขึ้นมา!', 'Rising Hellfire! Grapple up fast!')}</div>
         </div>
         <div class="m-panel"><div class="m-foot" id="pkFoot"></div></div>`;
       el.onclick = e => { const b = e.target.closest('.pk-beam'); if (b) this.hook(s, +b.dataset.o, b); };
       this.next(s);
+      s.pkLast = performance.now();
+      const loop = now => { if (!Mini.alive(s) || s.finished) return; s.raf = requestAnimationFrame(loop); this.step(s, now); };
+      s.raf = requestAnimationFrame(loop);
     },
+    stop(s) { cancelAnimationFrame(s.raf); },
     next(s) {
       s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
       const w = s.words[s.i], opts = shuffle([w, ...distractors(w, 2)]);
-      s.pk = { w, opts, ok: true, t: performance.now(), done: false };
-      $('#pkGoal').innerHTML = `${L('สะพานขาด! ยิงตะขอเหล็ก (🪝) เกี่ยวคานคำว่า:', 'Bridge broken! Grapple beam for:')} <b>${esc(meaningText(w))}</b>`;
+      s.pk = { w, opts, fire: 14, ok: true, t: performance.now(), done: false };
+      $('#pkGoal').innerHTML = `${L('ดีดตัวไต่หอคอยขึ้นสู่คานคำว่า:', 'Wall-jump up to ledge:')} <b>${esc(meaningText(w))}</b>`;
       $('#pkFoot').innerHTML = '';
-      const hero = $('#pkHero'), line = $('#pkLine');
-      if (hero) { hero.getAnimations().forEach(a => a.cancel()); hero.style.left = '50%'; hero.style.bottom = '28px'; hero.style.transform = 'translate(-50%,0)'; }
+      const hero = $('#pkHero'), line = $('#pkLine'), lava = $('#pkLava');
+      if (hero) { hero.getAnimations().forEach(a => a.cancel()); hero.style.left = (s.lastHeroX || 50) + '%'; hero.style.bottom = '58px'; hero.style.transform = 'translate(-50%,0)'; }
       if (line) line.setAttribute('opacity', '0');
-      $('#pkBeams').innerHTML = opts.map((x, i) => `<button type="button" class="pk-beam" data-o="${i}"><i>🪝 <kbd>${i + 1}</kbd></i><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small></button>`).join('');
+      if (lava) lava.style.height = '14%';
+      $('#pkBeams').innerHTML = opts.map((x, i) => `<button type="button" class="pk-beam" data-o="${i}"><i>🧗 <kbd>${i + 1}</kbd></i><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small></button>`).join('');
+    },
+    step(s, now) {
+      const dt = Math.min((now - (s.pkLast || now)) / 1000, 0.1); s.pkLast = now;
+      const pk = s.pk; if (!pk || pk.done || s.paused || document.hidden) return;
+      pk.fire = Math.min(72, pk.fire + dt * 9.5);
+      const lava = $('#pkLava');
+      if (lava) lava.style.height = pk.fire.toFixed(1) + '%';
+      if (pk.fire >= 68) {
+        pk.fire = 18; pk.ok = false;
+        const arena = $('#pkArena');
+        GX.flash(arena, 'rgba(255,60,20,.5)', 240); GX.quake(arena, 9);
+        GX.text(arena, arena.clientWidth / 2, arena.clientHeight - 90, L('ไฟนรกลวก! รีบทะยานขึ้นข้างบน!', 'Burned by rising fire!'), 'bad');
+        Mini.slip();
+      }
     },
     hook(s, i, btn) {
       const pk = s.pk; if (!pk || pk.done || s.paused) return;
@@ -1305,19 +1325,25 @@ const MG = {
       line.setAttribute('opacity', '1');
       if (pk.opts[i] === pk.w) {
         pk.done = true; btn.classList.add('ok');
+        const targetX = (bx / W * 100).toFixed(1);
+        s.lastHeroX = targetX;
+        s.alt += 15; $('#pkAlt').textContent = `🏯 ${s.alt}m`;
+        s.wallPos = (s.wallPos || 0) + 120;
+        $$('.pk-wall', arena).forEach(w => { w.style.backgroundPositionY = s.wallPos + 'px'; });
         GX.hitStop(arena, bx, by, { color: '#ffd27a' });
         hero.animate([
-          { left: '50%', bottom: '28px', transform: 'translate(-50%,0) rotate(0deg) scale(1)' },
-          { left: (bx / W * 100).toFixed(1) + '%', bottom: '155px', transform: 'translate(-50%,0) rotate(-18deg) scale(1.22)', offset: 0.55 },
-          { left: (bx / W * 100).toFixed(1) + '%', bottom: '115px', transform: 'translate(-50%,0) rotate(0deg) scale(1.05)' }
-        ], { duration: 640, easing: 'cubic-bezier(.2,.85,.35,1)', fill: 'forwards' });
+          { left: (hx / W * 100).toFixed(1) + '%', bottom: '58px', transform: 'translate(-50%,0) rotate(0deg) scale(1)' },
+          { left: (i === 0 ? 12 : i === 2 ? 88 : 50) + '%', bottom: '130px', transform: `translate(-50%,0) rotate(${i === 0 ? -28 : 28}deg) scale(1.25)`, offset: 0.45 },
+          { left: targetX + '%', bottom: '175px', transform: 'translate(-50%,0) rotate(0deg) scale(1.08)' }
+        ], { duration: 480, easing: 'cubic-bezier(.2,.85,.35,1)', fill: 'forwards' });
         GX.burst(arena, bx, by + 18, { n: 28, color: '#ffd27a', dist: 95 });
-        GX.text(arena, bx, by + 12, '飞爪! โหนสลิงข้ามเหว +35', 'big');
+        GX.text(arena, bx, by + 12, `飞檐走壁! ไต่ขึ้นชั้น ${s.alt}m`, 'big');
         if (S().autoSpeak) speakWord(pk.w);
         Mini.mark(pk.w, pk.ok, performance.now() - pk.t, btn);
-        Mini.advance(pk.ok, $('#pkFoot'), () => this.next(s));
+        Mini.later(() => this.next(s), 520);
       } else {
-        pk.ok = false; btn.classList.add('no'); btn.disabled = true;
+        pk.ok = false; pk.fire = Math.min(64, pk.fire + 12);
+        btn.classList.add('no'); btn.disabled = true;
         GX.shake(btn, 7); GX.burst(arena, bx, by, { n: 14, color: '#ff5a4d', dist: 50 });
         setTimeout(() => line.setAttribute('opacity', '0'), 240);
         Mini.slip();
@@ -1326,27 +1352,52 @@ const MG = {
     key(s, e) { const n = +e.key; if (n >= 1 && n <= 3) { e.preventDefault(); const b = $(`#pkBeams .pk-beam[data-o="${n - 1}"]`); if (b && !b.disabled) b.click(); } }
   },
 
-  /* ---------- W3 · มีดบินสังหารเงา (Flying Kunai Assassination — 100% Showcase Faithful) ---------- */
+  /* ---------- W3 · มีดบินสังหารเงา (Flying Kunai vs Live Charging Shadow Assassins) ---------- */
   kunai: {
     mount(s, el) {
       s.i = -1;
       el.innerHTML = `<div class="m-table kn-arena" id="knArena">
           <div class="pk-goal" id="knGoal"></div>
           <div class="kn-stage" id="knFoes"></div>
-          <div class="kn-hand">🗡️ ${L('แตะมือสังหารเพื่อปามีดบินเหล็กกล้าก่อนเกจดาบเต็ม!', 'Tap assassin to throw steel kunai!')}</div>
+          <svg class="sl-svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path id="knSlash" vector-effect="non-scaling-stroke" d="M12 18 L 88 84" fill="none" stroke="#ff2b2b" stroke-width="7" stroke-linecap="round" opacity="0" style="filter:drop-shadow(0 0 14px #ff0000)"/></svg>
+          <div class="kn-hand">🗡️ ${L('ปามีดสกัดก่อนเกจดาบเต็ม! ถ้าเกจเต็มนักฆ่าจะพุ่งฟันสวนทันที', 'Throw kunai before their strike gauge fills up!')}</div>
         </div>
         <div class="m-panel"><div class="m-foot" id="knFoot"></div></div>`;
       el.onclick = e => { const b = e.target.closest('.kn-foe'); if (b) this.throwKunai(s, +b.dataset.o, b); };
       this.next(s);
+      s.knLast = performance.now();
+      const loop = now => { if (!Mini.alive(s) || s.finished) return; s.raf = requestAnimationFrame(loop); this.step(s, now); };
+      s.raf = requestAnimationFrame(loop);
     },
+    stop(s) { cancelAnimationFrame(s.raf); },
     next(s) {
       s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
       const w = s.words[s.i], opts = shuffle([w, ...distractors(w, 2)]);
       const pos = [[22, 52], [50, 44], [78, 54]];
-      s.kn = { w, opts, ok: true, t: performance.now(), done: false };
+      s.kn = { w, opts, charge: 0, ok: true, t: performance.now(), done: false };
       $('#knGoal').innerHTML = `${L('ปามีดบินสกัดนักฆ่าที่ถือคำว่า:', 'Throw kunai at assassin holding:')} <b>${esc(meaningText(w))}</b>`;
       $('#knFoot').innerHTML = '';
-      $('#knFoes').innerHTML = opts.map((x, i) => `<button type="button" class="kn-foe" data-o="${i}" style="left:${pos[i][0]}%;top:${pos[i][1]}%"><kbd>${i + 1}</kbd><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small><span class="kn-warn">${L('กำลังง้างดาบ!', 'Striking!')}<i></i></span></button>`).join('');
+      $('#knFoes').innerHTML = opts.map((x, i) => `<button type="button" class="kn-foe" data-o="${i}" style="left:${pos[i][0]}%;top:${pos[i][1]}%"><kbd>${i + 1}</kbd><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small><span class="kn-warn"><em>${L('ง้างดาบ', 'Charge')} 0%</em><i style="width:0%"></i></span></button>`).join('');
+    },
+    step(s, now) {
+      const dt = Math.min((now - (s.knLast || now)) / 1000, 0.1); s.knLast = now;
+      const kn = s.kn; if (!kn || kn.done || s.paused || document.hidden) return;
+      kn.charge = Math.min(1, kn.charge + dt / 6.2);
+      const pct = Math.round(kn.charge * 100);
+      $$('#knFoes .kn-foe:not(.no)').forEach(b => {
+        const bar = b.querySelector('.kn-warn i'), em = b.querySelector('.kn-warn em');
+        if (bar) bar.style.width = pct + '%';
+        if (em) em.textContent = `${L('ง้างดาบ', 'Charge')} ${pct}%`;
+        b.style.transform = `translate(-50%, 0) scale(${(1 + kn.charge * 0.14).toFixed(2)})`;
+      });
+      if (kn.charge >= 1) {
+        kn.charge = 0; kn.ok = false;
+        const arena = $('#knArena'), slash = $('#knSlash');
+        if (slash) slash.animate([{ opacity: 1, strokeDasharray: '140', strokeDashoffset: '140' }, { opacity: 1, strokeDashoffset: '0', offset: 0.3 }, { opacity: 0, strokeDashoffset: '0' }], { duration: 420 });
+        GX.flash(arena, 'rgba(255,25,25,.58)', 280); GX.quake(arena, 11);
+        GX.text(arena, arena.clientWidth / 2, arena.clientHeight / 2, L('ฉัวะ! โดนมือสังหารฟันสวน!', 'Slashed by assassin!'), 'bad');
+        Mini.slip();
+      }
     },
     throwKunai(s, i, btn) {
       const kn = s.kn; if (!kn || kn.done || s.paused) return;
@@ -1375,7 +1426,8 @@ const MG = {
           Mini.advance(kn.ok, $('#knFoot'), () => this.next(s));
         }, 190);
       } else {
-        kn.ok = false; btn.classList.add('no'); btn.disabled = true;
+        kn.ok = false; kn.charge = Math.min(0.92, kn.charge + 0.25);
+        btn.classList.add('no'); btn.disabled = true;
         GX.shake(btn, 7); Mini.slip();
       }
     },
@@ -1456,12 +1508,12 @@ const MG = {
     key(s, e) { const n = +e.key; if (n >= 1 && n <= 3) { e.preventDefault(); this.cut(s, n - 1); } }
   },
 
-  /* ---------- Z1 · ปืนกลยันต์เพลิงปราบผีดิบ (Jiangshi Talisman Shooter — 100% Showcase Faithful) ---------- */
+  /* ---------- Z1 · ปืนกลยันต์เพลิงปราบผีดิบ (Real-Time Advancing Jiangshi Tower Defense) ---------- */
   siege: {
     mount(s, el) {
       s.i = -1;
       el.innerHTML = `<div class="m-table sg-arena" id="sgArena">
-          <div class="pk-goal" id="sgGoal">${L('ยิงยันต์เพลิงปราบผีดิบเจียงซีตัวหน้าสุด (กรอบแดง)!', 'Fire talisman at the frontmost Jiangshi (red border)!')}</div>
+          <div class="rn-top"><span class="rn-goal">${L('ฝูงผีดิบเจียงซีกำลังกระโดดบุกเข้ามา! ยิงยันต์ปราบตัวหน้าสุด (กรอบทอง)', 'Jiangshi horde advancing! Shoot talisman at the front zombie!')}</span><span class="rn-dist" id="sgDist">🧟 10.0m</span></div>
           <div class="sg-lane" id="sgHorde"></div>
           <div class="bm-wires" id="sgOpts"></div>
         </div>
@@ -1474,39 +1526,63 @@ const MG = {
         }
       };
       this.next(s);
+      s.sgLast = performance.now();
+      const loop = now => { if (!Mini.alive(s) || s.finished) return; s.raf = requestAnimationFrame(loop); this.step(s, now); };
+      s.raf = requestAnimationFrame(loop);
     },
+    stop(s) { cancelAnimationFrame(s.raf); },
     next(s) {
       s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
       const w = s.words[s.i], decoys = distractors(w, 2), opts = shuffle([w, ...decoys]);
       const mobs = [decoys[0] || w, w, decoys[1] || w];
-      s.sg = { w, opts, ok: true, t: performance.now(), done: false };
-      $('#sgFoot').innerHTML = '';
-      $('#sgHorde').innerHTML = mobs.map((x, idx) => `<div class="sg-mob ${idx === 1 ? 'front' : ''}" id="sgM${idx}"><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small></div>`).join('');
-      const front = $('#sgM1');
-      if (front) front.animate([{ transform: 'scale(1.12) translateY(0)' }, { transform: 'scale(1.22) translateY(14px)' }], { duration: 750, direction: 'alternate', iterations: Infinity, easing: 'ease-in-out' });
-      $('#sgOpts').innerHTML = opts.map((x, i) => `<button type="button" class="bm-wire sg-opt" data-o="${i}"><kbd>${i + 1}</kbd><span>敕 · ${esc(meaningText(x))}</span></button>`).join('');
+      s.sg = { w, opts, march: 0, ok: true, t: performance.now(), done: false };
+      $('#sgFoot').innerHTML = ''; $('#sgDist').textContent = '🧟 10.0m';
+      $('#sgHorde').innerHTML = mobs.map((x, idx) => `<div class="sg-mob ${idx === 1 ? 'front' : ''}" id="sgM${idx}"><span class="sg-tal">敕</span><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small></div>`).join('');
+      $('#sgOpts').innerHTML = opts.map((x, i) => `<button type="button" class="bm-wire sg-opt" data-o="${i}"><kbd>${i + 1}</kbd><span>🔥 敕 · ${esc(meaningText(x))}</span></button>`).join('');
+    },
+    step(s, now) {
+      const dt = Math.min((now - (s.sgLast || now)) / 1000, 0.1); s.sgLast = now;
+      const sg = s.sg; if (!sg || sg.done || s.paused || document.hidden) return;
+      sg.march = Math.min(1, sg.march + dt / 6.8);
+      const remM = Math.max(0, 10 * (1 - sg.march)).toFixed(1);
+      const dEl = $('#sgDist'); if (dEl) dEl.textContent = `🧟 ${remM}m`;
+      const hop = Math.abs(Math.sin(now / 150)) * -18;
+      [0, 1, 2].forEach(idx => {
+        const m = $(`#sgM${idx}`); if (!m) return;
+        const isFront = idx === 1;
+        const yOff = (isFront ? sg.march * 56 : sg.march * 28) + (isFront ? hop : hop * 0.6);
+        const sc = isFront ? 0.88 + sg.march * 0.42 : 0.78 + sg.march * 0.18;
+        m.style.transform = `translateY(${yOff.toFixed(1)}px) scale(${sc.toFixed(2)})`;
+      });
+      if (sg.march >= 1) {
+        sg.march = 0.18; sg.ok = false;
+        const arena = $('#sgArena');
+        GX.flash(arena, 'rgba(180,30,255,.48)', 260); GX.quake(arena, 10);
+        GX.text(arena, arena.clientWidth / 2, arena.clientHeight / 2, L('ผีดิบประชิดป้อม! รีบยิงยันต์สกัด!', 'Jiangshi breached the barrier!'), 'bad');
+        Mini.slip();
+      }
     },
     fire(s, i, btn) {
       const sg = s.sg; if (!sg || sg.done || s.paused) return;
       const arena = $('#sgArena'), front = $('#sgM1'), [jx, jy] = GX.at(front, arena), [bx, by] = GX.at(btn, arena);
       const tal = document.createElement('div'); tal.className = 'sg-fireball'; arena.appendChild(tal);
-      tal.animate([{ left: bx + 'px', top: by + 'px' }, { left: jx + 'px', top: jy + 'px' }], { duration: 210, fill: 'forwards' }).onfinish = () => tal.remove();
+      tal.animate([{ left: bx + 'px', top: by + 'px' }, { left: jx + 'px', top: jy + 'px' }], { duration: 200, fill: 'forwards' }).onfinish = () => tal.remove();
       if (sg.opts[i] === sg.w) {
         sg.done = true; btn.classList.add('ok');
         setTimeout(() => {
           if (!Mini.alive(s)) return;
           GX.hitStop(arena, jx, jy, { color: '#ff922b', ms: 55 });
           GX.flash(arena, 'rgba(255,160,40,.5)', 240); GX.quake(arena, 8);
-          front.getAnimations().forEach(a => a.cancel());
-          front.animate([{ transform: 'scale(1.25)', filter: 'brightness(2.5)' }, { transform: 'scale(.2)', opacity: 0 }], { duration: 380, fill: 'forwards' });
+          front.animate([{ transform: 'scale(1.35)', filter: 'brightness(2.5)' }, { transform: 'scale(.15)', opacity: 0 }], { duration: 360, fill: 'forwards' });
           GX.burst(arena, jx, jy, { n: 32, color: '#ffd27a', dist: 100 });
           GX.text(arena, jx, jy - 36, 'ปราบผีดิบ! +25', 'big');
           if (S().autoSpeak) speakWord(sg.w);
           Mini.mark(sg.w, sg.ok, performance.now() - sg.t, btn);
           Mini.advance(sg.ok, $('#sgFoot'), () => this.next(s));
-        }, 200);
+        }, 190);
       } else {
-        sg.ok = false; btn.classList.add('no'); btn.disabled = true;
+        sg.ok = false; sg.march = Math.min(0.92, sg.march + 0.22);
+        btn.classList.add('no'); btn.disabled = true;
         GX.shake(btn, 7); Mini.slip();
       }
     },
@@ -1622,7 +1698,7 @@ const MG = {
     key(s, e) { const n = +e.key; if (n >= 1 && n <= 4) { e.preventDefault(); const b = $(`#jdRow .jd-plaque[data-o="${n - 1}"]`); if (b && !b.disabled) b.click(); } }
   },
 
-  /* ---------- K1 · คมดาบพู่กัน (Flying Wood Plaque Brush-Blade Slash — 100% Showcase Faithful) ---------- */
+  /* ---------- K1 · คมดาบพู่กัน (Real-Time Gravity Arc + Swipe/Tap Brush-Blade Slash) ---------- */
   slice: {
     mount(s, el) {
       s.i = -1;
@@ -1632,46 +1708,95 @@ const MG = {
           <div class="sl-sky" id="slSky"></div>
         </div>
         <div class="m-panel"><div class="m-foot" id="slFoot"></div></div>`;
+      const arena = $('#slArena');
+      let swiping = false, sx = 0, sy = 0;
+      arena.onpointerdown = e => { swiping = true; sx = e.clientX; sy = e.clientY; };
+      arena.onpointerup = () => { swiping = false; };
+      arena.onpointermove = e => {
+        if (!swiping || !s.sl || s.sl.done) return;
+        const r = arena.getBoundingClientRect(), path = $('#slPath');
+        if (path && r.width && r.height) {
+          const x1 = ((sx - r.left) / r.width * 100).toFixed(1), y1 = ((sy - r.top) / r.height * 100).toFixed(1);
+          const x2 = ((e.clientX - r.left) / r.width * 100).toFixed(1), y2 = ((e.clientY - r.top) / r.height * 100).toFixed(1);
+          path.setAttribute('d', `M${x1} ${y1} L ${x2} ${y2}`);
+          path.style.strokeDashoffset = '0';
+        }
+        const hit = document.elementFromPoint(e.clientX, e.clientY);
+        const b = hit && hit.closest && hit.closest('.sl-plaque');
+        if (b && !b.disabled) this.slash(s, +b.dataset.o, b);
+      };
       el.onclick = e => { const b = e.target.closest('.sl-plaque'); if (b) this.slash(s, +b.dataset.o, b); };
       this.next(s);
+      s.slLast = performance.now();
+      const loop = now => { if (!Mini.alive(s) || s.finished) return; s.raf = requestAnimationFrame(loop); this.step(s, now); };
+      s.raf = requestAnimationFrame(loop);
     },
+    stop(s) { cancelAnimationFrame(s.raf); },
     next(s) {
       s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
       const w = s.words[s.i], opts = shuffle([w, ...distractors(w, 2)]);
-      const pos = [[24, 54], [52, 46], [78, 56]];
       s.sl = { w, opts, ok: true, t: performance.now(), done: false };
-      $('#slGoal').innerHTML = `${L('คมดาบพู่กัน · แตะฟันป้ายไม้คำว่า:', 'Brush-Blade · Slice plaque for:')} <b>${esc(meaningText(w))}</b>`;
+      $('#slGoal').innerHTML = `${L('คมดาบพู่กัน · ลากนิ้วฟันป้ายไม้ก่อนร่วงตกพื้น:', 'Swipe or tap to slice before it falls:')} <b>${esc(meaningText(w))}</b>`;
       $('#slFoot').innerHTML = '';
-      const path = $('#slPath'); if (path) path.style.strokeDashoffset = '140';
-      const sky = $('#slSky');
-      sky.innerHTML = opts.map((x, i) => `<button type="button" class="sl-plaque" data-o="${i}" style="left:${pos[i][0]}%;top:${pos[i][1]}%"><kbd>${i + 1}</kbd><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small></button>`).join('');
-      $$('.sl-plaque', sky).forEach((p, i) => {
-        p.animate([
-          { transform: 'translate(-50%, 110px) rotate(-12deg) scale(.85)', opacity: 0 },
-          { transform: 'translate(-50%, -58%) rotate(4deg) scale(1.04)', opacity: 1, offset: 0.6 },
-          { transform: 'translate(-50%, -50%) rotate(0deg) scale(1)', opacity: 1 }
-        ], { duration: 620 + i * 90, easing: 'cubic-bezier(.2,.85,.35,1)', fill: 'forwards' });
+      this.tossWave(s);
+    },
+    tossWave(s) {
+      const sl = s.sl; if (!sl) return;
+      const path = $('#slPath'); if (path) { path.setAttribute('d', 'M18 72 Q 50 32, 86 24'); path.style.strokeDashoffset = '140'; }
+      const sky = $('#slSky'); if (!sky) return;
+      const startX = [22, 50, 78];
+      sky.innerHTML = sl.opts.map((x, i) => `<button type="button" class="sl-plaque" data-o="${i}" style="left:${startX[i]}%;top:96%"><kbd>${i + 1}</kbd><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small></button>`).join('');
+      const els = $$('.sl-plaque', sky);
+      sl.bodies = els.map((el, i) => ({
+        el, x: startX[i], y: 98,
+        vx: (i === 0 ? 3.2 : i === 2 ? -3.2 : 0),
+        vy: -(52 + (i === 1 ? 6 : 0)),
+        rot: (i - 1) * 8, vrot: (i === 0 ? 12 : -12)
+      }));
+    },
+    step(s, now) {
+      const dt = Math.min((now - (s.slLast || now)) / 1000, 0.08); s.slLast = now;
+      const sl = s.sl; if (!sl || sl.done || !sl.bodies || s.paused || document.hidden) return;
+      const g = 24; // gravity %/s^2 -> ~4.2s hang time arc!
+      let allFallen = true;
+      sl.bodies.forEach(b => {
+        b.vy += g * dt;
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+        b.rot += b.vrot * dt;
+        if (b.y < 112) allFallen = false;
+        b.el.style.left = b.x.toFixed(1) + '%';
+        b.el.style.top = b.y.toFixed(1) + '%';
+        b.el.style.transform = `translate(-50%, -50%) rotate(${b.rot.toFixed(1)}deg)`;
       });
+      if (allFallen) {
+        sl.ok = false;
+        const arena = $('#slArena');
+        GX.flash(arena, 'rgba(255,60,40,.38)', 220); GX.quake(arena, 7);
+        GX.text(arena, arena.clientWidth / 2, arena.clientHeight - 70, L('ป้ายตกพื้น! โยนชุดใหม่อีกครั้ง', 'Dropped! Tossing again!'), 'bad');
+        Mini.slip();
+        this.tossWave(s);
+      }
     },
     slash(s, i, btn) {
       const sl = s.sl; if (!sl || sl.done || s.paused) return;
       const arena = $('#slArena'), [x, y] = GX.at(btn, arena), path = $('#slPath');
       if (sl.opts[i] === sl.w) {
         sl.done = true;
-        if (path) path.animate([{ strokeDashoffset: 140 }, { strokeDashoffset: 0 }], { duration: 210, fill: 'forwards' });
+        if (path) path.animate([{ strokeDashoffset: 140 }, { strokeDashoffset: 0 }], { duration: 190, fill: 'forwards' });
         const chars = Array.from(sl.w.zh), leftCh = chars[0] || sl.w.zh, rightCh = chars.slice(1).join('') || sl.w.zh;
         btn.style.opacity = '0'; btn.style.pointerEvents = 'none';
-        [-34, 34].forEach((dx, k) => {
+        [-38, 38].forEach((dx, k) => {
           const h = document.createElement('div'); h.className = 'sl-half hz';
           h.style.left = (x - 22 + (k ? 22 : -22)) + 'px'; h.style.top = (y - 48) + 'px';
           h.textContent = k ? rightCh : leftCh;
           arena.appendChild(h);
-          h.animate([{ transform: 'none', opacity: 1 }, { transform: `translate(${dx}px, 76px) rotate(${k ? 28 : -28}deg)`, opacity: 0 }], { duration: 600, fill: 'forwards' }).onfinish = () => h.remove();
+          h.animate([{ transform: 'none', opacity: 1 }, { transform: `translate(${dx}px, 84px) rotate(${k ? 32 : -32}deg)`, opacity: 0 }], { duration: 600, fill: 'forwards' }).onfinish = () => h.remove();
         });
         GX.hitStop(arena, x, y, { color: '#ffe599', ms: 52 });
         GX.flash(arena, 'rgba(255,225,130,.38)', 190); GX.quake(arena, 7);
         GX.burst(arena, x, y, { n: 28, color: '#ffe599', dist: 95 });
-        GX.text(arena, x, y - 32, 'ผ่าแม่นยำ! +20', 'big');
+        GX.text(arena, x, y - 32, 'ผ่ากลางอากาศ! +25', 'big');
         if (S().autoSpeak) speakWord(sl.w);
         Mini.mark(sl.w, sl.ok, performance.now() - sl.t, btn);
         Mini.advance(sl.ok, $('#slFoot'), () => this.next(s));

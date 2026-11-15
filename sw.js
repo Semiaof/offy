@@ -1,6 +1,6 @@
 // Library of Limu · new offy v4 — offline support.
 // Bump CACHE_NAME whenever app files change so old caches are dropped.
-const CACHE_NAME = 'new-offy-v4-20';
+const CACHE_NAME = 'new-offy-v4-21';
 const CORE_ASSETS = ['./', './index.html', './css/app.css', './css/v4.css', './js/i18n-en.js', './js/core.js', './js/play.js', './js/games.js', './js/app.js', './js/gami.js', './js/scene.js', './js/views.js', './data/words.js', './data/books.js', './manifest.json', './fonts/PinyinSans.woff', './fonts/KaiTi.woff', './icon.svg', './icons/icon-180.png', './icons/icon-192.png'];
 // The Thai interface fonts come from Google Fonts. They are fetched and kept at install time
 // (the stylesheet and every font file it points to), so even the very first offline start keeps its typeface.
