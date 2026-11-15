@@ -951,137 +951,168 @@ html { overscroll-behavior-y: none; }
 .mw-in.zh b { white-space: nowrap; } .mw-in.zh.l3 b { font-size: calc(clamp(22px, 5vmin, 54px) * var(--s-hz)); } .mw-in.zh.l4 b { font-size: calc(clamp(18px, 3.9vmin, 42px) * var(--s-hz)); }
 
 /* =====================================================================
-   NEW MINI-GAMES (R1 Runner · P2 Parkour · W3 Kunai · Y3 Bomb · Z1 Siege ·
-   V2 Forge · J2 Jade · K1 Slice · L1 Cipher · M1 Dimsum · N2 LanternFog)
+   NEW MINI-GAMES (100% Showcase-Faithful: R1 Runner · P2 Parkour ·
+   W3 Kunai · Y3 Bomb · Z1 Siege · V2 Forge · J2 Jade · K1 Slice ·
+   L1 Cipher · M1 Dimsum · N2 LanternFog)
    ===================================================================== */
-.pk-goal, .rn-top { position: absolute; left: 12px; right: 12px; top: 12px; z-index: 20; padding: 8px 14px; border-radius: 99px; background: rgba(14,12,18,.68); color: #fff; backdrop-filter: blur(8px); border: 1px solid rgba(255,210,122,.24); text-align: center; font: 600 clamp(13px, 2.2vmin, 17px) var(--ui); }
+.pk-goal, .rn-top { position: absolute; left: 12px; right: 12px; top: 10px; z-index: 26; padding: 7px 14px; border-radius: 99px; background: rgba(14,12,18,.74); color: #fff; backdrop-filter: blur(8px); border: 1px solid rgba(255,210,122,.28); text-align: center; font: 600 clamp(12.5px, 2.1vmin, 16px) var(--ui); }
 .pk-goal b, .rn-top b { color: #ffd27a; font-size: 1.12em; margin: 0 4px; }
-.rn-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.rn-dist { font: 700 13px var(--ui); background: rgba(194,59,34,.35); border: 1px solid #ff7a66; padding: 2px 10px; border-radius: 99px; white-space: nowrap; }
+.rn-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.rn-dist { font: 700 12px var(--ui); background: rgba(194,59,34,.42); border: 1px solid #ff7a66; padding: 2px 10px; border-radius: 99px; white-space: nowrap; }
 
-/* R1: Runner */
+/* R1: Wuxia Runner (3D perspective lane + approaching gates/traps + boulder) */
 .rn-arena { background: radial-gradient(120% 100% at 50% 15%, #3d1e24 0%, #140d16 78%); overflow: hidden; }
-.rn-persp { position: absolute; inset: 0; perspective: 300px; overflow: hidden; }
-.rn-road { position: absolute; left: 10%; right: 10%; top: 44px; bottom: -24px; background: linear-gradient(180deg, rgba(24,18,26,.85) 0%, rgba(56,42,48,.96) 100%); transform: rotateX(44deg); transform-origin: 50% 100%; border-left: 3px solid rgba(255,210,122,.45); border-right: 3px solid rgba(255,210,122,.45); display: grid; grid-template-columns: repeat(3, 1fr); }
-.rn-road > i { border-right: 1.5px dashed rgba(255,255,255,.2); cursor: pointer; }
+.rn-persp { position: absolute; inset: 0; perspective: 280px; overflow: hidden; }
+.rn-road { position: absolute; left: 12%; right: 12%; top: 38px; bottom: -28px; background: repeating-linear-gradient(180deg, rgba(44,32,38,.95) 0 28px, rgba(30,22,28,.95) 28px 56px); transform: rotateX(48deg); transform-origin: 50% 100%; border-left: 3px solid rgba(255,210,122,.5); border-right: 3px solid rgba(255,210,122,.5); display: grid; grid-template-columns: repeat(3, 1fr); animation: rnRoadScroll .42s linear infinite; }
+@keyframes rnRoadScroll { from { background-position-y: 0; } to { background-position-y: 56px; } }
+.rn-road > i { border-right: 1.5px dashed rgba(255,255,255,.22); cursor: pointer; }
 .rn-road > i:last-child { border-right: none; }
-.rn-gates { position: absolute; left: 8%; right: 8%; top: 58px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; z-index: 15; transform-origin: 50% 50%; }
-.rn-sign { min-height: 76px; border-radius: 14px; background: linear-gradient(180deg, #4f311c, #29170b); border: 2px solid #e6b54e; color: #fff6ea; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-shadow: 0 10px 22px rgba(0,0,0,.6); padding: 6px; transition: transform .2s, background .2s, border-color .2s; }
-.rn-sign .hz { font-size: clamp(22px, 4vmin, 32px); line-height: 1.1; }
-.rn-sign small { font-size: 11.5px; color: #ffd27a; }
-.rn-sign i { font: 700 10px var(--ui); opacity: .75; }
-.rn-sign.ok { background: #1d6e42; border-color: #63e6be; transform: scale(1.08); }
+.rn-entities { position: absolute; inset: 0; z-index: 16; pointer-events: none; }
+.rn-sign { position: absolute; width: clamp(78px, 21%, 116px); min-height: 68px; border-radius: 13px; background: linear-gradient(180deg, #54341e, #29170b); border: 2px solid #e6b54e; color: #fff6ea; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; box-shadow: 0 10px 22px rgba(0,0,0,.65); padding: 5px; pointer-events: auto; cursor: pointer; transition: background .18s, border-color .18s; }
+.rn-sign .hz { font-size: clamp(20px, 3.8vmin, 30px); line-height: 1.05; }
+.rn-sign small { font-size: 11px; color: #ffd27a; }
+.rn-sign i { font: 700 9.5px var(--ui); opacity: .78; }
+.rn-sign.ok { background: #1d6e42; border-color: #63e6be; box-shadow: 0 0 22px rgba(99,230,190,.6); }
 .rn-sign.no { background: #8c1d1d; border-color: #ff7a66; }
-.rn-trap { position: absolute; left: 16%; right: 16%; bottom: 108px; height: 40px; border-radius: 10px; z-index: 18; display: flex; align-items: center; justify-content: center; font: 700 13px var(--ui); color: #fff; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,.65); }
-.rn-trap.jump { background: repeating-linear-gradient(135deg, #9e1c1c 0 12px, #2b2d38 12px 24px); border: 2px solid #ff5a4d; }
-.rn-trap.slide { background: linear-gradient(180deg, #ffd27a 0 20%, #7a2419 20% 100%); border: 2px solid #ffd27a; }
-.rn-hero { position: absolute; bottom: 44px; transform: translateX(-50%); z-index: 22; display: flex; flex-direction: column; align-items: center; transition: left .22s cubic-bezier(.22,.95,.3,1); pointer-events: none; }
-.rn-body { width: 58px; height: 62px; border-radius: 16px; background: linear-gradient(180deg, #d94126, #7a180c); border: 2.5px solid #ffd27a; color: #fff; display: grid; place-items: center; font-size: 30px; box-shadow: 0 10px 22px rgba(0,0,0,.7); transition: transform .35s cubic-bezier(.2,.85,.35,1); }
+.rn-hazard { position: absolute; left: 50%; width: min(360px, 78%); height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font: 700 12.5px var(--ui); color: #fff; pointer-events: auto; cursor: pointer; box-shadow: 0 8px 20px rgba(0,0,0,.65); }
+.rn-hazard.jump { background: repeating-linear-gradient(135deg, #b82020 0 12px, #2b2d38 12px 24px); border: 2px solid #ff5a4d; }
+.rn-hazard.slide { background: linear-gradient(180deg, #ffd27a 0 24%, #7a2419 24% 100%); border: 2px solid #ffd27a; }
+.rn-hazard.rope { background: linear-gradient(90deg, #7a1414, #ff5a36, #7a1414); border: 2px solid #ffd27a; }
+.rn-rope { position: absolute; left: 50%; top: 44px; width: 3px; height: 0; background: #ffd27a; transform: translateX(-50%); z-index: 21; transition: height .2s; box-shadow: 0 0 10px #ffd27a; }
+.rn-rope.on { height: 145px; }
+.rn-hero { position: absolute; bottom: 44px; transform: translateX(-50%); z-index: 22; display: flex; flex-direction: column; align-items: center; transition: left .2s cubic-bezier(.22,.95,.3,1); pointer-events: none; }
+.rn-body { width: 54px; height: 58px; border-radius: 16px; background: linear-gradient(180deg, #d94126, #7a180c); border: 2.5px solid #ffd27a; color: #fff; display: grid; place-items: center; font-size: 28px; box-shadow: 0 10px 22px rgba(0,0,0,.7); transition: transform .36s cubic-bezier(.2,.85,.35,1), border-color .2s; }
 .rn-hero.jump .rn-body { transform: translateY(-64px) rotate(-360deg) scale(1.18); }
-.rn-hero.slide .rn-body { transform: translateY(16px) scaleY(.52) scaleX(1.22); border-color: #63e6be; }
-.rn-hero small { font: 800 10.5px var(--ui); background: #ffd27a; color: #1c1208; padding: 1px 8px; border-radius: 99px; margin-top: -6px; }
-.rn-boulder { position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%); width: min(460px, 88%); height: 42px; border-radius: 50% 50% 0 0; background: radial-gradient(circle at 50% 25%, #ff6b35, #7a1414 72%, #1a0808); border-top: 2.5px solid #ffd27a; z-index: 24; display: flex; align-items: center; justify-content: center; font: 700 12.5px var(--ui); color: #fff; box-shadow: 0 -8px 26px rgba(255,60,30,.75); }
-.rn-ctrl { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.rn-hero.slide .rn-body { transform: translateY(16px) scaleY(.52) scaleX(1.24); border-color: #63e6be; }
+.rn-hero.rope .rn-body { transform: translateY(-76px) rotate(14deg) scale(1.15); border-color: #ffd27a; box-shadow: 0 0 24px #ffd27a; }
+.rn-hero small { font: 800 10px var(--ui); background: #ffd27a; color: #1c1208; padding: 1px 8px; border-radius: 99px; margin-top: -5px; }
+.rn-boulder { position: absolute; left: 50%; bottom: -16px; transform: translateX(-50%); width: min(460px, 88%); height: 40px; border-radius: 50% 50% 0 0; background: radial-gradient(circle at 50% 25%, #ff6b35, #7a1414 72%, #1a0808); border-top: 2.5px solid #ffd27a; z-index: 24; display: flex; align-items: center; justify-content: center; font: 700 12px var(--ui); color: #fff; box-shadow: 0 -8px 26px rgba(255,60,30,.75); }
+.rn-ctrl { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
 
-/* P2: Parkour Grapple */
-.pk-arena { background: linear-gradient(180deg, #2a1014 0%, #5c1916 65%, #1c0808 100%); overflow: hidden; }
-.pk-beams { position: absolute; left: 12px; right: 12px; top: 62px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; z-index: 16; }
-.pk-beam { min-height: 92px; border-radius: 14px; background: linear-gradient(180deg, #4a3222, #26180f); border: 2px solid #d4a056; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 8px 4px; box-shadow: 0 10px 22px rgba(0,0,0,.55); transition: transform .2s, border-color .2s, background .2s; }
-.pk-beam .hz { font-size: clamp(22px, 4.2vmin, 34px); }
-.pk-beam small { font-size: 11.5px; color: #ffd27a; }
-.pk-beam i { font: 700 11px var(--ui); color: #ffd27a; }
-.pk-beam.ok { background: #1d6e42; border-color: #63e6be; transform: scale(1.06); }
-.pk-beam.no { opacity: .45; border-color: #ff5a4d; }
-.pk-rope-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 14; }
-.pk-hero { position: absolute; left: 18%; bottom: 54px; width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(180deg, #d94126, #7a180c); border: 2.5px solid #ffd27a; color: #fff; display: grid; place-items: center; font-size: 30px; z-index: 18; transform: translate(-50%, 0); box-shadow: 0 10px 22px rgba(0,0,0,.65); }
-.pk-lava { position: absolute; left: 0; right: 0; bottom: 0; height: 42px; background: linear-gradient(90deg, #9e1c1c, #ff5a36, #9e1c1c); border-top: 2px solid #ffd27a; display: flex; align-items: center; justify-content: center; font: 700 13px var(--ui); color: #fff; z-index: 17; }
+/* P2: Parkour Grapple (3D Bridge + Chasm + Overhead Grapple Beams) */
+.pk-arena { background: linear-gradient(180deg, #241218 0%, #4d1916 62%, #180707 100%); overflow: hidden; perspective: 300px; }
+.pk-road { position: absolute; left: 16%; right: 16%; top: 58px; bottom: -26px; background: linear-gradient(180deg, #2d232b, #4a373f); transform: rotateX(48deg); transform-origin: 50% 100%; border-left: 3px solid rgba(255,210,122,.45); border-right: 3px solid rgba(255,210,122,.45); }
+.pk-chasm { position: absolute; left: 15%; right: 15%; top: 44%; height: 64px; background: radial-gradient(circle at 50% 50%, #ff6b35, #9e1c1c 65%, #1c0505); border-top: 2.5px solid #ffd27a; border-bottom: 2.5px solid #ffd27a; display: flex; align-items: center; justify-content: center; font: 800 12.5px var(--ui); color: #fff; box-shadow: 0 0 28px rgba(255,90,54,.7); z-index: 12; }
+.pk-beams { position: absolute; left: 12px; right: 12px; top: 52px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; z-index: 20; }
+.pk-beam { min-height: 82px; border-radius: 13px; background: linear-gradient(180deg, #4a3222, #26180f); border: 2px solid #d4a056; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 4px; box-shadow: 0 10px 22px rgba(0,0,0,.6); transition: transform .2s, border-color .2s, background .2s; }
+.pk-beam .hz { font-size: clamp(20px, 3.8vmin, 30px); line-height: 1.08; }
+.pk-beam small { font-size: 11px; color: #ffd27a; }
+.pk-beam i { font-size: 13px; }
+.pk-beam.ok { background: #1d6e42; border-color: #63e6be; transform: scale(1.06); box-shadow: 0 0 20px rgba(99,230,190,.55); }
+.pk-beam.no { opacity: .42; border-color: #ff5a4d; }
+.pk-rope-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 18; }
+.pk-hero { position: absolute; left: 50%; bottom: 26px; width: 56px; height: 56px; border-radius: 16px; background: linear-gradient(180deg, #d94126, #7a180c); border: 2.5px solid #ffd27a; color: #fff; display: grid; place-items: center; font-size: 28px; z-index: 22; transform: translate(-50%, 0); box-shadow: 0 10px 22px rgba(0,0,0,.7); }
 
-/* W3: Kunai */
+/* W3: Kunai Shadow Assassins */
 .kn-arena { background: radial-gradient(120% 100% at 50% 90%, #3d1218, #0f0d14 78%); overflow: hidden; }
-.kn-foes, .sg-horde, .jd-row, .sl-sky { position: absolute; left: 14px; right: 14px; top: 64px; bottom: 52px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-items: center; z-index: 15; }
-.kn-foe, .sg-mob, .jd-plaque, .sl-plaque { position: relative; min-height: 128px; border-radius: 16px; background: linear-gradient(180deg, #282b36, #14161d); border: 2px solid #5c6478; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 10px 6px; box-shadow: 0 12px 24px rgba(0,0,0,.55); transition: transform .2s, border-color .2s, background .2s, opacity .25s; }
-.kn-foe .hz, .sg-mob .hz, .jd-plaque .hz, .sl-plaque .hz { font-size: clamp(24px, 4.5vmin, 36px); line-height: 1.1; }
-.kn-foe small, .sg-mob small, .jd-plaque small, .sl-plaque small { font-size: 12px; color: #ffd27a; }
-.kn-mask { width: 28px; height: 28px; border-radius: 50%; background: #9e1c1c; color: #fff; font: 700 14px var(--hz); display: grid; place-items: center; }
-.kn-foe.ok, .sg-mob.ok { background: #7a1c1c; border-color: #ffd27a; transform: scale(1.06); }
-.kn-foe.no, .sg-mob.no, .sl-plaque.no { opacity: .4; border-color: #ff5a4d; }
-.kn-blade { position: absolute; width: 10px; height: 48px; background: linear-gradient(180deg, #fff 0 65%, #c23b22 65% 100%); clip-path: polygon(50% 0, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0 65%); z-index: 25; pointer-events: none; }
-.kn-hand, .sg-turret { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); background: rgba(0,0,0,.55); border: 1.5px solid #ffd27a; color: #ffd27a; padding: 5px 16px; border-radius: 99px; font: 700 12.5px var(--ui); z-index: 18; white-space: nowrap; }
+.kn-stage { position: absolute; inset: 48px 12px 44px; z-index: 15; }
+.kn-foe { position: absolute; transform: translateX(-50%); width: clamp(92px, 27%, 136px); min-height: 116px; border-radius: 16px; background: linear-gradient(180deg, #252834, #12141c); border: 2px solid #5c6478; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 8px 6px; box-shadow: 0 12px 24px rgba(0,0,0,.65); transition: transform .22s, border-color .2s, background .2s, opacity .25s; }
+.kn-foe .hz { font-size: clamp(22px, 4.2vmin, 34px); line-height: 1.08; }
+.kn-foe small { font-size: 11.5px; color: #ffd27a; }
+.kn-mask { width: 26px; height: 26px; border-radius: 50%; background: #9e1c1c; color: #fff; font: 700 13px var(--hz); display: grid; place-items: center; }
+.kn-warn { width: 90%; font: 700 10px var(--ui); color: #ff8787; text-align: center; margin-top: 2px; }
+.kn-warn i { display: block; height: 4px; margin-top: 2px; border-radius: 99px; background: linear-gradient(90deg, #ffd27a, #ff3b30); animation: knCharge 2.4s ease-in-out infinite alternate; }
+@keyframes knCharge { from { width: 28%; } to { width: 100%; } }
+.kn-foe.ok { background: #7a1c1c; border-color: #ffd27a; }
+.kn-foe.no { opacity: .4; border-color: #ff5a4d; }
+.kn-blade { position: absolute; width: 12px; height: 48px; background: linear-gradient(180deg, #fff 0 65%, #c23b22 65% 100%); clip-path: polygon(50% 0, 100% 65%, 65% 65%, 65% 100%, 35% 100%, 35% 65%, 0 65%); z-index: 25; pointer-events: none; filter: drop-shadow(0 0 8px #ffd27a); }
+.kn-hand, .sg-turret { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); background: rgba(0,0,0,.62); border: 1.5px solid #ffd27a; color: #ffd27a; padding: 5px 16px; border-radius: 99px; font: 700 12.5px var(--ui); z-index: 20; white-space: nowrap; }
 
-/* Y3: Bomb Defusal */
-.bm-arena { background: radial-gradient(120% 100% at 50% 25%, #3a2218, #140f12 80%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding-top: 44px; }
-.bm-core { position: relative; width: 124px; height: 124px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #495057, #16191d 75%); border: 3px solid #adb5bd; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 14px 28px rgba(0,0,0,.65); }
-.bm-core.safe { border-color: #63e6be; box-shadow: 0 0 28px rgba(99,230,190,.45); }
-.bm-core .hz { font-size: clamp(28px, 5vmin, 40px); }
-.bm-core small { color: #ffd27a; font-size: 13px; }
-.bm-spark { position: absolute; top: -14px; color: #ff922b; font-size: 22px; text-shadow: 0 0 12px #ff5a36; }
-.bm-wires { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: min(520px, 92%); z-index: 16; }
-.bm-wire { min-height: 48px; border-radius: 12px; background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,210,122,.4); color: #fff; padding: 8px 12px; font: 600 14px var(--ui); display: flex; align-items: center; gap: 8px; }
+/* Y3: Bomb Defusal (Ticking Countdown + Curved Fuses + Spark Orb) */
+.bm-arena { background: radial-gradient(120% 100% at 50% 25%, #3a2218, #140f12 80%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding-top: 42px; overflow: hidden; }
+.bm-stage { position: relative; display: flex; flex-direction: column; align-items: center; z-index: 16; }
+.bm-core { position: relative; width: 128px; height: 128px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #495057, #16191d 75%); border: 3px solid #adb5bd; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 14px 28px rgba(0,0,0,.7); }
+.bm-core.safe { border-color: #63e6be; box-shadow: 0 0 28px rgba(99,230,190,.55); }
+.bm-core.boom { border-color: #ff3b30; background: radial-gradient(circle, #ff6b35, #7a1414); transform: scale(1.12); }
+.bm-timer, .bm-core em { font: 800 15px monospace; color: #ff6b6b; background: rgba(0,0,0,.55); padding: 1px 8px; border-radius: 6px; border: 1px solid rgba(255,107,107,.45); margin-top: 2px; font-style: normal; }
+.bm-core.safe .bm-timer, .bm-core.safe em { color: #63e6be; border-color: #63e6be; }
+.bm-core .hz { font-size: clamp(26px, 4.6vmin, 36px); line-height: 1.05; }
+.bm-core small { color: #ffd27a; font-size: 12px; }
+.bm-fuses { position: relative; width: 220px; height: 34px; display: flex; justify-content: space-around; align-items: center; }
+.bm-fuse-arc { width: 42px; height: 28px; border-top: 2.5px dashed #d4a056; border-radius: 50% 50% 0 0; opacity: .75; }
+.bm-spark-orb { position: absolute; top: 4px; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle, #fff, #ff922b 55%, #ff3b30); box-shadow: 0 0 16px #ff922b, 0 0 26px #ff3b30; pointer-events: none; }
+.bm-wires { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: min(520px, 92%); z-index: 18; }
+.bm-wire { min-height: 46px; border-radius: 12px; background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,210,122,.4); color: #fff; padding: 7px 12px; font: 600 13.5px var(--ui); display: flex; align-items: center; gap: 8px; }
 .bm-wire.ok { background: #1d6e42; border-color: #63e6be; }
 .bm-wire.no { background: #7a1c1c; opacity: .45; }
 
-/* Z1: Siege */
+/* Z1: Talisman Gatling Siege (Hopping Jiangshi + Fireball + Meaning Turret) */
 .sg-arena { background: radial-gradient(120% 100% at 50% 100%, #251f3d, #0f0e1a 78%); overflow: hidden; }
-.sg-mob { background: linear-gradient(180deg, #1d2a44, #0f1624); border-color: #4a6fa5; }
-.sg-tal { background: #f3c64f; color: #c23b22; font: 700 14px var(--hz); padding: 1px 6px; border-radius: 4px; }
-.sg-shot { position: absolute; width: 28px; height: 38px; background: #ffd27a; color: #c23b22; border-radius: 5px; display: grid; place-items: center; font-size: 20px; box-shadow: 0 0 16px #ff922b; z-index: 24; pointer-events: none; }
+.sg-lane { position: absolute; left: 16px; right: 16px; top: 54px; bottom: 52px; display: flex; align-items: center; justify-content: center; gap: 14px; z-index: 15; }
+.sg-mob { width: clamp(92px, 28%, 134px); min-height: 118px; border-radius: 16px; background: linear-gradient(180deg, #1d2a44, #0f1624); border: 2px solid #4a6fa5; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 8px; box-shadow: 0 12px 24px rgba(0,0,0,.6); opacity: .72; transform: scale(.92); transition: transform .25s, opacity .25s, border-color .2s; }
+.sg-mob.front { opacity: 1; border-color: #ffd27a; box-shadow: 0 0 24px rgba(255,210,122,.38); transform: scale(1.12); }
+.sg-mob .hz { font-size: clamp(24px, 4.4vmin, 34px); line-height: 1.1; }
+.sg-mob small { font-size: 12px; color: #ffd27a; }
+.sg-tal { background: #f3c64f; color: #c23b22; font: 700 13px var(--hz); padding: 1px 7px; border-radius: 4px; }
+.sg-fireball { position: absolute; width: 32px; height: 32px; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #ffd27a 40%, #ff5a36 75%, transparent 100%); box-shadow: 0 0 22px #ff5a36, 0 0 36px #ffd27a; z-index: 25; pointer-events: none; }
 
-/* V2: Forge */
-.fg-arena { background: linear-gradient(180deg, #3a1a12 0%, #170d0c 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding-top: 46px; }
+/* V2: Blacksmith Boss Forge (Polygon Sword + Anvil + Dual-layer Sparks) */
+.fg-arena { background: linear-gradient(180deg, #3a1a12 0%, #170d0c 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding-top: 44px; overflow: hidden; }
 .fg-anvil { position: relative; display: flex; align-items: center; justify-content: center; }
-.fg-blade { min-width: 240px; min-height: 62px; padding: 8px 28px; border-radius: 14px 42px 42px 14px; background: linear-gradient(90deg, #5c4028 0 15%, #d9480f 15% 85%, #ffd27a 100%); border: 2px solid #ffd27a; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 0 30px rgba(255,107,53,.55); }
-.fg-slot { width: 46px; height: 46px; border-radius: 10px; background: rgba(0,0,0,.35); border: 1.5px dashed #ffd27a; color: #fff; font-size: 28px; display: grid; place-items: center; }
-.fg-slot.forged { background: #ffd27a; color: #2a1205; border-style: solid; transform: scale(1.08); }
-.fg-hammer { font-size: 34px; margin-left: 8px; transition: transform .15s; }
-.fg-hammer.hit { transform: rotate(-45deg) scale(1.25); }
-.fg-ingots, .cp-keys { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 520px; padding: 0 12px; }
-.fg-ingot, .cp-key { min-width: 68px; height: 52px; padding: 0 14px; border-radius: 12px; background: linear-gradient(180deg, #523022, #2b1710); border: 2px solid #ff922b; color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.fg-sword { min-width: 248px; min-height: 60px; padding: 8px 34px 8px 22px; background: linear-gradient(90deg, #5c4028 0 14%, #d9480f 14% 78%, #ffd27a 100%); clip-path: polygon(0 18%, 14% 18%, 14% 0, 84% 0, 100% 50%, 84% 100%, 14% 100%, 14% 82%, 0 82%); display: flex; align-items: center; justify-content: center; gap: 10px; filter: drop-shadow(0 0 18px rgba(255,107,53,.75)); transition: filter .25s, transform .25s; }
+.fg-sword.complete { filter: drop-shadow(0 0 28px #ffd27a) brightness(1.18); transform: scale(1.06); }
+.fg-ch { width: 42px; height: 42px; border-radius: 9px; background: rgba(0,0,0,.38); border: 1.5px dashed #ffd27a; color: #fff; font-size: 26px; display: grid; place-items: center; transition: transform .2s, background .2s; }
+.fg-ch.lit, .fg-ch.forged { background: #ffd27a; color: #2a1205; border-style: solid; transform: scale(1.08); }
+.fg-hammer { font-size: 36px; margin-left: 8px; transition: transform .15s; }
+.fg-ingots, .cp-keys { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 520px; padding: 0 12px; z-index: 18; }
+.fg-ingot, .cp-key { min-width: 68px; height: 50px; padding: 0 14px; border-radius: 12px; background: linear-gradient(180deg, #523022, #2b1710); border: 2px solid #ff922b; color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .fg-ingot.used, .cp-key.used { opacity: .32; transform: scale(.92); }
 
-/* J2: Jade Plaque */
+/* J2: Jade Plaque Inspector (Hanging Jade + SVG Lightning Bolt) */
 .jd-arena { background: radial-gradient(120% 100% at 50% 20%, #1a3a32, #0d1c1a 80%); overflow: hidden; }
-.jd-plaque { background: linear-gradient(180deg, #4ea88a, #1f5c47); border-color: #a8ebd0; border-radius: 16px 16px 28px 28px; }
-.jd-plaque span { font: 600 12.5px var(--ui); background: rgba(0,0,0,.28); padding: 3px 9px; border-radius: 99px; }
-.jd-plaque.shatter { background: #c23b22; border-color: #ffd27a; transform: scale(.9) rotate(-6deg); }
+.jd-row { position: absolute; left: 14px; right: 14px; top: 58px; bottom: 48px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-items: center; z-index: 15; }
+.jd-plaque { position: relative; min-height: 126px; padding: 10px 6px; background: linear-gradient(180deg, #4ea88a, #1f5c47); border: 2px solid #a8ebd0; border-radius: 16px 16px 28px 28px; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 12px 24px rgba(0,0,0,.55); transition: transform .2s, opacity .25s; }
+.jd-plaque::before { content: ""; position: absolute; top: -18px; width: 2px; height: 18px; background: #ffd27a; }
+.jd-plaque .hz { font-size: clamp(22px, 4.2vmin, 34px); line-height: 1.1; }
+.jd-plaque small { font-size: 11.5px; color: #ffd27a; }
+.jd-plaque span { font: 600 12px var(--ui); background: rgba(0,0,0,.28); padding: 3px 9px; border-radius: 99px; }
 .jd-plaque.real { opacity: .45; }
-.jd-reveal, .ds-reveal { position: absolute; left: 16px; right: 16px; bottom: 12px; text-align: center; color: #ffd27a; font: 600 15px var(--ui); z-index: 18; }
+.jd-reveal, .ds-reveal { position: absolute; left: 16px; right: 16px; bottom: 10px; text-align: center; color: #ffd27a; font: 600 14.5px var(--ui); z-index: 22; }
 
-/* K1: Slice */
+/* K1: Brush-Blade Dojo Slice (Parabolic Airborne Plaques + Split Halves + SVG Slash) */
 .sl-arena { background: radial-gradient(120% 100% at 50% 80%, #2a2440, #12111c 75%); overflow: hidden; }
-.sl-plaque { background: linear-gradient(180deg, #e2b878, #b57d3e); border-color: #f5d7a1; color: #2a1808; }
-.sl-plaque small { color: #4a2c11; }
-.sl-plaque.cut { background: #1d6e42; color: #fff; border-color: #ffd27a; transform: scale(1.06) rotate(-4deg); }
+.sl-sky { position: absolute; inset: 52px 12px 18px; z-index: 15; }
+.sl-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 24; }
+.sl-plaque { position: absolute; width: clamp(86px, 22%, 124px); min-height: 104px; border-radius: 15px; background: linear-gradient(180deg, #e2b878, #b57d3e); border: 2px solid #f5d7a1; color: #2a1808; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 8px 6px; box-shadow: 0 12px 24px rgba(0,0,0,.6); transform: translate(-50%, -50%); }
+.sl-plaque .hz { font-size: clamp(22px, 4.2vmin, 34px); line-height: 1.1; }
+.sl-plaque small { font-size: 11.5px; color: #4a2c11; }
+.sl-plaque.no { opacity: .38; filter: grayscale(.6); }
+.sl-plaque.cut { background: transparent; border-color: transparent; box-shadow: none; pointer-events: none; }
+.sl-half { position: absolute; width: 46px; height: 92px; border-radius: 12px; background: linear-gradient(180deg, #e2b878, #b57d3e); border: 2px solid #ffd27a; color: #2a1808; font-size: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,.55); z-index: 22; pointer-events: none; }
 
-/* L1: Cipher */
-.cp-arena { background: radial-gradient(120% 100% at 50% 25%, #4a3222, #1e130c 80%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; }
-.cp-chest { width: min(360px, 92%); padding: 16px; border-radius: 20px; background: linear-gradient(180deg, #422c1d, #24160d); border: 3px solid #c89b4b; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 14px 28px rgba(0,0,0,.55); }
-.cp-chest.open { border-color: #63e6be; box-shadow: 0 0 32px rgba(255,210,122,.5); }
+/* L1: Royal Brass Cipher Lockbox (3D Rotating Brass Wheels) */
+.cp-arena { background: radial-gradient(120% 100% at 50% 25%, #4a3222, #1e130c 80%); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; padding: 16px; perspective: 500px; }
+.cp-chest { width: min(360px, 92%); padding: 16px; border-radius: 20px; background: linear-gradient(180deg, #422c1d, #24160d); border: 3px solid #c89b4b; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 10px; box-shadow: 0 14px 28px rgba(0,0,0,.6); transition: border-color .25s, box-shadow .25s; }
+.cp-chest.open { border-color: #63e6be; box-shadow: 0 0 32px rgba(255,210,122,.55); }
 .cp-word { text-align: center; }
-.cp-word .hz { font-size: clamp(32px, 5.5vmin, 46px); color: #ffe5a3; display: block; line-height: 1.1; }
-.cp-word span { font: 600 14px var(--ui); color: #e2d5be; }
-.cp-wheels { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-.cp-wheel { min-width: 74px; height: 48px; padding: 0 12px; border-radius: 10px; background: linear-gradient(180deg, #c89b4b, #fff3d1 50%, #9c722c); color: #1c1b19; font: 700 17px var(--pinyin); display: grid; place-items: center; }
-.cp-wheel.locked { background: #63e6be; color: #0b2e1f; }
+.cp-word .hz { font-size: clamp(30px, 5.2vmin, 44px); color: #ffe5a3; display: block; line-height: 1.1; }
+.cp-word span { font: 600 13.5px var(--ui); color: #e2d5be; }
+.cp-wheels { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; perspective: 400px; }
+.cp-wheel { min-width: 74px; height: 48px; padding: 0 12px; border-radius: 10px; background: linear-gradient(180deg, #c89b4b, #fff3d1 50%, #9c722c); color: #1c1b19; font: 700 17px var(--pinyin); display: grid; place-items: center; backface-visibility: hidden; }
+.cp-wheel.locked { background: linear-gradient(180deg, #38d9a9, #c3fae8 50%, #20c997); color: #0b2e1f; }
 .cp-key { font: 700 16px var(--pinyin); border-color: #c89b4b; }
 
-/* M1: Dimsum */
+/* M1: Dimsum Conveyor Rush (Live Sliding Steamer on Moving Belt) */
 .ds-arena { background: radial-gradient(120% 100% at 50% 25%, #523928, #24170f 80%); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; }
-.ds-belt { width: 100%; height: 136px; background: repeating-linear-gradient(90deg, #3a2618 0 32px, #2e1d12 32px 64px); border-top: 3px solid #8c622b; border-bottom: 3px solid #8c622b; display: flex; align-items: center; justify-content: center; }
-.ds-steamer { min-width: 190px; padding: 12px 22px; border-radius: 22px; background: radial-gradient(circle at 50% 35%, #f5deb3, #c49350); border: 3px solid #7a5220; color: #2a1808; display: flex; flex-direction: column; align-items: center; gap: 3px; box-shadow: 0 12px 24px rgba(0,0,0,.5); }
-.ds-steamer .hz { font-size: clamp(28px, 5vmin, 40px); line-height: 1.1; }
-.ds-steamer small { font-size: 13px; color: #5c3a16; }
-.ds-steamer span { font: 700 14px var(--ui); background: #fffdf8; padding: 3px 12px; border-radius: 99px; margin-top: 2px; }
-.ds-steamer.ok { border-color: #23805a; transform: scale(1.06); }
+.ds-belt { position: relative; width: 100%; height: 142px; background: repeating-linear-gradient(90deg, #3a2618 0 32px, #2e1d12 32px 64px); border-top: 3px solid #8c622b; border-bottom: 3px solid #8c622b; animation: dsBeltMove .55s linear infinite; }
+@keyframes dsBeltMove { from { background-position-x: 0; } to { background-position-x: 64px; } }
+.ds-steamer { position: absolute; top: 50%; left: 16%; transform: translate(-50%, -50%); min-width: 184px; padding: 10px 20px; border-radius: 22px; background: radial-gradient(circle at 50% 35%, #f5deb3, #c49350); border: 3px solid #7a5220; color: #2a1808; display: flex; flex-direction: column; align-items: center; gap: 2px; box-shadow: 0 12px 24px rgba(0,0,0,.55); transition: transform .22s, opacity .22s, border-color .2s; }
+.ds-steamer .hz { font-size: clamp(26px, 4.8vmin, 38px); line-height: 1.08; }
+.ds-steamer small { font-size: 12.5px; color: #5c3a16; }
+.ds-steamer span { font: 700 13.5px var(--ui); background: #fffdf8; padding: 2px 12px; border-radius: 99px; margin-top: 2px; }
+.ds-steamer.ok { border-color: #23805a; box-shadow: 0 0 24px rgba(99,230,190,.6); }
 .ds-acts { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
-/* N2: Lantern Fog */
-.lf-arena { background: radial-gradient(120% 100% at 50% 90%, #2a2440, #11101a 78%); display: flex; align-items: center; justify-content: center; padding-top: 42px; }
-.lf-grid { width: min(330px, 88%); display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; z-index: 16; }
-.lf-cell { height: 68px; border-radius: 14px; background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.18); color: rgba(255,255,255,.45); font-size: 30px; filter: blur(1.8px); display: flex; align-items: center; justify-content: center; gap: 4px; transition: filter .3s, color .3s, background .3s, border-color .3s, transform .2s; }
-.lf-cell:hover { filter: blur(.6px); color: rgba(255,255,255,.8); }
-.lf-cell.lit { filter: blur(0); color: #fff; background: rgba(230,181,78,.28); border-color: #ffd27a; box-shadow: 0 0 22px rgba(230,181,78,.45); transform: scale(1.05); }
+/* N2: Lantern Fog Sweep (Pointer-Following Golden Lantern Aura + Misty Grid) */
+.lf-arena { background: radial-gradient(120% 100% at 50% 90%, #2a2440, #11101a 78%); display: flex; align-items: center; justify-content: center; padding-top: 42px; overflow: hidden; }
+.lf-aura { position: absolute; left: 50%; top: 55%; width: 170px; height: 170px; border-radius: 50%; transform: translate(-50%, -50%); background: radial-gradient(circle, rgba(255,210,122,.42) 0%, rgba(255,146,43,.18) 45%, transparent 72%); pointer-events: none; z-index: 14; transition: left .08s linear, top .08s linear; }
+.lf-grid { width: min(336px, 88%); display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; z-index: 16; }
+.lf-cell { height: 68px; border-radius: 14px; background: rgba(255,255,255,.08); border: 1.5px solid rgba(255,255,255,.18); color: rgba(255,255,255,.42); font-size: 30px; filter: blur(1.8px); display: flex; align-items: center; justify-content: center; gap: 4px; transition: filter .25s, color .25s, background .25s, border-color .25s, transform .2s; }
+.lf-cell:hover { filter: blur(.3px); color: rgba(255,255,255,.9); border-color: rgba(255,210,122,.55); }
+.lf-cell.lit { filter: blur(0); color: #fff; background: rgba(230,181,78,.3); border-color: #ffd27a; box-shadow: 0 0 22px rgba(230,181,78,.5); transform: scale(1.05); }
 
 @media (max-width: 560px) {
-  .pk-beams, .kn-foes, .sg-horde, .jd-row, .sl-sky { grid-template-columns: repeat(2, 1fr); top: 56px; bottom: 44px; gap: 8px; }
-  .kn-foe, .sg-mob, .jd-plaque, .sl-plaque, .pk-beam { min-height: 78px; padding: 6px; }
+  .pk-beams, .jd-row { grid-template-columns: repeat(2, 1fr); top: 52px; bottom: 44px; gap: 8px; }
+  .jd-plaque, .pk-beam { min-height: 74px; padding: 6px; }
+  .sg-lane { gap: 8px; }
 }
