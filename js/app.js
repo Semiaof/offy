@@ -696,11 +696,16 @@ function renderRoute(h) {
     $$('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === v.nav));
     document.title = v.title ? `${v.title} · Library of Limu` : 'Library of Limu';
     try { v.show(args); } catch (err) { console.error(err); toast(`${T('เกิดข้อผิดพลาด')}: ` + err.message, { icon: 'info' }); }
+    if (changing && (v.immersive || v.el === 'v-level') && !reducedMotion()) {
+      const target = $(`#${v.el}`);
+      if (target) { target.classList.remove('scroll-unfurl-view'); void target.offsetWidth; target.classList.add('scroll-unfurl-view'); setTimeout(() => target.classList.remove('scroll-unfurl-view'), 560); }
+    }
     // a page opened fresh starts at the top; a tab or a page you come back to keeps its place
     if (changing) window.scrollTo(0, dir === 'push' && !TAB_ROOTS.has(v.el) ? 0 : (scrollMem[h] || 0));
   };
-  // how the page change looks: deeper pages slide in from the right, going back slides them away, tabs cross-fade
-  const kind = !changing || !from ? '' : dir === 'pop' ? 'pop' : dir === 'push' && !TAB_ROOTS.has(v.el) ? 'push' : 'fade';
+  // how the page change looks: entering immersive games/stage road unfurls like a Chinese scroll, going back slides away, tabs cross-fade
+  const isScrollRoute = dir === 'push' && (v.immersive || v.el === 'v-level');
+  const kind = !changing || !from ? '' : dir === 'pop' ? 'pop' : isScrollRoute ? 'scroll' : dir === 'push' && !TAB_ROOTS.has(v.el) ? 'push' : 'fade';
   if (!kind || !document.startViewTransition || reducedMotion() || document.hidden) { swap(); return; }
   const root = document.documentElement; root.dataset.vt = kind;
   try {

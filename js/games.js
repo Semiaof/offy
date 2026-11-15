@@ -191,7 +191,8 @@ const Mini = {
     $('#mgTitle').textContent = s.title === gameName(s.game) ? s.title : `${gameName(s.game)} · ${s.title}`;
     const r = $('#mgResult'); r.hidden = true; r.innerHTML = '';
     $('#mgCombo').className = 'combo'; $('#mgQuit use').setAttribute('href', '#i-x');
-    const st = $('#mgStage'); st.className = `mstage g-${s.game}`; st.innerHTML = ''; st.onclick = null; st.onpointerdown = null;
+    const st = $('#mgStage'); st.className = `mstage g-${s.game} scroll-unfurl`; delete st.dataset.comboTier; st.innerHTML = ''; st.onclick = null; st.onpointerdown = null;
+    setTimeout(() => st.classList.remove('scroll-unfurl'), 560);
     this.header();
     clearInterval(s.clockT);
     s.clockT = setInterval(() => { if (this.alive(s) && !s.paused && !s.finished) $('#mgClock').textContent = fmtClock(this.elapsed()); }, 250);
@@ -216,9 +217,21 @@ const Mini = {
     $('#mgBar').style.width = (total ? n / total * 100 : 0) + '%';
   },
   setCombo(n) {
-    const s = this.s, el = $('#mgCombo'); s.combo = n; s.bestCombo = Math.max(s.bestCombo, n);
-    if (n >= 2) { el.textContent = `${T('ต่อเนื่อง')} ×${n}`; el.classList.add('show'); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
-    else el.classList.remove('show', 'bump');
+    const s = this.s, el = $('#mgCombo'), st = $('#mgStage');
+    s.combo = n; s.bestCombo = Math.max(s.bestCombo, n);
+    const tier = n >= 8 ? 3 : n >= 5 ? 2 : n >= 3 ? 1 : 0;
+    if (st) {
+      if (tier > 0) { st.dataset.comboTier = String(tier); GX.embers(st, tier); }
+      else delete st.dataset.comboTier;
+    }
+    if (n >= 2) {
+      const prefix = tier === 3 ? '🐉 ' : tier === 2 ? '🔥🔥 ' : tier === 1 ? '🔥 ' : '';
+      el.textContent = `${prefix}${T('ต่อเนื่อง')} ×${n}`;
+      el.className = `combo show bump${tier ? ' combo-t' + tier : ''}`;
+      void el.offsetWidth;
+    } else {
+      el.className = 'combo';
+    }
   },
   /** one word is settled: ok = right on the first try */
   mark(w, ok, ms, at) {
@@ -377,6 +390,37 @@ const GX = {
   fly(el, from, { ms = 380, easing = 'cubic-bezier(.3,1.35,.5,1)' } = {}) {
     const to = el.getBoundingClientRect(), dx = from.left + from.width / 2 - (to.left + to.width / 2), dy = from.top + from.height / 2 - (to.top + to.height / 2);
     return el.animate([{ translate: `${dx}px ${dy}px`, scale: .9 }, { translate: '0 0', scale: 1 }], { duration: ms, easing });
+  },
+  /** Hit-Stop + Shockwave Ring: 48ms high-contrast impact freeze followed by an expanding golden/crimson shockwave ring */
+  hitStop(host, x, y, { color = '#ffd27a', ms = 48 } = {}) {
+    if (reducedMotion() || !host) return;
+    host.classList.add('gx-hitstop');
+    setTimeout(() => host.classList.remove('gx-hitstop'), ms);
+    const ring = document.createElement('i');
+    ring.className = 'gx-shock';
+    ring.style.cssText = `left:${x}px;top:${y}px;border-color:${color};box-shadow:0 0 18px ${color}`;
+    host.appendChild(ring);
+    ring.animate([
+      { width: '12px', height: '12px', opacity: 1, borderWidth: '4px' },
+      { width: '160px', height: '160px', opacity: 0, borderWidth: '1px' }
+    ], { duration: 420, easing: 'cubic-bezier(.16,.84,.3,1)', fill: 'forwards' }).onfinish = () => ring.remove();
+  },
+  /** Rising brush-fire embers for Combo Aura (tier 1..3) */
+  embers(host, tier = 1) {
+    if (reducedMotion() || !host) return;
+    const count = tier * 5, colors = ['#ffd27a', '#ff922b', '#ff4d3b'];
+    for (let i = 0; i < count; i++) {
+      const e = document.createElement('i');
+      e.className = 'gx-ember';
+      const lx = 6 + Math.random() * 88, sz = 5 + Math.random() * (tier * 3);
+      e.style.cssText = `left:${lx}%;bottom:4px;width:${sz}px;height:${sz}px;background:${colors[i % colors.length]}`;
+      host.appendChild(e);
+      const dx = (Math.random() - .5) * 44, dy = -(65 + Math.random() * 95);
+      e.animate([
+        { transform: 'translate(0,0) scale(1)', opacity: .95 },
+        { transform: `translate(${dx}px,${dy}px) scale(.15)`, opacity: 0 }
+      ], { duration: 680 + Math.random() * 420, easing: 'ease-out', fill: 'forwards' }).onfinish = () => e.remove();
+    }
   }
 };
 const isHan = c => /[㐀-鿿]/.test(c);
@@ -1199,6 +1243,7 @@ const MG = {
         rn.done = true;
         if (rn.els && rn.els[s.lane]) rn.els[s.lane].classList.add('ok');
         s.dist = Math.min(120, s.dist + 12); $('#rnDist').textContent = `🪨 ${s.dist}m`;
+        GX.hitStop(arena, hx, hy - 18, { color: '#63e6be' });
         GX.burst(arena, hx, hy - 18, { n: 26, color: '#ffd27a', dist: 90 });
         GX.text(arena, hx, hy - 48, `${rn.w.zh} · ทะลุด่าน! +เร่งสปีด`, 'big');
         if (S().autoSpeak) speakWord(rn.w);
@@ -1260,6 +1305,7 @@ const MG = {
       line.setAttribute('opacity', '1');
       if (pk.opts[i] === pk.w) {
         pk.done = true; btn.classList.add('ok');
+        GX.hitStop(arena, bx, by, { color: '#ffd27a' });
         hero.animate([
           { left: '50%', bottom: '28px', transform: 'translate(-50%,0) rotate(0deg) scale(1)' },
           { left: (bx / W * 100).toFixed(1) + '%', bottom: '155px', transform: 'translate(-50%,0) rotate(-18deg) scale(1.22)', offset: 0.55 },
@@ -1319,6 +1365,7 @@ const MG = {
             { transform: 'translate(-50%,-50%) scale(1.18)', filter: 'brightness(2.4)' },
             { transform: 'translate(-50%, 36px) rotate(22deg) scale(.35)', opacity: 0.15 }
           ], { duration: 420, fill: 'forwards' });
+          GX.hitStop(arena, tx, ty, { color: '#ff4d3b', ms: 55 });
           GX.flash(arena, 'rgba(255,50,40,.45)', 200); GX.quake(arena, 8);
           GX.burst(arena, tx, ty, { n: 28, color: '#ff4d3b', dist: 95 });
           GX.burst(arena, tx, ty, { n: 14, color: '#ffd27a', dist: 55 });
@@ -1392,6 +1439,7 @@ const MG = {
       if (bm.opts[i] === bm.w) {
         bm.done = true; btn.classList.add('ok'); if (arc) arc.classList.add('severed');
         core.classList.add('safe'); $('#bmSpark').hidden = true;
+        GX.hitStop(arena, bx, by - 30, { color: '#63e6be' });
         GX.pop(core, 1.12);
         GX.burst(arena, bx, by - 45, { n: 26, color: '#56c592', dist: 85 });
         GX.text(arena, bx, by - 55, 'ตัดชนวนทันเวลา! +25', 'big');
@@ -1447,6 +1495,7 @@ const MG = {
         sg.done = true; btn.classList.add('ok');
         setTimeout(() => {
           if (!Mini.alive(s)) return;
+          GX.hitStop(arena, jx, jy, { color: '#ff922b', ms: 55 });
           GX.flash(arena, 'rgba(255,160,40,.5)', 240); GX.quake(arena, 8);
           front.getAnimations().forEach(a => a.cancel());
           front.animate([{ transform: 'scale(1.25)', filter: 'brightness(2.5)' }, { transform: 'scale(.2)', opacity: 0 }], { duration: 380, fill: 'forwards' });
@@ -1500,6 +1549,7 @@ const MG = {
         btn.disabled = true; btn.classList.add('used');
         const slot = slots[fg.at]; slot.textContent = got; slot.classList.add('forged');
         const [sx, sy] = GX.at(slot, arena);
+        GX.hitStop(arena, sx, sy, { color: '#ff922b', ms: 55 });
         GX.flash(arena, 'rgba(255,160,40,.55)', 220); GX.quake(arena, 9);
         GX.burst(arena, sx, sy, { n: 36, color: '#ffd27a', dist: 115, size: 7 });
         GX.burst(arena, sx, sy, { n: 18, color: '#ff6b35', dist: 70, size: 6 });
@@ -1554,6 +1604,7 @@ const MG = {
         bolt.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:30;pointer-events:none';
         bolt.innerHTML = `<polyline points="${px},0 ${+px - 4},35 ${+px + 5},42 ${px},${py}" fill="none" stroke="#fff" stroke-width="2.2" style="filter:drop-shadow(0 0 10px #80e5be)"/>`;
         arena.appendChild(bolt); setTimeout(() => bolt.remove(), 320);
+        GX.hitStop(arena, x, y, { color: '#80e5be', ms: 52 });
         GX.flash(arena, 'rgba(255,100,80,.38)', 260); GX.quake(arena, 8);
         btn.animate([{ transform: 'scale(1.08)', filter: 'brightness(2)' }, { transform: 'translateY(110px) rotate(-22deg) scale(.5)', opacity: 0 }], { duration: 480, fill: 'forwards' });
         GX.burst(arena, x, y, { n: 26, color: '#80e5be', dist: 85 });
@@ -1617,6 +1668,7 @@ const MG = {
           arena.appendChild(h);
           h.animate([{ transform: 'none', opacity: 1 }, { transform: `translate(${dx}px, 76px) rotate(${k ? 28 : -28}deg)`, opacity: 0 }], { duration: 600, fill: 'forwards' }).onfinish = () => h.remove();
         });
+        GX.hitStop(arena, x, y, { color: '#ffe599', ms: 52 });
         GX.flash(arena, 'rgba(255,225,130,.38)', 190); GX.quake(arena, 7);
         GX.burst(arena, x, y, { n: 28, color: '#ffe599', dist: 95 });
         GX.text(arena, x, y - 32, 'ผ่าแม่นยำ! +20', 'big');

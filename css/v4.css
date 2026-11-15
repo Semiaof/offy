@@ -1116,3 +1116,54 @@ html { overscroll-behavior-y: none; }
   .jd-plaque, .pk-beam { min-height: 74px; padding: 6px; }
   .sg-lane { gap: 8px; }
 }
+
+/* =====================================================================
+   UPGRADE 1: Hit-Stop Freeze + Shockwave Impact Ring (.gx-hitstop, .gx-shock)
+   ===================================================================== */
+.gx-hitstop { filter: contrast(1.38) brightness(1.22) saturate(1.25) !important; transform: scale(1.015); }
+.gx-shock { position: absolute; border-radius: 50%; border: 3px solid #ffd27a; transform: translate(-50%, -50%); pointer-events: none; z-index: 32; }
+
+/* =====================================================================
+   UPGRADE 2: Combo Fire Aura (Tier 1..3 Badge + Arena Border + Embers)
+   ===================================================================== */
+.combo.combo-t1 { background: linear-gradient(90deg, #d97706, #f59e0b); color: #fff; box-shadow: 0 0 14px rgba(245,158,11,.55); }
+.combo.combo-t2 { background: linear-gradient(90deg, #c23b22, #ff6b35); color: #fff; box-shadow: 0 0 20px rgba(255,107,53,.75); animation: comboAuraPulse .65s ease-in-out infinite alternate; }
+.combo.combo-t3 { background: linear-gradient(90deg, #9e1c1c, #ff3b30, #ffd27a); color: #1c1208; font-weight: 800; box-shadow: 0 0 26px rgba(255,210,122,.9), 0 0 42px rgba(255,59,48,.65); animation: comboAuraPulse .42s ease-in-out infinite alternate; }
+@keyframes comboAuraPulse { from { transform: scale(1); filter: brightness(1); } to { transform: scale(1.08); filter: brightness(1.18); } }
+
+#mgStage[data-combo-tier="1"] .m-table, #gStage[data-combo-tier="1"] { box-shadow: inset 0 0 26px rgba(245,158,11,.32), 0 0 18px rgba(245,158,11,.28); border-color: rgba(255,210,122,.65); }
+#mgStage[data-combo-tier="2"] .m-table, #gStage[data-combo-tier="2"] { box-shadow: inset 0 0 38px rgba(255,90,54,.42), 0 0 26px rgba(255,107,53,.42); border-color: #ff6b35; animation: stageFireBorder .75s ease-in-out infinite alternate; }
+#mgStage[data-combo-tier="3"] .m-table, #gStage[data-combo-tier="3"] { box-shadow: inset 0 0 52px rgba(255,59,48,.52), inset 0 0 22px rgba(255,210,122,.45), 0 0 34px rgba(255,210,122,.55); border-color: #ffd27a; animation: stageFireBorder .48s ease-in-out infinite alternate; }
+@keyframes stageFireBorder { from { filter: saturate(1.05); } to { filter: saturate(1.25) brightness(1.06); } }
+
+.gx-ember { position: absolute; border-radius: 50%; pointer-events: none; z-index: 28; box-shadow: 0 0 10px #ff922b, 0 0 18px #ff3b30; }
+
+/* =====================================================================
+   UPGRADE 3: Scroll Unfurl & Ink-Wash Stage/Mini-Game Transition
+   ===================================================================== */
+html[data-vt="scroll"]::view-transition-old(root) { animation: vtScrollOut .32s cubic-bezier(.4,0,.2,1) both; }
+html[data-vt="scroll"]::view-transition-new(root) { animation: vtScrollIn .46s cubic-bezier(.18,.88,.28,1) both; transform-origin: 50% 0%; }
+@keyframes vtScrollOut { to { opacity: 0; transform: scale(.96) translateY(-10px); filter: blur(3px); } }
+@keyframes vtScrollIn {
+  0% { clip-path: inset(0 0 96% 0 round 20px); transform: translateY(-12px) scaleY(.94); filter: sepia(.35) contrast(1.1); }
+  70% { clip-path: inset(0 0 0% 0 round 12px); filter: sepia(.08); }
+  100% { clip-path: inset(0 0 0% 0 round 0px); transform: none; filter: none; }
+}
+
+.scroll-unfurl, .scroll-unfurl-view { position: relative; animation: scrollUnfurlStage .48s cubic-bezier(.18,.88,.28,1) both; transform-origin: 50% 0%; }
+.scroll-unfurl::after {
+  content: ""; position: absolute; left: 4%; right: 4%; height: 8px; top: 0; border-radius: 99px;
+  background: linear-gradient(90deg, #5c3a16, #ffd27a 25%, #c23b22 50%, #ffd27a 75%, #5c3a16);
+  box-shadow: 0 6px 20px rgba(0,0,0,.45), 0 0 16px rgba(255,210,122,.65);
+  z-index: 60; pointer-events: none;
+  animation: scrollRodSweep .48s cubic-bezier(.18,.88,.28,1) forwards;
+}
+@keyframes scrollUnfurlStage {
+  0% { clip-path: inset(0 0 92% 0 round 22px); opacity: .35; transform: translateY(-10px); }
+  100% { clip-path: inset(0 0 0% 0 round 0px); opacity: 1; transform: none; }
+}
+@keyframes scrollRodSweep {
+  0% { top: 4%; opacity: 1; }
+  82% { top: 96%; opacity: .9; }
+  100% { top: 100%; opacity: 0; }
+}

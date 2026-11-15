@@ -73,9 +73,21 @@ const Game = {
     $('#gDeck').textContent = s.finished ? '' : `${T('เหลือ')} ${Math.max(0, total - s.idx - (s.phase === 'deal' ? 0 : 1))} ${T('ใบ')}`;
   },
   setCombo(n) {
-    const s = this.s, el = $('#gCombo'); s.combo = n; s.bestCombo = Math.max(s.bestCombo, n);
-    if (n >= 2) { el.textContent = `${T('ต่อเนื่อง')} ×${n}`; el.classList.add('show'); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
-    else el.classList.remove('show', 'bump');
+    const s = this.s, el = $('#gCombo'), st = $('#gStage');
+    s.combo = n; s.bestCombo = Math.max(s.bestCombo, n);
+    const tier = n >= 8 ? 3 : n >= 5 ? 2 : n >= 3 ? 1 : 0;
+    if (st) {
+      if (tier > 0) { st.dataset.comboTier = String(tier); if (typeof GX !== 'undefined' && GX.embers) GX.embers(st, tier); }
+      else delete st.dataset.comboTier;
+    }
+    if (n >= 2) {
+      const prefix = tier === 3 ? '🐉 ' : tier === 2 ? '🔥🔥 ' : tier === 1 ? '🔥 ' : '';
+      el.textContent = `${prefix}${T('ต่อเนื่อง')} ×${n}`;
+      el.className = `combo show bump${tier ? ' combo-t' + tier : ''}`;
+      void el.offsetWidth;
+    } else {
+      el.className = 'combo';
+    }
   },
 
   /* ---------- timer loop ---------- */
