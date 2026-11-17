@@ -106,7 +106,7 @@ const Cloud = {
   _pushTimer: null,
 
   DEFAULT_URL: 'https://hloxhyephrfspxiryzgt.supabase.co',
-  DEFAULT_KEY: '',
+  DEFAULT_KEY: 'sb_publishable_wEitzVHMo-HvjBwXTxo4ug_FzH1izio',
 
   /** Default or user-configured Supabase credentials */
   getConfig() {
@@ -122,6 +122,12 @@ const Cloud = {
   hasSupabase() {
     const c = this.getConfig();
     return !!(c.url && c.key && /^https?:\/\//.test(c.url));
+  },
+  apiHeaders(cfg, extra = {}) {
+    const h = { 'apikey': cfg.key, ...extra };
+    const tok = (this.user && this.user.token) || (cfg.key && cfg.key.startsWith('eyJ') ? cfg.key : '');
+    if (tok && tok.startsWith('eyJ')) h['Authorization'] = `Bearer ${tok}`;
+    return h;
   },
 
   async init() {
@@ -260,12 +266,10 @@ const Cloud = {
       try {
         const res = await fetch(`${cfg.url}/rest/v1/offy_profiles?on_conflict=username`, {
           method: 'POST',
-          headers: {
-            'apikey': cfg.key,
-            'Authorization': `Bearer ${this.user.token || cfg.key}`,
+          headers: this.apiHeaders(cfg, {
             'Content-Type': 'application/json',
             'Prefer': 'resolution=merge-duplicates'
-          },
+          }),
           body: JSON.stringify({
             username: payload.username,
             sync_code: payload.sync_code,
@@ -299,11 +303,17 @@ const Cloud = {
       const cfg = this.getConfig();
       try {
         const res = await fetch(`${cfg.url}/rest/v1/offy_profiles?or=(username.eq.${encodeURIComponent(keyName)},sync_code.eq.${encodeURIComponent(this.user.syncCode)})&limit=1`, {
-          headers: { 'apikey': cfg.key, 'Authorization': `Bearer ${this.user.token || cfg.key}` }
+          headers: this.apiHeaders(cfg)
         });
         if (res.ok) {
           const rows = await res.json();
-          if (rows && rows[0] && rows[0].data) remote = rows[0].data;
+          if (rows && rows[0] && rows[0].data) {
+            remote = rows[0].data;
+            if (rows[0].username && this.user.username.startsWith('LM-')) {
+              this.user.username = rows[0].username;
+              localStorage.setItem(this.AUTH_KEY, JSON.stringify(this.user));
+            }
+          }
         }
       } catch (e) { }
     }
