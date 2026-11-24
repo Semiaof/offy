@@ -183,10 +183,18 @@ const Game = {
     </div><div class="tint"></div>`;
     return el;
   },
-  /** 1 correct + 3 distractors with different meanings, preferring same level & part of speech */
+  /** 1 correct + 3 distractors with different meanings, preferring curated HSK 3.0 distractors, then same level & part of speech */
   options(w) {
     const used = new Set([meaningText(w)]), out = [w];
-    const tiers = [levelWords(w.lvl).filter(x => x._pk === w._pk), levelWords(w.lvl), WORDS.filter(x => x._pk === w._pk), WORDS];
+    const smart = [];
+    if (Array.isArray(w._quiz) && w._quiz.length) {
+      for (const dz of w._quiz) {
+        const cands = WORDS.filter(x => x.zh === dz && x.id !== w.id);
+        const pick = cands.find(x => x.lvl === w.lvl && x._pk === w._pk) || cands.find(x => x.lvl === w.lvl) || cands[0];
+        if (pick) smart.push(pick);
+      }
+    }
+    const tiers = [smart, levelWords(w.lvl).filter(x => x._pk === w._pk), levelWords(w.lvl), WORDS.filter(x => x._pk === w._pk), WORDS];
     for (const t of tiers) {
       for (const x of shuffle(t)) {
         if (out.length >= 4) break;

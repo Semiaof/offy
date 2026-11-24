@@ -9,7 +9,7 @@
 /* ---------- 0. menu language ----------
    Thai is the source language. L(th, en) picks a wording in new code; T(th) looks older strings up
    in js/i18n-en.js. The language is fixed for the page: changing it in settings reloads. */
-const LANG = (() => { try { for (const k of ['offy.v4', 'offy.v3', 'offy.v2']) { const d = JSON.parse(localStorage.getItem(k) || 'null'); if (d && d.settings) return d.settings.lang === 'en' ? 'en' : 'th'; } } catch (e) { } return 'th'; })();
+const LANG = (() => { try { for (const k of ['offy.v6', 'offy.v4', 'offy.v3', 'offy.v2']) { const d = JSON.parse(localStorage.getItem(k) || 'null'); if (d && d.settings) return d.settings.lang === 'en' ? 'en' : 'th'; } } catch (e) { } return 'th'; })();
 const EN_DICT = window.OFFY_EN || {};
 const L = (th, en) => LANG === 'en' ? en : th;
 const T = s => (LANG === 'en' && EN_DICT[s]) || s;
@@ -121,10 +121,10 @@ function buildWords() {
   WORDS.forEach(w => { (BY_LVL[w.lvl] = BY_LVL[w.lvl] || []).push(w); });
 }
 const levelWords = l => BY_LVL[l] || [];
-const stageCount = l => Math.ceil(levelWords(l).length / STAGE_SIZE);
-const stageWords = (l, n) => levelWords(l).slice((n - 1) * STAGE_SIZE, n * STAGE_SIZE);
+const stageCount = l => { const n = levelWords(l).length; if (!n) return 0; const q = Math.floor(n / STAGE_SIZE), r = n % STAGE_SIZE; return q && r && r < 4 ? q : Math.ceil(n / STAGE_SIZE); };
+const stageWords = (l, n) => { const all = levelWords(l), tot = stageCount(l), s = (n - 1) * STAGE_SIZE; return n >= tot ? all.slice(s) : all.slice(s, s + STAGE_SIZE); };
 const meaningText = w => { const s = S(); if (s.showTh && w.th) return w.th; return w.en || w.th || ''; };
-const meanHTML = w => `<span class="lang-th">${esc(w.th)}</span>${w.th && w.en ? '<span class="lang-th lang-en"> · </span>' : ''}<span class="lang-en">${esc(w.en)}</span>`;
+const meanHTML = w => w._f5 && typeof f5rowMean === 'function' ? f5rowMean(w) : `<span class="lang-th">${esc(w.th)}</span>${w.th && w.en ? '<span class="lang-th lang-en"> · </span>' : ''}<span class="lang-en">${esc(w.en)}</span>`;
 function compactRange(nums) {
   const a = [...nums].sort((x, y) => x - y), out = []; let i = 0;
   while (i < a.length) { let j = i; while (j + 1 < a.length && a[j + 1] === a[j] + 1) j++; out.push(j > i ? `${a[i]}–${a[j]}` : `${a[i]}`); i = j + 1; }
@@ -159,8 +159,8 @@ const DEFAULT_SETTINGS = { theme: null, showPinyin: true, showTh: true, showEn: 
   front: { s1: 100, s2: 100, s3: 100, s4: 100, rows4: true },          // hanzi size on the card front, by number of characters
   colors: { accent: '', felt: '', paper: '', ink: '', pinyin: '' } };   // '' = built-in colour
 const Store = {
-  KEY: 'offy.v4', d: null, migrated: '',
-  defaults() { return { v: 4, created: Date.now(), settings: clone(DEFAULT_SETTINGS), sessions: [], ws: {}, stages: {}, review: [], customWords: [], legacy: { days: {} }, last: null, customCfg: null, xp: null, seals: {}, quests: null }; },
+  KEY: 'offy.v6', d: null, migrated: '',
+  defaults() { return { v: 4, created: Date.now(), settings: clone(DEFAULT_SETTINGS), sessions: [], ws: {}, stages: {}, gram: {}, course: {}, review: [], customWords: [], legacy: { days: {} }, last: null, customCfg: null, xp: null, seals: {}, quests: null }; },
   read(k) { try { const d = JSON.parse(localStorage.getItem(k) || 'null'); return d && typeof d === 'object' ? d : null; } catch (e) { return null; } },
   /** make any saved / imported object safe to use (also upgrades v1 data) */
   normalize(d) {
@@ -170,7 +170,7 @@ const Store = {
     if (old.afterOk === undefined && old.autoNext === false) d.settings.afterOk = 'manual';      // v2/v3 had a single on/off switch
     ['scale', 'front', 'colors'].forEach(k => { d.settings[k] = Object.assign({ ...DEFAULT_SETTINGS[k] }, d.settings[k] && typeof d.settings[k] === 'object' ? d.settings[k] : {}); });
     ['sessions', 'review', 'customWords'].forEach(k => { if (!Array.isArray(d[k])) d[k] = []; });
-    ['ws', 'stages'].forEach(k => { if (!d[k] || typeof d[k] !== 'object') d[k] = {}; });
+    ['ws', 'stages', 'gram', 'course'].forEach(k => { if (!d[k] || typeof d[k] !== 'object') d[k] = {}; });
     if (!d.legacy || typeof d.legacy !== 'object') d.legacy = { days: {} };
     if (!d.legacy.days) d.legacy.days = {};
     return d;
@@ -178,17 +178,19 @@ const Store = {
   load() {
     let d = this.read(this.KEY);
     // first run of this version: carry progress over from new offy v2, else v1 (their own keys are left untouched)
-    if (!d) for (const old of ['v3', 'v2', 'v1']) { const o = this.read('offy.' + old); if (o && o.settings && Array.isArray(o.sessions)) { d = o; this.migrated = old; break; } }
+    if (!d) for (const old of ['v4', 'v3', 'v2', 'v1']) { const o = this.read('offy.' + old); if (o && o.settings && Array.isArray(o.sessions)) { d = o; this.migrated = old; break; } }
     const fresh = !d;
     this.d = this.normalize(d || {});
     if (fresh && this.migrateOld()) this.migrated = 'old';
     if (fresh || this.migrated) this.flush();
   },
   save() { clearTimeout(this._t); this._t = setTimeout(() => this.flush(), 150); },
-  flush() {
+  flush(skipCloud = false) {
     clearTimeout(this._t);
     try { localStorage.setItem(this.KEY, JSON.stringify(this.d)); }
     catch (e) { if (!this._warned) { this._warned = true; toast(`${T('บันทึกข้อมูลไม่สำเร็จ พื้นที่เบราว์เซอร์อาจเต็ม ลองสำรองข้อมูลในหน้าตั้งค่า')}`, { icon: 'info', ms: 5000 }); } }
+    if (typeof IDB !== 'undefined') IDB.set('kv', 'state', this.d);
+    if (!skipCloud && typeof Cloud !== 'undefined') Cloud.schedulePush();
   },
   /** import progress from the original single-file version (keys hskStats, hskForgotten, …). */
   migrateOld() {
@@ -256,6 +258,11 @@ const Stats = {
   /** apply one answer to the per-word memory + review bank */
   applyWord(id, ok, ts) {
     const d = Store.d;
+    if (String(id).startsWith('G:')) {                    // grammar practice (G:<grammar id>:<example>) — tallied per grammar point
+      const g = String(id).split(':')[1], gs = (d.gram || (d.gram = {}))[g] || (d.gram[g] = { s: 0, c: 0, w: 0, t: 0 });
+      gs.s++; gs.t = ts; if (ok) gs.c++; else gs.w++;
+      return;
+    }
     const ws = d.ws[id] || (d.ws[id] = { s: 0, c: 0, w: 0, b: 0, t: 0 });
     ws.s++; ws.t = ts;
     if (ok) { ws.c++; ws.b = Math.min(5, (ws.b || 0) + 1); ws.d = ts + SRS_DAYS[ws.b] * DAY; d.review = d.review.filter(x => x !== id); }

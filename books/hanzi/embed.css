@@ -1,0 +1,22 @@
+/* Library of Limu · new offy v6 — 汉字书写 as VOL 02 基本笔画 · VOL 03 六书 · VOL 04 部首 of the bookshelf
+   (only with ?embed=1 → html.embed). The book's chapter tabs replace the page's top bar, tab bar and the
+   explore tabs; surfaces follow new offy and the accent is the book's spine colour. Every tool stays. */
+html.embed {
+  --book: #c2631f;
+  --top-h: 64px; --tab-h: 0px;   /* top bar is hidden; 64px keeps the writing canvas small enough for its tool bar to stay on screen */
+  --bg: #f4f2ec; --surface: #ffffff; --surface-2: #faf8f3;
+  --ink: #1b1d1a; --ink-2: #4b4f48; --muted: #7d8279; --line: #e7e3d9; --line-2: #d7d2c5;
+  --accent: var(--book); --accent-dark: color-mix(in srgb, var(--book) 78%, #000000); --accent-soft: color-mix(in srgb, var(--book) 12%, #ffffff);
+}
+html.embed[data-theme="dark"] {
+  --bg: #111311; --surface: #191c19; --surface-2: #1f231f;
+  --ink: #ebeee8; --ink-2: #bcc2b8; --muted: #8b9288; --line: #2a2f2a; --line-2: #3a413a;
+  --accent: color-mix(in srgb, var(--book) 70%, #ffffff); --accent-dark: var(--book); --accent-soft: color-mix(in srgb, var(--book) 18%, transparent);
+}
+html.embed .topbar, html.embed .tabbar, html.embed .credit, html.embed #themeBtn { display: none !important; }
+html.embed #page-explore > .page-title, html.embed #page-explore > .ex-tabs { display: none; }
+html.embed body { padding-bottom: 0; }
+html.embed main { padding-top: clamp(14px, 2.4vw, 24px); padding-bottom: 28px; }
+html.embed .toast { bottom: 20px; }
+/* writing studio: the board fits the frame height so its tool bar stays on screen (iPad portrait / landscape, phone) */
+html.embed .board { max-width: clamp(260px, calc(100vh - 290px), 620px) !important; }

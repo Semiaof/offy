@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- Library of Limu · new offy v4 — © 2026 李牧飞 Aphisit Kaewnet -->
+<!-- Library of Limu · new offy v6 (lab) — © 2026 李牧飞 Aphisit Kaewnet -->
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -97,13 +97,20 @@
 <link rel="preload" href="fonts/PinyinSans.woff" as="font" type="font/woff" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-lite-webfont@1.1.0/style.css" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=4.5.2">
-<link rel="stylesheet" href="css/v4.css?v=4.5.2">
+<link rel="stylesheet" href="css/app.css?v=5.1.0">
+<link rel="stylesheet" href="css/v4.css?v=5.0.0">
+<link rel="stylesheet" href="css/five.css?v=7.0.0">
+<link rel="stylesheet" href="css/books5.css?v=9.0.0">
+<link rel="stylesheet" href="css/cbook.css?v=1.0.1">
+<link rel="stylesheet" href="css/ibooks.css?v=6.7.0">
+<link rel="stylesheet" href="css/tree.css?v=7.2.0">
+<link rel="stylesheet" href="css/digi.css?v=7.7.2">
+<link rel="stylesheet" href="css/compose.css?v=7.9.0">
 <script>
 /* apply the saved / system theme before first paint */
 (function () {
   var t = null;
-  try { var d = JSON.parse(localStorage.getItem('offy.v4') || localStorage.getItem('offy.v3') || localStorage.getItem('offy.v2') || localStorage.getItem('offy.v1') || 'null'); t = d && d.settings && d.settings.theme; } catch (e) {}
+  try { var d = JSON.parse(localStorage.getItem('offy.v6') || localStorage.getItem('offy.v4') || localStorage.getItem('offy.v3') || localStorage.getItem('offy.v2') || localStorage.getItem('offy.v1') || 'null'); t = d && d.settings && d.settings.theme; } catch (e) {}
   if (t !== 'dark' && t !== 'light') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   document.documentElement.setAttribute('data-theme', t);
 })();
@@ -185,6 +192,9 @@
   <symbol id="i-wand" viewBox="0 0 24 24"><path d="m4.500 19.500 12-12 2 2-12 12z"/><path d="m14.500 9.500 2 2"/><path d="M9 3.500c.3 1.300.9 1.900 2.200 2.200-1.300.3-1.900.9-2.200 2.200-.3-1.300-.9-1.900-2.200-2.200C8.100 5.400 8.700 4.800 9 3.500zM18.500 13.500c.3 1.300.9 1.900 2.200 2.200-1.300.3-1.900.9-2.200 2.200-.3-1.300-.9-1.900-2.200-2.200 1.300-.3 1.900-.9 2.200-2.200z"/></symbol>
   <symbol id="i-vocab" viewBox="0 0 24 24"><path d="M10 19.500H4a1 1 0 0 1-1-1v-14a1 1 0 0 1 1-1h6a2 2 0 0 1 2 2 2 2 0 0 1 2-2h6a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-6a2 2 0 0 0-2 2 2 2 0 0 0-2-2z"/><path d="M12 5.500v15.500M6.500 7.500h2M6.500 11h2M15.500 7.500h2M15.500 11h2M15.500 14.500h2"/></symbol>
   <symbol id="i-trend" viewBox="0 0 24 24"><path d="M4 19.500h16"/><path d="m4 15 4-6 4 2 4-5.500 4 4"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+  <symbol id="i-shrink" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></symbol>
+  <symbol id="i-hanzi" viewBox="0 0 24 24"><rect x="3.500" y="3.500" width="17" height="17" rx="4"/><path d="M7.500 9h9M12 6.500V17.500M8 17l4-4.500 4 4.500"/></symbol>
   <symbol id="i-books" viewBox="0 0 24 24"><rect x="4" y="4" width="4.500" height="16" rx="1"/><rect x="8.500" y="4" width="4.500" height="16" rx="1"/><path d="M4 8h4.500M8.500 16H13"/><path d="m13.900 5.200 2.300-.6a1 1 0 0 1 1.200.7l3.400 13a1 1 0 0 1-.7 1.200l-2.300.6a1 1 0 0 1-1.200-.7l-3.400-13a1 1 0 0 1 .7-1.200z"/><path d="m14.700 9.300 3.600-.9M16.600 16.300l3.300-.8"/></symbol>
   <!-- rough ink edge + speckle for the seals -->
   <filter id="rough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="d"/><feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="1" seed="9" result="s"/><feColorMatrix in="s" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3.2 2.6" result="m"/><feComposite in="d" in2="m" operator="in"/></filter>
@@ -202,6 +212,7 @@
       <a href="#/dict" data-nav="dict"><i class="ng"><svg class="ic"><use href="#i-vocab"/></svg></i><span>คลังคำ</span></a>
       <a href="#/stats" data-nav="stats"><i class="ng"><svg class="ic"><use href="#i-trend"/></svg></i><span>สถิติ</span></a>
       <a href="#/library" data-nav="library" class="rail-only"><i class="ng"><svg class="ic"><use href="#i-books"/></svg></i><span>หนังสือ</span></a>
+      <a href="#/hanzi" data-nav="hanzi"><i class="ng"><svg class="ic"><use href="#i-hanzi"/></svg></i><span>อักษร</span></a>
     </div>
     <div class="nav-foot rail-only">
       <button class="ibtn js-pinyin" aria-label="แสดง/ซ่อนพินอิน" data-tip="พินอิน"><svg class="ic"><use href="#i-eye"/></svg></button>
@@ -216,11 +227,12 @@
     <!-- ================= HOME ================= -->
     <section class="view" id="v-home">
       <header class="ph">
-        <div class="ph-t"><p class="eyebrow" id="hDate"></p><h1>Library of Limu</h1></div>
-        <div class="ph-a tab-only">
-          <button class="ibtn js-pinyin" aria-label="แสดง/ซ่อนพินอิน"><svg class="ic"><use href="#i-eye"/></svg></button>
-          <button class="ibtn js-theme" aria-label="สลับธีมสว่าง/มืด"><svg class="ic"><use href="#i-moon"/></svg></button>
-          <a class="ibtn" href="#/settings" aria-label="ตั้งค่า"><svg class="ic"><use href="#i-gear"/></svg></a>
+        <div class="ph-t"><p class="eyebrow" id="hDate"></p><h1>Library of Limu <small class="v5-tag">v5 Cloud</small></h1></div>
+        <div class="ph-a">
+          <button class="btn sm cloud-pill js-cloud-btn" type="button" aria-label="เข้าสู่ระบบและซิงค์ข้ามอุปกรณ์"><span class="cd-dot"></span><span class="cd-name">เข้าสู่ระบบ / ซิงค์</span></button>
+          <button class="ibtn js-pinyin tab-only" aria-label="แสดง/ซ่อนพินอิน"><svg class="ic"><use href="#i-eye"/></svg></button>
+          <button class="ibtn js-theme tab-only" aria-label="สลับธีมสว่าง/มืด"><svg class="ic"><use href="#i-moon"/></svg></button>
+          <a class="ibtn tab-only" href="#/settings" aria-label="ตั้งค่า"><svg class="ic"><use href="#i-gear"/></svg></a>
         </div>
       </header>
       <div id="homeHero"></div>
@@ -452,11 +464,13 @@
         <div class="search lg">
           <svg class="ic"><use href="#i-search"/></svg>
           <input class="input" id="qInput" placeholder="ค้นหา ตัวจีน · พินอิน (nihao, ni3hao3) · ไทย · English" autocomplete="off" enterkeyhint="search">
+          <button class="clr q-pen" data-handpad="#qInput" data-hp-mode="append" aria-label="เขียนค้นหา"><svg class="ic"><use href="#i-pen"/></svg></button>
           <button class="clr" id="qClear" aria-label="ล้างการค้นหา"><svg class="ic"><use href="#i-x"/></svg></button>
         </div>
         <div class="q-filters">
           <div class="chips scroll" id="qLevels"></div>
           <select class="input sel" id="qPos" aria-label="ชนิดคำ"></select>
+          <select class="input sel" id="qTopic" aria-label="หัวข้อ HSK 3.0"></select>
           <select class="input sel" id="qStatus" aria-label="สถานะ">
             <option value="">ทุกสถานะ</option><option value="new">ยังไม่เคยเล่น</option><option value="learning">กำลังเรียน</option><option value="mastered">จำได้แล้ว</option><option value="review">รอทบทวน</option>
           </select>
@@ -484,6 +498,28 @@
       </header>
       <p class="lead">สรุปเนื้อหาตามความเข้าใจส่วนตัวเพื่อใช้ทบทวน ไม่ควรใช้อ้างอิงเชิงวิชาการ</p>
       <div class="shelf" id="shelf"></div>
+    </section>
+
+    <!-- ================= CREDITS ================= -->
+    <section class="view" id="v-credits">
+      <header class="ph">
+        <button class="back-btn" data-up="/settings" aria-label="กลับ"><svg class="ic"><use href="#i-chev-l"/></svg></button>
+        <div class="ph-t"><p class="eyebrow">Credits</p><h1>แหล่งข้อมูลและเครดิต</h1></div>
+      </header>
+      <div id="crBody"></div>
+    </section>
+
+    <!-- ================= HANZI TOOLS ================= -->
+    <section class="view" id="v-hanzi">
+      <header class="ph">
+        <button class="back-btn tab-only" data-up="/home" aria-label="กลับ"><svg class="ic"><use href="#i-chev-l"/></svg></button>
+        <div class="ph-t"><p class="eyebrow">汉字 · Hanzi</p><h1>อักษร</h1></div>
+        <div class="ph-a"><button class="ibtn" id="hzFull" aria-label="เต็มจอ" data-tip="เต็มจอ"><svg class="ic"><use href="#i-expand"/></svg></button></div>
+      </header>
+      <div class="hz-bar"><div class="seg hz-tabs" id="hzTabs"><button data-v="digi">สายวิวัฒนาการ</button><button data-v="tree">ต้นไม้ตัวอักษร</button><button data-v="compose">ผสมอักษร</button></div>
+        <div class="hz-lv" id="hzLv" role="group" aria-label="ระดับ HSK"></div>
+        <button class="ibtn hz-exit" id="hzExit" aria-label="ออกจากเต็มจอ"><svg class="ic"><use href="#i-shrink"/></svg></button></div>
+      <article class="card hz-card" id="hzStage"></article>
     </section>
 
     <!-- ================= BOOK ================= -->
@@ -588,9 +624,14 @@
             <div class="set-row col"><div class="lbl"><b>การ์ดต่อวัน <span class="val" id="sGoalVal">30</span></b></div><input type="range" id="sGoal" min="10" max="200" step="10"></div>
           </div>
 
+          <h3 class="st">บัญชี & ซิงค์ข้ามอุปกรณ์</h3>
+          <div class="card" id="sCloudCard"></div>
+
+          <h3 class="st">เกี่ยวกับ</h3>
+          <div class="card rows"><a class="set-row cr-link" href="#/credits"><div class="lbl"><b>แหล่งข้อมูลและเครดิต</b><small>แหล่งข้อมูลที่แอปใช้และสัญญาอนุญาต</small></div><svg class="ic"><use href="#i-chev-r"/></svg></a></div>
           <h3 class="st">ข้อมูลของฉัน</h3>
           <div class="card">
-            <p class="note">ข้อมูลทั้งหมดเก็บในเบราว์เซอร์ของเครื่องนี้เท่านั้น สำรองเป็นไฟล์เพื่อย้ายเครื่องหรือกันข้อมูลหาย (นำเข้าไฟล์สำรองจาก new offy v1 และ v2 ได้)</p>
+            <p class="note">สำรองเป็นไฟล์ JSON เพื่อเก็บไว้ในเครื่อง หรือใช้ระบบซิงค์ข้ามอุปกรณ์ด้านบน (นำเข้าไฟล์สำรองจาก new offy v1–v4 ได้)</p>
             <div class="grid2">
               <button class="btn" id="sExport"><svg class="ic"><use href="#i-down"/></svg>สำรองข้อมูล</button>
               <button class="btn" id="sImport"><svg class="ic"><use href="#i-up"/></svg>นำเข้าข้อมูล</button>
@@ -603,7 +644,7 @@
               <button class="btn danger solid" data-reset="all">ล้างทั้งหมด</button>
             </div>
           </div>
-          <p class="fine">new offy v4 · Library of Limu<br>© 2026 李牧飞 Aphisit Kaewnet</p>
+          <p class="fine">new offy v6 (ห้องทดลอง 5 ภาษา) · Library of Limu<br>© 2026 李牧飞 Aphisit Kaewnet</p>
         </div>
       </div>
     </section>
@@ -625,15 +666,28 @@
 <div class="edge-pull" id="edgeL"><svg class="ic"><use href="#i-chev-l"/></svg></div>
 <canvas id="confetti" aria-hidden="true"></canvas>
 
-<script src="data/words.js?v=4.4.2"></script>
-<script src="data/books.js?v=4.4.2"></script>
-<script src="js/i18n-en.js?v=4.4.2"></script>
-<script src="js/core.js?v=4.4.2"></script>
-<script src="js/play.js?v=4.5.4"></script>
-<script src="js/games.js?v=4.5.4"></script>
-<script src="js/app.js?v=4.5.4"></script>
-<script src="js/gami.js?v=4.5.4"></script>
-<script src="js/scene.js?v=4.5.4"></script>
-<script src="js/views.js?v=4.5.4"></script>
+<script src="data/words.js?v=5.0.0"></script>
+<script src="data/books.js?v=5.0.0"></script>
+<script src="js/i18n-en.js?v=5.0.0"></script>
+<script src="js/core.js?v=8.3.0"></script>
+<script src="js/cloud.js?v=5.3.0"></script>
+<script src="js/play.js?v=5.1.0"></script>
+<script src="js/games.js?v=8.1.0"></script>
+<script src="js/app.js?v=7.9.1"></script>
+<script src="js/gami.js?v=5.0.0"></script>
+<script src="js/scene.js?v=5.0.0"></script>
+<script src="js/books5.js?v=9.0.0"></script>
+<script src="js/gbook.js?v=9.0.0"></script>
+<script src="js/cbook.js?v=1.2.0"></script>
+<script src="js/ibooks.js?v=7.0.0"></script>
+<script src="js/tree.js?v=7.5.0"></script>
+<script src="js/digi.js?v=7.7.2"></script>
+<script src="js/compose.js?v=7.5.0"></script>
+<script src="js/handpad.js?v=7.1.0"></script>
+<script src="js/hanzi.js?v=7.2.0"></script>
+<script src="js/credits.js?v=7.8.0"></script>
+<script src="data/hsk.js?v=10.1.0"></script>
+<script src="js/five.js?v=7.1.0"></script>
+<script src="js/views.js?v=5.1.0"></script>
 </body>
 </html>

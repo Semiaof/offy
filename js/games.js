@@ -35,6 +35,7 @@ const GAME_LIST = [
   */
 ];
 const GAME_BY_ID = Object.fromEntries(GAME_LIST.map(g => [g.id, g]));
+GAME_BY_ID.judge = { id: 'judge', icon: 'target', name: L('จับผิดประโยค', 'Spot mistake'), sub: L('ตัดสินว่าประโยคนี้ถูกหรือผิดไวยากรณ์', 'Judge whether the sentence is right or wrong') };
 const gameName = id => (GAME_BY_ID[id] || GAME_BY_ID.flash).name;
 
 /** start any game (flashcards and 听写 keep their own screens) */
@@ -312,7 +313,12 @@ const Mini = {
     if (best && best.first) bestTag = `<span class="newbest">${T('ผ่านด่านนี้ครั้งแรก')}</span>`;
     else if (best && best.improved) bestTag = `<span class="newbest">${T('สถิติใหม่ · เดิม')} ${best.prevPct}%</span>`;
     const avg = total ? (s.results.reduce((a, r) => a + r.ms, 0) / total / 1000).toFixed(1) : '0';
-    const words = s.results.map(r => { const w = BY_ID.get(r.id); return w ? `<button class="wchip ${r.ok ? 'ok' : 'no'}" data-speak="${esc(w.id)}" title="${esc(w.py)} · ${esc(meaningText(w))}"><span class="hz">${esc(w.zh)}</span><small class="pyx">${esc(w.py)}</small></button>` : ''; }).join('');
+    const byId = id => BY_ID.get(id) || s.words.find(x => x.id === id);
+    const words = s.results.map(r => {
+      const w = byId(r.id); if (!w) return '';
+      if (w._pk === 'g') return `<button class="wchip ${r.ok ? 'ok' : 'no'}" data-speak="${esc(w.id)}" title="${esc(w.ex_py || '')}${exMean(w) ? ' · ' + esc(exMean(w)) : ''}"><span class="hz">${esc(w.ex_zh || w.zh)}</span></button>`;
+      return `<button class="wchip ${r.ok ? 'ok' : 'no'}" data-speak="${esc(w.id)}" title="${esc(w.py)} · ${esc(meaningText(w))}"><span class="hz">${esc(w.zh)}</span><small class="pyx">${esc(w.py)}</small></button>`;
+    }).join('');
     const toMap = s.kind === 'stage' || String(s.back).startsWith('/level');
     $('#mgQuit use').setAttribute('href', '#i-x');
     const res = $('#mgResult');
@@ -340,10 +346,10 @@ const Mini = {
     for (let i = 0; i < stars; i++) setTimeout(() => { if (this.alive(s)) sfx('star', i); }, 380 + i * 220);
     setTimeout(() => { if (!this.alive(s)) return; if (stars === 3) { sfx('complete'); Fx.confetti(); buzz([18, 40, 18, 40, 30]); } else if (stars === 0) sfx('fail'); }, 380 + stars * 220 + 80);
     res.onclick = e => {
-      const sp = e.target.closest('[data-speak]'); if (sp) { speakWord(BY_ID.get(sp.dataset.speak)); return; }
+      const sp = e.target.closest('[data-speak]'); if (sp) { const w = byId(sp.dataset.speak); if (w) { if (w._pk === 'g' && w.ex_zh) TTS.speak(w.ex_zh); else speakWord(w); } return; }
       const b = e.target.closest('[data-r]'); if (!b) return;
       const r = b.dataset.r, cfg = s.cfg;
-      if (r === 'wrong') this.start({ ...cfg, words: s.results.filter(x => !x.ok).map(x => BY_ID.get(x.id)).filter(Boolean), base: cfg.base || s.title, title: `${T('ฝึกคำที่ผิด')} · ` + (cfg.base || s.title), kind: 'retry', lvl: undefined, stage: undefined });
+      if (r === 'wrong') this.start({ ...cfg, words: s.results.filter(x => !x.ok).map(x => byId(x.id)).filter(Boolean), base: cfg.base || s.title, title: `${T('ฝึกคำที่ผิด')} · ` + (cfg.base || s.title), kind: 'retry', lvl: undefined, stage: undefined });
       else if (r === 'again') this.start(cfg);
       else if (r === 'next') { this.teardown(); this.s = null; Level.play(cfg.lvl, nextStage, s.game); }
       else if (r === 'back') this.leave(s.back);
@@ -356,7 +362,7 @@ const Mini = {
 const optHTML = (x, i, { hz = false } = {}) => `<button class="choice" data-o="${i}"><kbd>${i + 1}</kbd>${hz
   ? `<span class="hz">${esc(x.zh)}</span><small class="pyx o-py">${esc(x.py)}</small>`
   : `<span>${esc(meaningText(x))}</span>${S().showTh && x.th && S().showEn && x.en ? `<small>${esc(x.en)}</small>` : ''}`}</button>`;
-const exMean = w => S().showTh && w.ex_th ? w.ex_th : (w.ex_en || w.ex_th || '');
+const exMean = w => w._tr || (S().showTh && w.ex_th ? w.ex_th : (w.ex_en || w.ex_th || ''));
 
 /* =====================================================================
    effects shared by the games: particles, floating text, shakes, flashes, a big seal
@@ -840,13 +846,13 @@ const MG = {
     undo(s) { const o = s.o; if (o.done || !o.placed.length) return; const last = $('#oLine .tok:last-child'); if (last) this.move(s, last); },
     check(s) {
       const o = s.o; o.done = true;
-      const got = o.placed.map(i => o.toks[i]).join(''), want = o.toks.join(''), ok = got === want, sc = $('#oScroll'), line = $('#oLine'), host = $('#mgStage');
+      const got = o.placed.map(i => o.toks[i]).join(''), want = o.toks.join(''), alts = o.w._alts || [], ok = got === want || alts.includes(got), sc = $('#oScroll'), line = $('#oLine'), host = $('#mgStage');
       sc.classList.add(ok ? 'ok' : 'no');
       if (ok) { line.insertAdjacentHTML('beforeend', `<span class="o-end hz">${esc(o.end)}</span>`); GX.burst(host, ...GX.at(line, host), { n: 22, dist: 110 }); }
       else { GX.shake(line, 9); $('#oFix').innerHTML = `<span class="k">${L('ที่ถูก', 'Correct')}</span><span class="hz">${esc(want + o.end)}</span>`; }
       const py = $('#oPy'); py.textContent = o.w.ex_py || ''; py.animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0 0 0)' }], { duration: 800, easing: 'ease-out', fill: 'forwards' });
       Mini.mark(o.w, ok, performance.now() - o.t, line);
-      if (ok || S().autoSpeak) TTS.speak(o.w.ex_zh);
+      if (ok || S().autoSpeak) TTS.speak(ok ? got + o.end : o.w.ex_zh);
       Mini.advance(ok, $('#oFoot'), () => this.next(s));
     },
     key(s, e) { if (e.key === 'Backspace') { e.preventDefault(); this.undo(s); } }
@@ -872,10 +878,12 @@ const MG = {
     next(s) {
       s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
       const w = s.words[s.i], at = w.ex_zh.indexOf(w.zh), n = Array.from(w.ex_zh).length;
-      s.c = { w, opts: shuffle([w, ...distractors(w, 3, { avoid: w.ex_zh })]), t: performance.now(), done: false };
+      const own = w._opts && w._opts.map(z => ({ zh: z, py: '', th: '', en: '', _fake: true }));     // grammar practice brings its own choices
+      s.c = { w, opts: shuffle([w, ...(own || distractors(w, 3, { avoid: w.ex_zh }))]), t: performance.now(), done: false };
       const sign = $('#cSign'); sign.className = 'sign2'; sign.style.setProperty('--fs', n > 16 ? .62 : n > 11 ? .78 : 1);
       $$('#cCard .sg-lamp').forEach(l => l.classList.remove('on'));
-      $('#cSent').innerHTML = `${esc(w.ex_zh.slice(0, at))}<b class="sg-gap" style="--n:${w._len}"></b>${esc(w.ex_zh.slice(at + w.zh.length))}`;
+      const gapN = w._pk === 'g' ? clamp(Math.max(...s.c.opts.map(x => Array.from(x.zh).length)), 1, 4) : w._len;
+      $('#cSent').innerHTML = `${esc(w.ex_zh.slice(0, at))}<b class="sg-gap" style="--n:${gapN}"></b>${esc(w.ex_zh.slice(at + w.zh.length))}`;
       sign.animate([{ transform: 'translateY(-26px) rotate(-2deg)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 420, easing: 'cubic-bezier(.3,1.3,.5,1)' });
       $('#cPy').textContent = ''; $('#cMean').textContent = exMean(w);
       $('#cOpts').innerHTML = s.c.opts.map((x, i) => optHTML(x, i, { hz: true })).join('');
@@ -912,6 +920,72 @@ const MG = {
       Mini.advance(ok, $('#cFoot'), () => this.next(s));
     },
     key(s, e) { const n = +e.key; if (n >= 1 && n <= 4) { e.preventDefault(); const b = $(`#cOpts .choice[data-o="${n - 1}"]`); if (b && !b.disabled) b.click(); } }
+  },
+
+  /* ---------- จับผิดประโยค (grammar only): judge whether a Chinese sentence is grammatically right or wrong ---------- */
+  judge: {
+    ok: w => typeof w._ok === 'boolean' && !!w.zh,
+    none: L('บทเรียนนี้ยังไม่มีตัวอย่างสำหรับจับผิดประโยค', 'This lesson has no mistake-check items yet'),
+    mount(s, el) {
+      s.i = -1;
+      el.innerHTML = `<div class="m-table felt jg-table">
+          <div class="jg-lesson" id="jLesson"></div>
+          <div class="jg-card" id="jCard">
+            <button class="ibtn sm jg-say" id="jSay" data-a="say" hidden aria-label="${T('ฟังเสียง')}">${ic('vol')}</button>
+            <div class="jg-sent" id="jSent" lang="zh-Hans"></div>
+            <div class="jg-fix" id="jFix"></div>
+          </div>
+        </div>
+        <div class="m-panel">
+          <div class="jg-acts" id="jActs">
+            <button class="jg-btn yes" data-j="1"><kbd>1</kbd>${ic('check')}${L('ถูกต้อง', 'Correct')}</button>
+            <button class="jg-btn no" data-j="0"><kbd>2</kbd>${ic('x')}${L('ผิดไวยากรณ์', 'Incorrect')}</button>
+          </div>
+          <div class="m-foot" id="jFoot"></div>
+        </div>`;
+      el.onclick = e => {
+        if (e.target.closest('[data-a="say"]')) { const w = s.words[s.i]; if (w) TTS.speak(w._right || w.ex_zh); return; }
+        const b = e.target.closest('[data-j]'); if (b) this.choose(s, b.dataset.j === '1');
+      };
+      this.next(s);
+    },
+    next(s) {
+      s.i++; if (s.i >= s.words.length) { Mini.finish(); return; }
+      const w = s.words[s.i];
+      s.j = { w, t: performance.now(), done: false };
+      const card = $('#jCard'); card.className = 'jg-card';
+      card.animate([{ transform: 'translateY(16px) scale(.97)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 320, easing: 'cubic-bezier(.22,.8,.28,1)' });
+      const ls = $('#jLesson'); ls.textContent = w._lesson || ''; ls.hidden = !w._lesson;
+      $('#jSent').textContent = w.zh;
+      $('#jFix').innerHTML = ''; $('#jSay').hidden = true; $('#jFoot').innerHTML = '';
+      $$('#jActs .jg-btn').forEach(b => { b.disabled = false; b.classList.remove('correct', 'wrong', 'dim'); });
+    },
+    choose(s, guessOk) {
+      const j = s.j; if (!j || j.done || s.paused) return; j.done = true;
+      const w = j.w, ok = guessOk === w._ok, card = $('#jCard'), host = $('#mgStage');
+      card.classList.add(ok ? 'ok' : 'no');
+      $$('#jActs .jg-btn').forEach(b => {
+        const val = b.dataset.j === '1'; b.disabled = true;
+        b.classList.add(val === w._ok ? 'correct' : val === guessOk ? 'wrong' : 'dim');
+      });
+      if (ok) GX.burst(host, ...GX.at(card, host), { n: 20, dist: 100 });
+      else GX.shake(card, 8);
+      const badge = w._ok
+        ? `<div class="jg-badge ok">${ic('check')}${L('ประโยคนี้ถูกต้อง', 'Grammatically correct')}</div>`
+        : `<div class="jg-badge no">${ic('x')}${L('ประโยคนี้ผิดไวยากรณ์', 'Grammatical mistake')}</div>`;
+      const diff = w._ok ? '' : `<div class="jg-diff"><s lang="zh-Hans">${esc(w._wrong)}</s><span>→</span><b lang="zh-Hans">${esc(w._right)}</b></div>`;
+      const py = w.ex_py ? `<div class="jg-py pyx">${esc(w.ex_py)}</div>` : '';
+      const note = w._note ? `<div class="jg-note"${w._noteLang ? ` lang="${w._noteLang}"` : ''}>${esc(w._note)}</div>` : '';
+      $('#jFix').innerHTML = badge + diff + py + note;
+      $('#jSay').hidden = false;
+      Mini.mark(w, ok, performance.now() - j.t, card);
+      if (ok || S().autoSpeak) TTS.speak(w._right || w.ex_zh);
+      Mini.advance(ok, $('#jFoot'), () => this.next(s));
+    },
+    key(s, e) {
+      if (e.key === '1' || e.key === 'ArrowLeft') { e.preventDefault(); const b = $('#jActs .jg-btn[data-j="1"]'); if (b && !b.disabled) b.click(); }
+      else if (e.key === '2' || e.key === 'ArrowRight') { e.preventDefault(); const b = $('#jActs .jg-btn[data-j="0"]'); if (b && !b.disabled) b.click(); }
+    }
   },
 
   /* ---------- ล่าวรรณยุกต์: draw each syllable's pitch with a finger (keys 1–5 still work) ---------- */

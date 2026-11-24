@@ -1,0 +1,2036 @@
+<!DOCTYPE html>
+<html lang="th" data-embed-app="pinyin">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#fff8ec">
+<title>พินอินเข้าใจง่าย v4 — เรียนอ่านพินอินตั้งแต่ศูนย์</title>
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("pyv4Theme");
+      if (!t && window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) t = "dark";
+      if (t === "dark") document.documentElement.dataset.theme = "dark";
+    } catch (e) {}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600;700;800&family=Anuphan:wght@400;500;600;700&family=Noto+Sans:wght@500;700;800;900&family=Noto+Sans+SC:wght@500;700;900&display=swap">
+<style>
+/* =======================================================
+   DESIGN TOKENS — "ครีม + หมึกดำ + สีเสียง" (ขอบหนา เงาแข็ง)
+   ======================================================= */
+:root {
+  --bg: #fff8ec;
+  --bg-2: #fff1d9;
+  --card: #ffffff;
+  --card-2: #fffaf2;
+  --ink: #17171c;
+  --muted: #5f5b52;
+  --line: #17171c;
+  --soft-line: #e8dfcf;
+  --hard: #17171c;
+  --yellow: #ffd84d;
+  --soft-y: #fff0b8;
+  --ini: #6d5dfc;  --ini-bg: #ecebff;
+  --fin: #ff4f8b;  --fin-bg: #ffe6ef;
+  --t1: #f59e0b; --t2: #ef4444; --t3: #3b82f6; --t4: #10b981; --t0: #9ca3af;
+  --t1-bg: #fff3d6; --t2-bg: #ffe4e4; --t3-bg: #e3edff; --t4-bg: #dcf7ec; --t0-bg: #f0f0f2;
+  --ok: #10b981; --bad: #ef4444;
+  --r: 18px;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  --spring: cubic-bezier(.34, 1.56, .64, 1);
+  --head: 'Kanit', 'Anuphan', sans-serif;
+  --body: 'Anuphan', 'Noto Sans', sans-serif;
+  --py: 'Noto Sans', 'Anuphan', sans-serif;
+  --zh: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+[data-theme="dark"] {
+  --bg: #121218;
+  --bg-2: #1a1a22;
+  --card: #1d1d26;
+  --card-2: #23232d;
+  --ink: #f4f1e8;
+  --muted: #aaa69c;
+  --line: #5a5868;
+  --soft-line: #2f2e3a;
+  --hard: #000000;
+  --yellow: #ffd84d;
+  --soft-y: rgba(255, 216, 77, .14);
+  --ini: #9d92ff;  --ini-bg: rgba(157, 146, 255, .14);
+  --fin: #ff7aa8;  --fin-bg: rgba(255, 122, 168, .14);
+  --t1: #fbbf24; --t2: #f87171; --t3: #60a5fa; --t4: #34d399; --t0: #a1a1aa;
+  --t1-bg: rgba(251, 191, 36, .14); --t2-bg: rgba(248, 113, 113, .14); --t3-bg: rgba(96, 165, 250, .14); --t4-bg: rgba(52, 211, 153, .14); --t0-bg: rgba(161, 161, 170, .14);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--body);
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.65;
+  min-height: 100vh;
+  transition: background-color .3s, color .3s;
+  background-image: radial-gradient(color-mix(in srgb, var(--ink) 7%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+button, input { font-family: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--ini); outline-offset: 3px; }
+::selection { background: var(--yellow); color: #17171c; }
+.py { font-family: var(--py); }
+.zh { font-family: var(--zh); }
+.muted { color: var(--muted); }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+
+/* buttons / cards — เงาแข็งแบบกดได้ */
+.card { background: var(--card); border: 2px solid var(--line); border-radius: var(--r); box-shadow: 5px 5px 0 var(--hard); }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 48px; padding: 0 20px;
+  border: 2px solid var(--line); border-radius: 14px;
+  background: var(--card);
+  font-family: var(--head); font-size: 16px; font-weight: 600;
+  box-shadow: 3px 3px 0 var(--hard);
+  transition: transform .12s, box-shadow .12s, background-color .2s;
+  white-space: nowrap;
+}
+.btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--hard); }
+.btn:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--hard); }
+.btn.ink { background: var(--ink); color: var(--bg); }
+.btn.yellow { background: var(--yellow); color: #17171c; }
+.btn.sm { height: 38px; padding: 0 14px; font-size: 14px; border-radius: 11px; }
+.btn:disabled { opacity: .45; pointer-events: none; }
+
+.chip-say {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px;
+  border: 2px solid var(--line); border-radius: 999px;
+  background: var(--card);
+  font-weight: 600; font-size: 14px;
+  box-shadow: 2px 2px 0 var(--hard);
+  transition: transform .12s, box-shadow .12s;
+  margin: 3px 4px 3px 0;
+}
+.chip-say:active { transform: translate(2px, 2px); box-shadow: 0 0 0; }
+.chip-say .zh { font-weight: 700; }
+
+.tag { display: inline-block; font-family: var(--head); font-weight: 600; font-size: 13px; padding: 2px 10px; border-radius: 999px; border: 2px solid var(--line); background: var(--yellow); color: #17171c; }
+
+/* =======================================================
+   TOP BAR + NAV
+   ======================================================= */
+.topbar {
+  position: sticky; top: 0; z-index: 500;
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px clamp(14px, 3vw, 32px);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 2px solid var(--line);
+}
+.logo { display: flex; align-items: center; gap: 10px; border: none; background: none; text-align: left; }
+.logo-mark {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: var(--yellow); color: #17171c;
+  border: 2px solid var(--line); box-shadow: 3px 3px 0 var(--hard);
+  display: grid; place-items: center;
+  font-family: var(--zh); font-size: 22px; font-weight: 900;
+  transition: rotate .4s var(--spring);
+}
+.logo:hover .logo-mark { rotate: -8deg; }
+.logo b { font-family: var(--head); font-size: 19px; font-weight: 700; line-height: 1.1; display: block; }
+.logo small { font-size: 12px; color: var(--muted); font-weight: 600; }
+.nav { display: flex; gap: 6px; margin-left: auto; }
+.nav button {
+  height: 40px; padding: 0 14px;
+  border: 2px solid transparent; border-radius: 12px;
+  background: none;
+  font-family: var(--head); font-size: 15px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: background-color .15s, border-color .15s;
+}
+.nav button:hover { background: var(--bg-2); }
+.nav button.on { border-color: var(--line); background: var(--card); box-shadow: 3px 3px 0 var(--hard); font-weight: 600; }
+.theme-btn { width: 42px; height: 42px; padding: 0; border-radius: 12px; }
+.tabbar { display: none; }
+
+/* =======================================================
+   VIEWS
+   ======================================================= */
+.view { display: none; }
+.view.on { display: block; animation: viewIn .5s var(--ease); }
+@keyframes viewIn { from { opacity: 0; translate: 0 14px; } to { opacity: 1; translate: 0 0; } }
+.wrap { max-width: 1120px; margin: 0 auto; padding: clamp(18px, 3vw, 34px) clamp(14px, 3vw, 32px) 70px; }
+.view-head { margin-bottom: 20px; }
+.view-head h1 { font-family: var(--head); font-size: clamp(28px, 4vw, 40px); font-weight: 700; line-height: 1.2; }
+.view-head p { color: var(--muted); font-size: 16px; max-width: 720px; margin-top: 6px; }
+
+/* =======================================================
+   HOME
+   ======================================================= */
+.hero { text-align: center; padding: clamp(28px, 6vw, 64px) 0 clamp(20px, 4vw, 36px); }
+.hero .tag { margin-bottom: 18px; }
+.hero-word { display: flex; justify-content: center; flex-wrap: wrap; gap: clamp(10px, 3vw, 34px); font-family: var(--py); font-weight: 900; font-size: clamp(54px, 11vw, 124px); line-height: 1.25; letter-spacing: -2px; }
+.hm { position: relative; display: inline-flex; flex-direction: column; align-items: center; cursor: pointer; border: none; background: none; font: inherit; color: var(--ink); transition: transform .3s var(--spring); }
+.hm:hover { transform: translateY(-6px) rotate(-2deg); }
+.hm .v { position: relative; display: inline-block; }
+.mk-svg { position: absolute; left: 50%; top: -.06em; width: .62em; height: .3em; translate: -50% 0; overflow: visible; }
+.mk-svg path { fill: none; stroke-width: 5.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .55s var(--ease) forwards; animation-delay: var(--d); }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.hm .zh-under { font-family: var(--zh); font-size: .26em; font-weight: 700; letter-spacing: 0; color: var(--muted); line-height: 1; margin-top: -.05em; }
+.hm .bar { width: 70%; height: .07em; border-radius: 99px; margin-top: .14em; transform-origin: left; animation: barIn .6s var(--ease) both; animation-delay: var(--d); }
+@keyframes barIn { from { transform: scaleX(0); } }
+.hero h1 { font-family: var(--head); font-size: clamp(24px, 3.6vw, 38px); font-weight: 700; margin-top: 18px; line-height: 1.3; }
+.hero h1 mark { background: linear-gradient(transparent 58%, color-mix(in srgb, var(--yellow) 55%, transparent) 58%); color: inherit; padding: 0 4px; }
+.hero p { color: var(--muted); font-size: 17px; max-width: 620px; margin: 10px auto 0; }
+.hero-ctas { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+
+.why { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 30px 0; }
+.why .card { padding: 18px; }
+.why b { font-family: var(--head); font-size: 18px; font-weight: 600; display: block; margin: 6px 0 4px; }
+.why p { color: var(--muted); font-size: 14.5px; }
+.why .ic { font-size: 28px; }
+
+.paths { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.path {
+  text-align: left; padding: 20px; border-radius: var(--r);
+  border: 2px solid var(--line); box-shadow: 5px 5px 0 var(--hard);
+  transition: transform .15s, box-shadow .15s;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.path:hover { transform: translate(-2px, -2px); box-shadow: 7px 7px 0 var(--hard); }
+.path:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--hard); }
+.path .n { font-family: var(--head); font-size: 13px; font-weight: 600; opacity: .8; }
+.path b { font-family: var(--head); font-size: 22px; font-weight: 700; line-height: 1.2; }
+.path p { font-size: 14px; opacity: .85; }
+.path .go { margin-top: auto; padding-top: 8px; font-family: var(--head); font-weight: 600; }
+.path.p1 { background: var(--yellow); color: #17171c; }
+.path.p2 { background: var(--ini-bg); }
+.path.p3 { background: var(--fin-bg); }
+.path.p4 { background: var(--t4-bg); }
+.voice-warn { display: none; margin: 0 auto 18px; max-width: 760px; padding: 12px 16px; font-size: 14px; background: var(--t2-bg); }
+.voice-warn.show { display: block; }
+
+/* =======================================================
+   LEARN — การ์ดบทเรียนทีละขั้น
+   ======================================================= */
+.deck-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.deck-count { font-family: var(--head); font-weight: 600; font-size: 15px; white-space: nowrap; }
+.segs { flex: 1; display: flex; gap: 4px; }
+.segs i { flex: 1; height: 9px; border-radius: 99px; background: var(--soft-line); border: 1.5px solid var(--line); transition: background-color .3s; cursor: pointer; }
+.segs i.done { background: var(--ink); }
+.segs i.cur { background: var(--yellow); }
+.step-card { padding: clamp(20px, 4vw, 40px); min-height: 520px; overflow: hidden; position: relative; }
+.step-anim-next { animation: slideNext .45s var(--ease); }
+.step-anim-prev { animation: slidePrev .45s var(--ease); }
+@keyframes slideNext { from { opacity: 0; translate: 40px 0; } to { opacity: 1; translate: 0 0; } }
+@keyframes slidePrev { from { opacity: 0; translate: -40px 0; } to { opacity: 1; translate: 0 0; } }
+.step-kicker { font-family: var(--head); font-weight: 600; color: var(--muted); font-size: 14px; }
+.step-card h2 { font-family: var(--head); font-size: clamp(26px, 4vw, 38px); font-weight: 700; line-height: 1.25; margin: 4px 0 10px; }
+.step-card .lead { font-size: 17px; color: var(--muted); max-width: 760px; }
+.step-card .lead b { color: var(--ink); }
+.step-body { margin-top: 22px; }
+.deck-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 18px; }
+.try { display: inline-flex; align-items: center; gap: 6px; font-family: var(--head); font-weight: 600; font-size: 14px; background: var(--soft-y); color: var(--ink); border: 2px solid var(--line); border-radius: 10px; padding: 1px 10px; margin-bottom: 10px; }
+
+/* ruby cards (step 1) */
+.ruby-row { display: flex; flex-wrap: wrap; gap: 16px; }
+.ruby {
+  border: 2px solid var(--line); border-radius: 18px; background: var(--card-2);
+  box-shadow: 4px 4px 0 var(--hard); padding: 14px 20px 12px;
+  text-align: center; min-width: 150px;
+  transition: transform .12s, box-shadow .12s;
+}
+.ruby:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--hard); }
+.ruby .rp { display: flex; justify-content: center; gap: 14px; font-family: var(--py); font-weight: 800; font-size: 22px; color: var(--ini); }
+.ruby .rc { display: flex; justify-content: center; gap: 14px; font-family: var(--zh); font-weight: 700; font-size: 54px; line-height: 1.2; }
+.ruby .rc span, .ruby .rp span { min-width: 1.1em; }
+.ruby small { display: block; font-size: 14px; color: var(--muted); font-weight: 600; }
+.karaoke { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 22px; padding: 14px 18px; border: 2px dashed var(--line); border-radius: 14px; font-size: 15.5px; }
+
+/* assembly (step 2) */
+.asm { display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: center; }
+.asm-pieces { display: flex; flex-direction: column; gap: 12px; }
+.piece {
+  display: flex; align-items: center; gap: 14px;
+  border: 2px solid var(--line); border-radius: 16px; padding: 10px 16px;
+  box-shadow: 3px 3px 0 var(--hard);
+  animation: pieceIn .55s var(--spring) both; animation-delay: var(--d);
+}
+@keyframes pieceIn { from { opacity: 0; translate: -30px 0; } }
+.piece b { font-family: var(--py); font-size: 30px; font-weight: 900; min-width: 64px; text-align: center; }
+.piece span { font-size: 14.5px; font-weight: 600; line-height: 1.4; }
+.piece span small { display: block; font-weight: 500; color: var(--muted); }
+.piece.ini { background: var(--ini-bg); } .piece.ini b { color: var(--ini); }
+.piece.fin { background: var(--fin-bg); } .piece.fin b { color: var(--fin); }
+.piece.ton { background: var(--t1-bg); } .piece.ton b { color: var(--t1); }
+.asm-plus { font-family: var(--head); font-size: 40px; font-weight: 800; }
+.asm-out { text-align: center; }
+.asm-out .big { font-family: var(--py); font-size: clamp(56px, 9vw, 92px); font-weight: 900; line-height: 1.1; animation: popIn .6s var(--spring) both; animation-delay: 1s; }
+.asm-out .big .i { color: var(--ini); } .asm-out .big .f { color: var(--fin); } .asm-out .big .m { color: var(--t1); }
+.asm-out .zhc { font-family: var(--zh); font-size: 60px; font-weight: 700; animation: popIn .6s var(--spring) both; animation-delay: 1.2s; }
+@keyframes popIn { from { opacity: 0; scale: .5; } }
+.asm-examples { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; justify-content: center; }
+.asm-examples button { border: 2px solid var(--line); border-radius: 12px; background: var(--card-2); padding: 6px 12px; font-weight: 600; box-shadow: 2px 2px 0 var(--hard); }
+.asm-examples button.on { background: var(--soft-y); border-color: var(--ink); }
+
+/* tone buttons (step 3) */
+.tone-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.tone-btn {
+  position: relative;
+  border: 2px solid var(--line); border-radius: 20px;
+  background: var(--tb); box-shadow: 4px 4px 0 var(--hard);
+  padding: 16px 10px 12px; text-align: center;
+  transition: transform .12s, box-shadow .12s;
+}
+.tone-btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--hard); }
+.tone-btn .py { display: block; font-size: 46px; font-weight: 900; color: var(--tc); line-height: 1.1; }
+.tone-btn .zh { display: block; font-size: 40px; font-weight: 700; line-height: 1.2; }
+.tone-btn .mean { font-weight: 700; font-size: 15px; }
+.tone-btn .cont { width: 70px; height: 34px; display: block; margin: 6px auto 0; overflow: visible; }
+.tone-btn .cont path { fill: none; stroke: var(--tc); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.tone-btn .heard { position: absolute; top: -10px; right: -10px; width: 30px; height: 30px; border-radius: 50%; background: var(--ok); color: #fff; border: 2px solid var(--line); display: grid; place-items: center; font-weight: 800; scale: 0; transition: scale .35s var(--spring); }
+.tone-btn.was .heard { scale: 1; }
+.tone-btn.playing { animation: wob .5s var(--spring); }
+@keyframes wob { 30% { rotate: -3deg; scale: 1.05; } 60% { rotate: 2deg; } }
+.callout { margin-top: 20px; padding: 14px 18px; border: 2px solid var(--line); border-radius: 14px; background: var(--card-2); font-size: 15.5px; display: flex; gap: 12px; align-items: flex-start; }
+.callout .ic { font-size: 22px; line-height: 1.3; }
+.callout.y { background: var(--soft-y); }
+.callout.r { background: var(--t2-bg); }
+.callout.b { background: var(--t3-bg); }
+
+/* pitch graph (step 4) */
+.pitch-wrap { display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; align-items: start; }
+.pitch-svg { width: 100%; height: auto; display: block; overflow: visible; border: 2px solid var(--line); border-radius: 16px; background: var(--card-2); }
+.pg-line { stroke: var(--soft-line); stroke-width: 1.5; stroke-dasharray: 4 5; }
+.pg-num { font: 700 13px var(--py); fill: var(--muted); }
+.pg-path { fill: none; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; transition: opacity .3s; }
+.pitch-svg.focus .pg-path { opacity: .15; }
+.pitch-svg.focus .pg-path.on { opacity: 1; }
+#pgDot { opacity: 0; transition: opacity .2s; }
+#pgDot.show { opacity: 1; }
+.thai-tone { display: flex; flex-direction: column; gap: 8px; }
+.thai-tone button {
+  display: grid; grid-template-columns: 54px 1fr; gap: 12px; align-items: center;
+  text-align: left; border: 2px solid var(--line); border-radius: 14px;
+  background: var(--card); padding: 8px 12px; box-shadow: 3px 3px 0 var(--hard);
+  transition: transform .12s, box-shadow .12s, background-color .2s;
+}
+.thai-tone button:active { transform: translate(3px, 3px); box-shadow: 0 0 0; }
+.thai-tone button.on { background: var(--tb); }
+.thai-tone .py { font-size: 30px; font-weight: 900; color: var(--tc); text-align: center; }
+.thai-tone b { display: block; font-size: 15px; }
+.thai-tone small { display: block; font-size: 13px; color: var(--muted); line-height: 1.45; }
+
+/* quiz bits */
+.qbox { border: 2px solid var(--line); border-radius: 18px; background: var(--card-2); padding: 20px; text-align: center; }
+.qbox.shake { animation: shake .45s; }
+@keyframes shake { 20% { translate: -8px 0; } 40% { translate: 7px 0; } 60% { translate: -4px 0; } 80% { translate: 3px 0; } }
+.q-play { width: 84px; height: 84px; border-radius: 50%; font-size: 34px; border: 2px solid var(--line); background: var(--yellow); color: #17171c; box-shadow: 4px 4px 0 var(--hard); transition: transform .12s, box-shadow .12s; }
+.q-play:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--hard); }
+.q-play.pulse { animation: qpulse 1.6s ease-out infinite; }
+@keyframes qpulse { 0% { box-shadow: 4px 4px 0 var(--hard), 0 0 0 0 rgba(255, 216, 77, .7); } 70% { box-shadow: 4px 4px 0 var(--hard), 0 0 0 18px rgba(255, 216, 77, 0); } 100% { box-shadow: 4px 4px 0 var(--hard), 0 0 0 0 rgba(255, 216, 77, 0); } }
+.q-reveal { min-height: 66px; margin-top: 12px; }
+.q-reveal .zh { font-size: 42px; font-weight: 700; line-height: 1.2; }
+.q-reveal .py { font-size: 24px; font-weight: 800; }
+.q-opts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+.q-opt { border: 2px solid var(--line); border-radius: 14px; background: var(--card); padding: 10px 4px; box-shadow: 3px 3px 0 var(--hard); font-family: var(--head); font-weight: 600; transition: transform .12s, box-shadow .12s, background-color .2s; }
+.q-opt .py { display: block; font-size: 30px; font-weight: 900; color: var(--tc); line-height: 1.2; }
+.q-opt:active { transform: translate(3px, 3px); box-shadow: 0 0 0; }
+.q-opt.right { background: var(--t4-bg); border-color: var(--ok); }
+.q-opt.wrong { background: var(--t2-bg); border-color: var(--bad); }
+.q-opt:disabled { cursor: default; }
+.score-row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 14px; }
+.score-row span { font-family: var(--head); font-weight: 600; font-size: 14px; border: 2px solid var(--line); border-radius: 999px; padding: 2px 12px; background: var(--card); }
+
+/* letter tiles (steps 6–8) */
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px; }
+.tile {
+  position: relative;
+  border: 2px solid var(--line); border-radius: 16px; background: var(--card);
+  box-shadow: 3px 3px 0 var(--hard); padding: 10px 8px 8px; text-align: center;
+  transition: transform .12s, box-shadow .12s;
+}
+.tile:active { transform: translate(3px, 3px); box-shadow: 0 0 0; }
+.tile .L { font-family: var(--py); font-size: 34px; font-weight: 900; line-height: 1.1; color: var(--ini); }
+.tile.vow .L { color: var(--fin); }
+.tile .eq { font-family: var(--head); font-size: 22px; font-weight: 700; }
+.tile .ex { font-size: 13px; color: var(--muted); font-weight: 600; }
+.tile .ex .zh { font-weight: 700; color: var(--ink); }
+.tile.trap { background: var(--soft-y); border-color: color-mix(in srgb, var(--yellow) 70%, var(--line)); }
+.tile .flag { position: absolute; top: -10px; right: -8px; font-size: 11px; font-family: var(--head); font-weight: 600; background: var(--t2); color: #fff; border: 2px solid var(--line); border-radius: 8px; padding: 0 6px; rotate: 6deg; }
+.legend-line { display: flex; flex-wrap: wrap; gap: 16px; font-size: 14px; color: var(--muted); margin-top: 14px; }
+.legend-line i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; border: 2px solid var(--line); vertical-align: -2px; margin-right: 6px; }
+
+/* mouth diagrams (step 7) */
+.gangs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.gang { border: 2px solid var(--line); border-radius: 18px; background: var(--card-2); padding: 14px; box-shadow: 4px 4px 0 var(--hard); }
+.gang h3 { font-family: var(--head); font-size: 19px; font-weight: 700; line-height: 1.3; }
+.gang h3 .py { color: var(--ini); }
+.gang p { font-size: 14px; color: var(--muted); margin: 4px 0 8px; }
+.mouth { width: 100%; height: auto; display: block; background: var(--card); border: 2px solid var(--line); border-radius: 12px; margin-bottom: 10px; }
+.mouth .pal { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+.mouth .teeth { fill: var(--card); stroke: var(--ink); stroke-width: 2.5; }
+.mouth .tongue { fill: color-mix(in srgb, var(--fin) 35%, transparent); stroke: var(--fin); stroke-width: 3; stroke-linejoin: round; }
+.mouth .hit { fill: var(--yellow); stroke: var(--ink); stroke-width: 2; animation: hitPulse 1.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes hitPulse { 50% { scale: 1.5; } }
+.mouth text { font: 600 11px var(--body); fill: var(--muted); }
+.gang-keys { display: flex; flex-wrap: wrap; gap: 8px; }
+.gang-keys button { border: 2px solid var(--line); border-radius: 12px; background: var(--card); padding: 4px 10px; box-shadow: 2px 2px 0 var(--hard); text-align: center; min-width: 66px; transition: transform .12s, box-shadow .12s; }
+.gang-keys button:active { transform: translate(2px, 2px); box-shadow: 0 0 0; }
+.gang-keys b { display: block; font-family: var(--py); font-size: 22px; font-weight: 900; color: var(--ini); line-height: 1.2; }
+.gang-keys small { display: block; font-size: 12px; font-weight: 600; color: var(--muted); }
+.minimal { margin-top: 18px; }
+
+/* finals list (step 9) */
+.fin-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.fin-group { border: 2px solid var(--line); border-radius: 16px; background: var(--card-2); padding: 12px; }
+.fin-group h4 { font-family: var(--head); font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+.frow { display: grid; grid-template-columns: 70px 1fr auto; align-items: center; gap: 8px; width: 100%; border: none; background: none; padding: 5px 6px; border-radius: 10px; text-align: left; transition: background-color .15s; }
+.frow:hover { background: var(--card); }
+.frow .py { font-size: 19px; font-weight: 800; color: var(--fin); }
+.frow .th { font-weight: 600; }
+.frow .ex { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.frow .ex .zh { color: var(--ink); font-weight: 700; }
+.frow.trap { background: var(--soft-y); }
+
+/* rules (step 10) */
+.rules3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.rule { border: 2px solid var(--line); border-radius: 18px; background: var(--card-2); padding: 14px; box-shadow: 4px 4px 0 var(--hard); }
+.rule .no { font-family: var(--head); font-weight: 700; font-size: 13px; background: var(--ink); color: var(--bg); border-radius: 8px; padding: 1px 8px; display: inline-block; }
+.rule h3 { font-family: var(--head); font-size: 19px; font-weight: 700; margin: 6px 0 4px; line-height: 1.3; }
+.rule p { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+.xf { display: flex; align-items: center; gap: 8px; width: 100%; border: none; background: none; padding: 4px 6px; border-radius: 10px; font-family: var(--py); font-weight: 700; font-size: 18px; text-align: left; }
+.xf:hover { background: var(--card); }
+.xf .a { color: var(--muted); min-width: 58px; }
+.xf .arr { font-size: 13px; color: var(--muted); }
+.xf .b { color: var(--ink); font-weight: 900; }
+.xf .b em { font-style: normal; color: var(--t2); }
+.hat { display: flex; align-items: center; justify-content: center; gap: 18px; padding: 10px 0; font-family: var(--py); font-size: 46px; font-weight: 900; cursor: pointer; }
+.uu { position: relative; display: inline-block; }
+.uu i { position: absolute; top: .06em; width: .13em; height: .13em; border-radius: 50%; background: var(--fin); }
+.uu i:first-child { left: .12em; } .uu i:last-child { right: .12em; }
+.uu.off i { animation: hatOff 1s .4s var(--ease) forwards; }
+.uu.off i:last-child { animation-delay: .5s; }
+@keyframes hatOff { to { translate: 0 -46px; rotate: 40deg; opacity: 0; } }
+.hat .arrow { font-size: 24px; color: var(--muted); }
+
+/* tone-mark game (step 11) */
+.order { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; margin: 6px 0 18px; }
+.order span { font-family: var(--py); font-size: 26px; font-weight: 900; border: 2px solid var(--line); border-radius: 12px; background: var(--card); padding: 0 14px; box-shadow: 2px 2px 0 var(--hard); }
+.order span:nth-child(1) { background: var(--yellow); color: #17171c; }
+.order i { font-style: normal; font-weight: 800; color: var(--muted); }
+.mg { text-align: center; }
+.mg-word { display: flex; justify-content: center; gap: 6px; margin: 14px 0; }
+.mg-word button {
+  width: 64px; height: 84px;
+  border: 2px solid var(--line); border-radius: 14px; background: var(--card);
+  box-shadow: 3px 3px 0 var(--hard);
+  font-family: var(--py); font-size: 44px; font-weight: 900;
+  transition: transform .12s, box-shadow .12s, background-color .2s;
+}
+.mg-word button:active { transform: translate(3px, 3px); box-shadow: 0 0 0; }
+.mg-word button.cons { color: var(--muted); }
+.mg-word button.hit { background: var(--t4-bg); border-color: var(--ok); color: var(--tc); animation: hop .5s var(--spring); }
+.mg-word button.miss { background: var(--t2-bg); animation: shake .4s; }
+@keyframes hop { 40% { translate: 0 -12px; } }
+.mg-msg { min-height: 52px; font-size: 15.5px; font-weight: 600; }
+
+/* sandhi (step 12) */
+.sandhi { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.sd { border: 2px solid var(--line); border-radius: 18px; background: var(--card-2); padding: 14px; box-shadow: 4px 4px 0 var(--hard); }
+.sd h3 { font-family: var(--head); font-size: 19px; font-weight: 700; line-height: 1.3; }
+.sd .formula { font-family: var(--py); font-size: 22px; font-weight: 900; margin: 6px 0; }
+.sd .formula s { color: var(--muted); text-decoration-thickness: 3px; text-decoration-color: var(--t2); }
+.sd p { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+
+.finish { text-align: center; padding: 20px 0; }
+.finish .big { font-size: 80px; line-height: 1; animation: popIn .7s var(--spring); }
+.finish-paths { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 20px; }
+
+/* =======================================================
+   LAB — ห้องแล็บประกอบพยางค์
+   ======================================================= */
+.lab-result { padding: clamp(18px, 3vw, 28px); margin-bottom: 20px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; align-items: start; }
+.lab-out { text-align: center; }
+.lab-big { font-family: var(--py); font-size: clamp(60px, 10vw, 104px); font-weight: 900; line-height: 1.05; min-height: 1.1em; }
+.lab-big .i { color: var(--ini); } .lab-big .f { color: var(--fin); }
+.lab-big.bad { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--t2); text-decoration-thickness: 6px; font-size: clamp(44px, 8vw, 72px); }
+.lab-big.pop { animation: popIn .45s var(--spring); }
+.lab-read { font-size: 16px; font-weight: 600; margin-top: 6px; }
+.lab-read b { font-family: var(--head); }
+.lab-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.lab-why h3 { font-family: var(--head); font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.steps { list-style: none; display: flex; flex-direction: column; gap: 8px; counter-reset: st; }
+.steps li { display: grid; grid-template-columns: 30px 1fr; gap: 10px; align-items: start; animation: stepIn .45s var(--ease) both; animation-delay: calc(var(--k) * 120ms); }
+@keyframes stepIn { from { opacity: 0; translate: 16px 0; } }
+.steps li::before { counter-increment: st; content: counter(st); width: 28px; height: 28px; border-radius: 9px; border: 2px solid var(--line); background: var(--soft-y); color: var(--ink); display: grid; place-items: center; font-family: var(--head); font-weight: 700; font-size: 14px; }
+.steps .f { font-family: var(--py); font-size: 22px; font-weight: 900; line-height: 1.2; }
+.steps .n { font-size: 14px; color: var(--muted); line-height: 1.5; }
+.lab-ex { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.lab-ex button { border: 2px solid var(--line); border-radius: 12px; background: var(--card-2); padding: 4px 10px; box-shadow: 2px 2px 0 var(--hard); display: inline-flex; align-items: baseline; gap: 6px; font-weight: 600; transition: transform .12s, box-shadow .12s; }
+.lab-ex button:active { transform: translate(2px, 2px); box-shadow: 0 0 0; }
+.lab-ex button.cur { background: var(--soft-y); border-color: var(--ink); }
+.lab-ex .zh { font-size: 24px; font-weight: 700; }
+.lab-ex .py { font-weight: 800; }
+.lab-ex small { font-size: 12.5px; opacity: .8; }
+
+.lab-pickers { display: grid; grid-template-columns: 1fr 1.6fr .7fr; gap: 16px; align-items: start; }
+.picker { padding: 16px; }
+.picker h3 { font-family: var(--head); font-size: 17px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.picker h3 .dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--line); }
+.picker p { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.pgrid { display: grid; gap: 6px; }
+.pgrid.ini { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); }
+.pgrid.fin { grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); }
+.pbtn {
+  border: 2px solid var(--line); border-radius: 11px; background: var(--card);
+  padding: 4px 2px; font-family: var(--py); font-weight: 800; font-size: 17px; line-height: 1.2;
+  box-shadow: 2px 2px 0 var(--hard);
+  transition: transform .1s, box-shadow .1s, background-color .15s, opacity .2s;
+}
+.pbtn small { display: block; font-family: var(--body); font-size: 11px; font-weight: 600; color: var(--muted); }
+.pbtn:active { transform: translate(2px, 2px); box-shadow: 0 0 0; }
+.pbtn.dim { opacity: .3; box-shadow: none; }
+.pgrid.ini .pbtn.on { background: var(--ini); color: #fff; } .pgrid.ini .pbtn.on small { color: #e9e7ff; }
+.pgrid.fin .pbtn.on { background: var(--fin); color: #fff; } .pgrid.fin .pbtn.on small { color: #ffe3ee; }
+.fam-label { grid-column: 1 / -1; font-family: var(--head); font-size: 12.5px; font-weight: 600; color: var(--muted); margin-top: 6px; }
+.ptones { display: flex; flex-direction: column; gap: 8px; }
+.ptones .pbtn { display: flex; align-items: center; gap: 10px; padding: 6px 10px; text-align: left; font-size: 22px; }
+.ptones .pbtn span { color: var(--tc); min-width: 28px; }
+.ptones .pbtn small { font-size: 12px; }
+.ptones .pbtn.on { background: var(--tb); border-color: var(--tc); box-shadow: 2px 2px 0 var(--tc); }
+
+/* =======================================================
+   CHART
+   ======================================================= */
+.chart-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+.inp {
+  height: 48px; padding: 0 16px; min-width: 260px;
+  border: 2px solid var(--line); border-radius: 14px; background: var(--card);
+  font-family: var(--py); font-size: 17px; font-weight: 700;
+  box-shadow: 3px 3px 0 var(--hard); outline: none;
+}
+.inp::placeholder { font-family: var(--body); font-weight: 500; color: var(--muted); }
+.inp:focus { box-shadow: 3px 3px 0 var(--ini); border-color: var(--ini); }
+.chart-msg { font-weight: 600; }
+.chart-box { overflow: auto; max-height: calc(100vh - 230px); border: 2px solid var(--line); border-radius: var(--r); background: var(--card); box-shadow: 5px 5px 0 var(--hard); }
+.chart { border-collapse: separate; border-spacing: 0; font-family: var(--py); }
+.chart th, .chart td { border-right: 1px solid var(--soft-line); border-bottom: 1px solid var(--soft-line); padding: 0; text-align: center; }
+.chart thead th { position: sticky; top: 0; z-index: 3; background: var(--card); font-weight: 900; font-size: 15px; color: var(--fin); padding: 6px 4px; min-width: 60px; border-bottom: 2px solid var(--line); }
+.chart thead th small { display: block; font-family: var(--body); font-size: 10.5px; color: var(--muted); font-weight: 600; }
+.chart thead tr.fam th { top: 0; font-family: var(--head); font-size: 12.5px; color: #fff; padding: 3px; border-bottom: none; }
+.chart thead tr.keys th { top: 28px; }
+.chart tbody th { position: sticky; left: 0; z-index: 2; background: var(--card); font-weight: 900; font-size: 17px; color: var(--ini); padding: 4px 10px; border-right: 2px solid var(--line); min-width: 74px; }
+.chart tbody th small { display: block; font-family: var(--body); font-size: 11px; color: var(--muted); font-weight: 600; }
+.chart thead th.corner { left: 0; z-index: 4; border-right: 2px solid var(--line); }
+.chart td button { width: 100%; min-height: 38px; border: none; background: none; font-family: var(--py); font-weight: 700; font-size: 14px; padding: 4px; transition: background-color .12s, transform .15s var(--spring); }
+.chart td button:hover { background: var(--soft-y); color: var(--ink); transform: scale(1.12); position: relative; z-index: 1; border-radius: 8px; }
+.chart td button.colloq { font-style: italic; color: var(--t3); }
+.chart td.empty { background: color-mix(in srgb, var(--soft-line) 35%, transparent); }
+.chart td button.found { background: var(--soft-y); color: var(--ink); animation: found 1.8s var(--ease); border-radius: 8px; }
+@keyframes found { 0%, 40%, 80% { box-shadow: 0 0 0 4px var(--ink); } 20%, 60%, 100% { box-shadow: 0 0 0 0 var(--ink); } }
+.f1 { background: #8e3a49; } .f2 { background: #2c5e7a; } .f3 { background: #2a6f68; } .f4 { background: #5b4b8a; }
+
+/* =======================================================
+   PRACTICE
+   ======================================================= */
+.games { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.game { padding: 20px; }
+.game h2 { font-family: var(--head); font-size: 22px; font-weight: 700; }
+.game > p { color: var(--muted); font-size: 14.5px; margin-bottom: 14px; }
+.dict-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }
+.dict-row .inp { min-width: 0; flex: 1; max-width: 260px; text-align: center; }
+.dict-hint { font-size: 13.5px; color: var(--muted); margin-top: 10px; }
+.dict-hint kbd { font-family: var(--py); font-weight: 700; border: 1.5px solid var(--line); border-radius: 6px; padding: 0 5px; background: var(--card); }
+
+/* =======================================================
+   FX
+   ======================================================= */
+.particle { position: fixed; width: 10px; height: 10px; border-radius: 2px; border: 1.5px solid #17171c; pointer-events: none; z-index: 10002; animation: particle 1s var(--ease) forwards; }
+@keyframes particle { from { transform: translate(-50%, -50%) rotate(0); opacity: 1; } to { transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) rotate(320deg); opacity: 0; } }
+.toast {
+  position: fixed; left: 50%; bottom: calc(22px + env(safe-area-inset-bottom));
+  translate: -50% 160%; opacity: 0;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 18px; border-radius: 999px;
+  background: var(--ink); color: var(--bg);
+  border: 2px solid var(--line);
+  font-family: var(--head); font-weight: 600; font-size: 16px;
+  z-index: 10000; pointer-events: none;
+  transition: translate .45s var(--spring), opacity .3s;
+  max-width: calc(100vw - 30px);
+}
+.toast.show { translate: -50% 0; opacity: 1; }
+.toast .zh { font-weight: 700; }
+.bars { display: inline-flex; gap: 3px; align-items: flex-end; height: 16px; }
+.bars i { width: 3px; height: 100%; border-radius: 2px; transform-origin: bottom; animation: bars .8s ease-in-out infinite; }
+.bars i:nth-child(1) { background: var(--t1); } .bars i:nth-child(2) { background: var(--t2); animation-delay: -.2s; } .bars i:nth-child(3) { background: var(--t3); animation-delay: -.4s; } .bars i:nth-child(4) { background: var(--t4); animation-delay: -.6s; }
+@keyframes bars { 50% { transform: scaleY(.3); } }
+.toast.warn .bars { display: none; }
+
+/* =======================================================
+   RESPONSIVE
+   ======================================================= */
+@media (max-width: 980px) {
+  .paths { grid-template-columns: repeat(2, 1fr); }
+  .lab-pickers { grid-template-columns: 1fr 1fr; }
+  .lab-pickers .picker.tones { grid-column: 1 / -1; }
+  .ptones { flex-direction: row; flex-wrap: wrap; }
+  .ptones .pbtn { flex: 1; min-width: 110px; }
+  .games { grid-template-columns: 1fr; }
+  .rules3, .sandhi, .gangs { grid-template-columns: 1fr; }
+  .pitch-wrap { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .nav { display: none; }
+  .theme-btn { margin-left: auto; }
+  .tabbar {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); z-index: 600;
+    background: var(--card); border: 2px solid var(--line); border-radius: 18px; box-shadow: 4px 4px 0 var(--hard);
+    padding: 5px;
+  }
+  .tabbar button { border: none; background: none; border-radius: 12px; padding: 4px 0; font-family: var(--head); font-size: 11.5px; font-weight: 500; display: flex; flex-direction: column; align-items: center; line-height: 1.3; }
+  .tabbar button span { font-size: 19px; }
+  .tabbar button.on { background: var(--soft-y); color: var(--ink); font-weight: 600; }
+  .wrap { padding-bottom: 110px; }
+  .toast { bottom: calc(92px + env(safe-area-inset-bottom)); }
+  .why, .paths { grid-template-columns: 1fr; }
+  .asm { grid-template-columns: 1fr; }
+  .asm-plus { text-align: center; rotate: 90deg; }
+  .tone-grid { grid-template-columns: repeat(2, 1fr); }
+  .lab-result { grid-template-columns: 1fr; }
+  .lab-pickers { grid-template-columns: 1fr; }
+  .q-opts { grid-template-columns: repeat(2, 1fr); }
+  .step-card { min-height: 0; }
+  .mg-word button { width: 52px; height: 72px; font-size: 36px; }
+  .deck-nav .btn { flex: 1; }
+  .logo small { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+}
+
+/* ---------- v4 additions ---------- */
+.ic { width: 1.15em; height: 1.15em; flex-shrink: 0; vertical-align: -0.18em; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ic.fill { fill: currentColor; stroke: none; }
+.chip-say::before { content: none; }
+.chip-say .ic { width: 14px; height: 14px; color: var(--muted); }
+.callout .tagl { flex-shrink: 0; font-family: var(--head); font-weight: 600; font-size: 13px; border: 2px solid var(--line); border-radius: 8px; padding: 0 8px; background: var(--card); line-height: 1.6; margin-top: 1px; }
+.callout.y .tagl { background: var(--yellow); color: #17171c; }
+.why .num { font-family: var(--head); font-weight: 700; font-size: 14px; width: 30px; height: 30px; border-radius: 9px; border: 2px solid var(--line); display: grid; place-items: center; background: var(--soft-y); }
+.path .ic { width: 22px; height: 22px; vertical-align: -4px; margin-right: 4px; }
+.nav button .ic, .tabbar button .ic { width: 18px; height: 18px; }
+.tabbar button .ic { width: 20px; height: 20px; margin-bottom: 1px; }
+.q-play .ic { width: 34px; height: 34px; }
+.tile .flag { background: var(--t2); }
+.finish .big { font-family: var(--zh); font-size: 84px; font-weight: 900; line-height: 1.1; border: none; background: none; color: var(--ink); }
+.finish .big small { display: block; font-family: var(--py); font-size: 22px; font-weight: 800; color: var(--t3); }
+.ok-msg { color: var(--ok); font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+.bad-msg { color: var(--bad); font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+.mid-msg { color: var(--t1); font-weight: 700; }
+.foot { text-align: center; font-size: 13px; color: var(--muted); padding: 10px 16px 30px; line-height: 1.8; }
+.foot a { color: inherit; }
+
+/* mouth diagram */
+.mouth2 { width: 100%; height: auto; display: block; background: var(--card); border: 2px solid var(--line); border-radius: 14px; }
+.mouth2 .ln { fill: none; stroke: var(--ink); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+.mouth2 .lip { fill: color-mix(in srgb, var(--fin) 28%, var(--card)); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.mouth2 .tooth { fill: var(--card); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.mouth2 .vel { fill: color-mix(in srgb, var(--ini) 30%, var(--card)); stroke: var(--ink); stroke-width: 2; stroke-linejoin: round; }
+.mouth2 .tg { fill: color-mix(in srgb, var(--fin) 38%, var(--card)); stroke: none; }
+.mouth2 .tg-line { fill: none; stroke: var(--fin); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.mouth2 [data-p] { transition: d .55s var(--ease), opacity .3s, cx .45s var(--ease), cy .45s var(--ease); }
+.mouth2 .mk { fill: var(--yellow); stroke: #17171c; stroke-width: 2; }
+.mouth2 .mk.near { fill: var(--card); stroke: var(--ink); stroke-dasharray: 3 2.5; }
+.mouth2 .nasal { fill: none; stroke: var(--t3); stroke-width: 3; stroke-dasharray: 7 6; stroke-linecap: round; animation: flow 1s linear infinite; }
+@keyframes flow { to { stroke-dashoffset: -26; } }
+.mouth2 .puff path { stroke: var(--t3); fill: none; stroke-width: 2.6; stroke-linecap: round; animation: puff 1.3s ease-out infinite; }
+.mouth2 .puff path:nth-child(2) { animation-delay: .2s; }
+@keyframes puff { 0% { opacity: 0; translate: 8px 0; } 40% { opacity: 1; } 100% { opacity: 0; translate: -6px 0; } }
+.mouth2 .badge circle { fill: var(--ink); }
+.mouth2 .badge text { fill: var(--bg); font: 700 10px var(--head); text-anchor: middle; dominant-baseline: central; }
+.mouth2 .cap { font: 600 11px var(--body); fill: var(--muted); }
+.mouth-legend { display: grid; grid-template-columns: 1.2fr 1fr; gap: 20px; align-items: center; }
+.legend-list { list-style: none; display: grid; gap: 6px; }
+.legend-list li { display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; font-size: 15px; }
+.legend-list li b { font-family: var(--head); font-weight: 600; }
+.legend-list li small { display: block; color: var(--muted); font-size: 13px; }
+.legend-list .n { width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--bg); display: grid; place-items: center; font-family: var(--head); font-weight: 700; font-size: 12px; margin-top: 2px; }
+.terms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 18px; }
+.term { border: 2px solid var(--line); border-radius: 14px; padding: 10px 12px; background: var(--card-2); }
+.term b { font-family: var(--head); font-weight: 600; display: block; }
+.term span { font-size: 13.5px; color: var(--muted); }
+
+/* articulation explorer */
+.xp { display: grid; grid-template-columns: 1fr 1.15fr; gap: 22px; align-items: start; }
+.xp-groups { display: flex; flex-direction: column; gap: 10px; }
+.xp-g h4 { font-family: var(--head); font-size: 13.5px; font-weight: 600; color: var(--muted); margin-bottom: 5px; }
+.xp-keys { display: flex; flex-wrap: wrap; gap: 7px; }
+.xk { position: relative; min-width: 58px; border: 2px solid var(--line); border-radius: 12px; background: var(--card); padding: 3px 8px 2px; box-shadow: 2px 2px 0 var(--hard); text-align: center; transition: transform .1s, box-shadow .1s, background-color .15s; }
+.xk:active { transform: translate(2px, 2px); box-shadow: 0 0 0; }
+.xk b { display: block; font-family: var(--py); font-size: 22px; font-weight: 900; color: var(--ini); line-height: 1.2; }
+.xk.vow b { color: var(--fin); }
+.xk small { display: block; font-family: var(--head); font-size: 12px; font-weight: 500; color: var(--muted); }
+.xk.on { background: var(--ink); }
+.xk.on b, .xk.on small { color: var(--bg); }
+.xk.trap::after { content: ""; position: absolute; top: -5px; right: -5px; width: 12px; height: 12px; border-radius: 50%; background: var(--t2); border: 2px solid var(--line); }
+.xp-panel { position: sticky; top: 84px; }
+.xp-info { margin-top: 12px; }
+.xp-title { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.xp-title .L { font-family: var(--py); font-size: 46px; font-weight: 900; line-height: 1; }
+.xp-title .eq { font-family: var(--head); font-size: 26px; font-weight: 700; }
+.xp-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.xp-tags span { font-family: var(--head); font-size: 12.5px; font-weight: 500; border: 2px solid var(--line); border-radius: 999px; padding: 0 10px; background: var(--card); }
+.xp-tags span.asp { background: var(--t3-bg); }
+.xp-tags span.nas { background: var(--ini-bg); }
+.xp-tags span.trap { background: var(--t2-bg); }
+.xp-how { font-size: 15.5px; }
+.xp-anim { animation: viewIn .4s var(--ease); }
+.xp-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+.xp-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; margin-right: 5px; border: 2px solid var(--line); }
+
+/* erhua */
+.er-write { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-family: var(--py); font-size: 26px; font-weight: 800; padding: 12px 16px; border: 2px dashed var(--line); border-radius: 14px; margin-bottom: 16px; }
+.er-write .r { color: var(--t2); }
+.er-write small { font-family: var(--body); font-size: 14px; font-weight: 600; color: var(--muted); }
+.er-rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 12px; }
+.er { border: 2px solid var(--line); border-radius: 16px; background: var(--card-2); padding: 12px 14px; box-shadow: 3px 3px 0 var(--hard); }
+.er .no { font-family: var(--head); font-weight: 700; font-size: 12.5px; background: var(--ink); color: var(--bg); border-radius: 7px; padding: 0 8px; display: inline-block; }
+.er h3 { font-family: var(--head); font-size: 17px; font-weight: 700; margin: 4px 0 2px; line-height: 1.35; }
+.er p { font-size: 13.5px; color: var(--muted); margin-bottom: 6px; }
+.er .ipa { font-family: var(--py); font-size: 13px; color: var(--muted); }
+.er-ex { display: flex; flex-direction: column; gap: 6px; }
+.er-ex button, .er-ex div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; border: 2px solid var(--line); border-radius: 11px; background: var(--card); padding: 4px 10px; text-align: left; }
+.er-ex div { border-style: dashed; }
+.er-ex .zh { font-size: 20px; font-weight: 700; white-space: nowrap; }
+.er-ex .py { white-space: nowrap; }
+.er-ex .py { font-weight: 800; }
+.er-ex .py .r { color: var(--t2); }
+.er-ex small { margin-left: auto; color: var(--muted); font-size: 12.5px; }
+.er-ex .ic { color: var(--muted); width: 14px; height: 14px; align-self: center; }
+details.er-all { margin-top: 16px; border: 2px solid var(--line); border-radius: 14px; background: var(--card-2); }
+details.er-all summary { cursor: pointer; padding: 10px 14px; font-family: var(--head); font-weight: 600; }
+.er-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; padding: 0 14px 14px; }
+.er-grid div { font-size: 13.5px; border-bottom: 1px dashed var(--soft-line); padding: 3px 0; }
+.er-grid b { font-family: var(--py); font-weight: 800; color: var(--fin); margin-right: 6px; }
+
+.lab-mouth { margin-top: 14px; display: grid; grid-template-columns: 150px 1fr; gap: 12px; align-items: center; text-align: left; font-size: 14px; }
+.lab-mouth b { font-family: var(--head); }
+.lab-mouth .muted { font-size: 13px; }
+
+@media (max-width: 980px) {
+  .xp { grid-template-columns: 1fr; }
+  .xp-panel { position: static; order: -1; }
+  .mouth-legend { grid-template-columns: 1fr; }
+  .terms { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .xp-title .L { font-size: 38px; }
+  .lab-mouth { grid-template-columns: 120px 1fr; }
+}
+</style>
+<link rel="stylesheet" href="embed.css?v=1">
+</head>
+<body>
+
+<header class="topbar">
+  <button type="button" class="logo" onclick="go('home')">
+    <span class="logo-mark">拼</span>
+    <span><b>พินอินเข้าใจง่าย</b><small>เรียนอ่านพินอินตั้งแต่ศูนย์</small></span>
+  </button>
+  <nav class="nav" id="nav">
+    <button type="button" data-v="home" onclick="go('home')"><i data-ic="home"></i>หน้าแรก</button>
+    <button type="button" data-v="learn" onclick="go('learn')"><i data-ic="book"></i>บทเรียน</button>
+    <button type="button" data-v="lab" onclick="go('lab')"><i data-ic="flask"></i>ห้องแล็บ</button>
+    <button type="button" data-v="chart" onclick="go('chart')"><i data-ic="grid"></i>ตาราง</button>
+    <button type="button" data-v="practice" onclick="go('practice')"><i data-ic="target"></i>ฝึก</button>
+  </nav>
+  <button type="button" class="btn theme-btn" onclick="toggleTheme(event)" aria-label="สลับธีมสว่าง/มืด" id="themeBtn"></button>
+</header>
+
+<nav class="tabbar" id="tabbar">
+  <button type="button" data-v="home" onclick="go('home')"><i data-ic="home"></i>หน้าแรก</button>
+  <button type="button" data-v="learn" onclick="go('learn')"><i data-ic="book"></i>บทเรียน</button>
+  <button type="button" data-v="lab" onclick="go('lab')"><i data-ic="flask"></i>แล็บ</button>
+  <button type="button" data-v="chart" onclick="go('chart')"><i data-ic="grid"></i>ตาราง</button>
+  <button type="button" data-v="practice" onclick="go('practice')"><i data-ic="target"></i>ฝึก</button>
+</nav>
+
+<main>
+  <!-- ================= HOME ================= -->
+  <section class="view" id="v-home">
+    <div class="wrap">
+      <div class="hero">
+        <span class="tag">สำหรับคนที่ไม่เคยเรียนจีนมาก่อน</span>
+        <div class="hero-word" id="heroWord"></div>
+        <h1>อ่าน <mark>พินอิน</mark> ให้เป็น ใน 15 ขั้นสั้น ๆ</h1>
+        <p>กดคำข้างบนดูสิ — "ma" คำเดียว แต่เปลี่ยนเสียงแล้วกลายเป็น แม่ · ป่าน · ม้า · ด่า ทุกเสียงในเว็บนี้อัดจากเสียงคนจีนจริง</p>
+        <div class="hero-ctas">
+          <button type="button" class="btn ink" onclick="go('learn')" id="ctaLearn">เริ่มเรียนเลย</button>
+          <button type="button" class="btn yellow" onclick="go('lab')"><i data-ic="flask"></i>ลองประกอบพยางค์เอง</button>
+        </div>
+      </div>
+
+      <div class="why">
+        <div class="card"><span class="num">1</span><b>เสียงคนจริงทุกพยางค์</b><p>ไฟล์เสียงภาษาจีนกลางมาตรฐานที่คนจีนอัดไว้ครบทั้ง 1,600+ พยางค์ × 4 เสียง ไม่ใช่เสียงหุ่นยนต์</p></div>
+        <div class="card"><span class="num">2</span><b>เห็นลิ้นและรูปปาก</b><p>ภาพปากด้านข้างครบทั้ง 23 พยัญชนะและสระเดี่ยว ดูได้ว่าลิ้นแตะตรงไหน ลมออกทางไหน</p></div>
+        <div class="card"><span class="num">3</span><b>เทียบกับเสียงไทย</b><p>b = ป ไม่ใช่ บ · e = เออ ไม่ใช่ เอ — รู้กับดักที่คนไทยพลาดบ่อยตั้งแต่แรก</p></div>
+      </div>
+
+      <div class="paths">
+        <button type="button" class="path p1" onclick="go('learn')"><span class="n">ขั้นที่ 1</span><b><i data-ic="book"></i>บทเรียน 15 การ์ด</b><p>ทีละเรื่อง ทีละนิด ทุกการ์ดมีให้กดลอง</p><span class="go" id="pathLearnGo">เริ่ม</span></button>
+        <button type="button" class="path p2" onclick="go('lab')"><span class="n">ขั้นที่ 2</span><b><i data-ic="flask"></i>ห้องแล็บพยางค์</b><p>ประกอบพยางค์เอง เห็นกฎการเขียนทำงานจริง</p><span class="go">เปิดแล็บ</span></button>
+        <button type="button" class="path p3" onclick="go('chart')"><span class="n">อ้างอิง</span><b><i data-ic="grid"></i>ตารางพินอิน</b><p>ทุกพยางค์ในภาษาจีนกลาง ค้นหาได้ กดแล้วส่งเข้าแล็บ</p><span class="go">ดูตาราง</span></button>
+        <button type="button" class="path p4" onclick="go('practice')"><span class="n">ทบทวน</span><b><i data-ic="target"></i>ฝึกหู ฝึกสะกด</b><p>ฟังแล้วตอบเสียง · ฟังแล้วพิมพ์พินอิน</p><span class="go">ไปฝึก</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LEARN ================= -->
+  <section class="view" id="v-learn">
+    <div class="wrap">
+      <div class="deck-top">
+        <span class="deck-count" id="deckCount">1 / 15</span>
+        <div class="segs" id="segs"></div>
+      </div>
+      <div class="card step-card" id="stepCard"></div>
+      <div class="deck-nav">
+        <button type="button" class="btn" id="prevBtn" onclick="stepGo(-1)"><i data-ic="arrowL"></i>ย้อนกลับ</button>
+        <button type="button" class="btn ink" id="nextBtn" onclick="stepGo(1)">ถัดไป</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LAB ================= -->
+  <section class="view" id="v-lab">
+    <div class="wrap">
+      <div class="view-head">
+        <h1>ห้องแล็บประกอบพยางค์</h1>
+        <p>เลือก <b style="color:var(--ini)">พยัญชนะต้น</b> + <b style="color:var(--fin)">สระ</b> + <b>เสียง</b> แล้วดูว่าพยางค์จริงเขียนและอ่านอย่างไร ปุ่มที่จาง ๆ คือคู่ที่ไม่มีในภาษาจีนกลาง</p>
+      </div>
+      <div class="card lab-result">
+        <div class="lab-out">
+          <div class="lab-big" id="labBig"></div>
+          <div class="lab-read" id="labRead"></div>
+          <div class="lab-actions">
+            <button type="button" class="btn yellow" onclick="labSpeak()"><i data-ic="speaker"></i>ฟังเสียง</button>
+            <button type="button" class="btn" onclick="labRandom()"><i data-ic="shuffle"></i>สุ่มพยางค์</button>
+          </div>
+          <div class="lab-mouth" id="labMouth"></div>
+        </div>
+        <div class="lab-why">
+          <h3>ทำไมเขียนแบบนี้?</h3>
+          <ol class="steps" id="labSteps"></ol>
+          <div class="lab-ex" id="labEx"></div>
+        </div>
+      </div>
+      <div class="lab-pickers">
+        <div class="card picker"><h3><span class="dot" style="background:var(--ini)"></span>พยัญชนะต้น</h3><p>ตัวเล็กใต้ปุ่ม = เสียงไทยที่ใกล้เคียง</p><div class="pgrid ini" id="pkIni"></div></div>
+        <div class="card picker"><h3><span class="dot" style="background:var(--fin)"></span>สระ</h3><p>แบ่งเป็น 4 ตระกูลตามรูปปาก</p><div class="pgrid fin" id="pkFin"></div></div>
+        <div class="card picker tones"><h3><span class="dot" style="background:var(--t1)"></span>เสียง</h3><p>วรรณยุกต์ 4 + เสียงเบา</p><div class="ptones" id="pkTone"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CHART ================= -->
+  <section class="view" id="v-chart">
+    <div class="wrap">
+      <div class="view-head">
+        <h1>ตารางพินอินทั้งหมด</h1>
+        <p>แถว = พยัญชนะต้น · คอลัมน์ = สระ · ช่องว่าง = ไม่มีพยางค์นั้นในภาษาจีนกลาง กดพยางค์ไหนก็ได้เพื่อส่งไปดูในห้องแล็บ</p>
+      </div>
+      <div class="chart-tools">
+        <input class="inp" id="chartSearch" placeholder="ค้นหาพยางค์ เช่น zhong, xue, lü" oninput="chartFind()" autocomplete="off" spellcheck="false">
+        <span class="chart-msg" id="chartMsg"></span>
+      </div>
+      <div class="chart-box" id="chartBox"></div>
+    </div>
+  </section>
+
+  <!-- ================= PRACTICE ================= -->
+  <section class="view" id="v-practice">
+    <div class="wrap">
+      <div class="view-head">
+        <h1>ฝึกฝน</h1>
+        <p>ฝึกจากคำจีนพื้นฐานที่ใช้บ่อย ทุกข้อมีความหมายภาษาไทย สถิติจะถูกเก็บไว้ในเครื่องนี้</p>
+      </div>
+      <div class="games">
+        <div class="card game">
+          <h2>ฟังแล้วตอบเสียง</h2>
+          <p>ฟังพยางค์ แล้วเลือกว่าเป็นวรรณยุกต์เสียงไหน (คีย์ลัด 1–4)</p>
+          <div class="score-row"><span id="g1Score">ถูก 0/0</span><span id="g1Streak">ติดกัน 0</span><span id="g1Best">สูงสุด 0</span></div>
+          <div class="qbox" id="g1Box">
+            <button type="button" class="q-play pulse" onclick="g1Play()" aria-label="ฟังเสียง"><i data-ic="speaker"></i></button>
+            <div class="q-reveal" id="g1Reveal"></div>
+            <div class="q-opts" id="g1Opts"></div>
+          </div>
+          <div class="deck-nav"><span></span><button type="button" class="btn ink sm" onclick="g1.next(true)">ข้อต่อไป</button></div>
+        </div>
+        <div class="card game">
+          <h2>ฟังแล้วพิมพ์พินอิน</h2>
+          <p>พิมพ์ได้ทั้ง <b class="py">hǎo</b> หรือ <b class="py">hao3</b> · ใช้ <b class="py">v</b> แทน <b class="py">ü</b></p>
+          <div class="score-row"><span id="g2Score">ถูก 0/0</span><span id="g2Streak">ติดกัน 0</span><span id="g2Best">สูงสุด 0</span></div>
+          <div class="qbox" id="g2Box">
+            <button type="button" class="q-play pulse" onclick="g2Play()" aria-label="ฟังเสียง"><i data-ic="speaker"></i></button>
+            <div class="dict-row">
+              <input class="inp" id="g2Input" placeholder="พิมพ์พินอิน" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter'){event.preventDefault(); g2Check();}">
+              <button type="button" class="btn yellow" onclick="g2Check()">ตรวจ</button>
+            </div>
+            <div class="q-reveal" id="g2Reveal"></div>
+            <div class="dict-hint">ติดอยู่? <button type="button" class="btn sm" onclick="g2Hint()">ขอคำใบ้</button></div>
+          </div>
+          <div class="deck-nav"><span></span><button type="button" class="btn ink sm" onclick="g2New(true)">ข้อต่อไป</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  เสียงอ่าน: Chen Wang (พยางค์) และ Yue Tan (คำ) จากโครงการ audio-cmn โดย Hugo Lopez — สัญญาอนุญาต CC BY-SA<br>
+  ถ้าเปิดไฟล์นี้เดี่ยว ๆ โดยไม่มีโฟลเดอร์ audio ระบบจะโหลดเสียงจากอินเทอร์เน็ตแทน
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><span class="bars"><i></i><i></i><i></i><i></i></span><span id="toastText"></span></div>
+
+<script>
+/* ข้อมูลพยางค์ (ชุดเดียวกับเวอร์ชันก่อน) */
+const FINALS_DATA = [
+  { key: "a", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/a/", th: "อา", erForm: "ar [ar]", erEx: "อาร์ (哪儿 nǎr)" },
+  { key: "o", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/o/", th: "โอ/ออ", erForm: "or [or]", erEx: "ออร์ (粉末儿 mòr)" },
+  { key: "e", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/ɤ/", th: "เออ", erForm: "er [ɤr]", erEx: "เออร์ (唱歌儿 gēr)" },
+  { key: "-i", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/z̩/, /ʐ̩/", th: "อือ", erForm: "-ir [ər]", erEx: "เออร์ (没事儿 shìr)" },
+  { key: "er", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/ɚ/", th: "เออร์", erForm: "—", erEx: "ม้วนลิ้นอยู่แล้ว" },
+  { key: "ai", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/ai̯/", th: "ไอ", erForm: "air [ar]", erEx: "อาร์ (小孩儿 háir)" },
+  { key: "ei", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/ei̯/", th: "เอย์", erForm: "eir [ər]", erEx: "เออร์ (刀背儿 bèir)" },
+  { key: "ao", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/au̯/", th: "เอา", erForm: "aor [aur]", erEx: "เอา-ร์ (小鸟儿 niǎor)" },
+  { key: "ou", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/ou̯/", th: "โอว", erForm: "our [our]", erEx: "โอว-ร์ (老头儿 tóur)" },
+  { key: "an", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/an/", th: "อัน", erForm: "anr [ar]", erEx: "อาร์ (好玩儿 wánr)" },
+  { key: "en", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/ən/", th: "เอิน", erForm: "enr [ər]", erEx: "เออร์ (门儿 ménr)" },
+  { key: "ang", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/ɑŋ/", th: "อัง", erForm: "angr [ɑ̃r]", erEx: "อาง-ร์ (帮忙儿 mángr)" },
+  { key: "eng", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/əŋ/", th: "เอิง", erForm: "engr [ə̃r]", erEx: "เอิง-ร์ (声儿 shēngr)" },
+  { key: "ong", group: "1. สระปากเปิด (开口呼)", gClass: "th-g1", ipa: "/ʊŋ/", th: "โอง/อุง", erForm: "ongr [ʊ̃r]", erEx: "โอง-ร์ (有空儿 kòngr)" },
+  { key: "i", group: "2. สระฟันชิด ตระกูล i (齐齿呼)", gClass: "th-g2", ipa: "/i/", th: "อี", erForm: "ir [iər]", erEx: "เอียร์ (小鸡儿 jīr)" },
+  { key: "ia", group: "2. สระฟันชิด ตระกูล i (齐齿呼)", gClass: "th-g2", ipa: "/i̯a/", th: "เอีย/ยา", erForm: "iar [iar]", erEx: "เอียร์ (豆芽儿 yár)" },
+  { key: "iao", group: "2. สระฟันชิด ตระกูล i (齐齿呼)", gClass: "th-g2", ipa: "/i̯au̯/", th: "เอียว", erForm: "iaor [iaur]", erEx: "เอียว-ร์ (面条儿 tiáor)" },
+  { key: "ie", group: "2. สระฟันชิด ตระกูล i (齐齿呼)", gClass: "th-g2", ipa: "/i̯ɛ/", th: "เอเย/เย", erForm: "ier [iɛr]", erEx: "เอียร์ (树叶儿 yèr)" },
+  { key: "iou (iu)", group: "2. สระฟันชิด ตระกูล i (齐齿呼)", gClass: "th-g2", ipa: "/i̯ou̯/", th: "โยว/อิว", erForm: "iur [iour]", erEx: "อิว-ร์ (加油儿 yóur)" },
+  { key: "ian", group: "2. สระฟันชิด ตระกูล i (齐齿呼)", gClass: "th-g2", ipa: "/i̯ɛn/", th: "เอียน", erForm: "ianr [iar]", erEx: "เอียร์ (一点儿 diǎnr)" },
+  { key: "in", group: "2. สระฟันชิด ตระกูล i (齐齿呼)", gClass: "th-g2", ipa: "/in/", th: "อิน", erForm: "inr [iər]", erEx: "เอียร์ (信儿 xìnr)" },
+  { key: "iang", group: "2. สระฟันชิด ตระกูล i (齐齿呼)", gClass: "th-g2", ipa: "/i̯ɑŋ/", th: "เอียง", erForm: "iangr [iɑ̃r]", erEx: "เอียง-ร์ (亮儿 liàngr)" },
+  { key: "ing", group: "2. สระฟันชิด ตระกูล i (齐齿呼)", gClass: "th-g2", ipa: "/iŋ/", th: "อิง", erForm: "ingr [iə̃r]", erEx: "อิง-ร์ (电影儿 yǐngr)" },
+  { key: "iong", group: "2. สระฟันชิด ตระกูล i (齐齿呼)", gClass: "th-g2", ipa: "/i̯ʊŋ/", th: "ยง/อวีง", erForm: "iongr [iʊ̃r]", erEx: "ยง-ร์ (小熊儿 xióngr)" },
+  { key: "u", group: "3. สระห่อปาก ตระกูล u (合口呼)", gClass: "th-g3", ipa: "/u/", th: "อู", erForm: "ur [ur]", erEx: "อูร์ (眼珠儿 zhūr)" },
+  { key: "ua", group: "3. สระห่อปาก ตระกูล u (合口呼)", gClass: "th-g3", ipa: "/u̯a/", th: "วา/อัว", erForm: "uar [uar]", erEx: "วาร์ (花儿 huār)" },
+  { key: "uo", group: "3. สระห่อปาก ตระกูล u (合口呼)", gClass: "th-g3", ipa: "/u̯ɔ/", th: "วอ/อัว", erForm: "uor [uɔr]", erEx: "วอร์ (火儿 huǒr)" },
+  { key: "uai", group: "3. สระห่อปาก ตระกูล u (合口呼)", gClass: "th-g3", ipa: "/u̯ai̯/", th: "ไว/อวย", erForm: "uair [uar]", erEx: "วาร์ (一块儿 kuàir)" },
+  { key: "uei (ui)", group: "3. สระห่อปาก ตระกูล u (合口呼)", gClass: "th-g3", ipa: "/u̯ei̯/", th: "เวย/อุย", erForm: "uir [uər]", erEx: "อุยร์ (一会儿 huìr)" },
+  { key: "uan", group: "3. สระห่อปาก ตระกูล u (合口呼)", gClass: "th-g3", ipa: "/u̯an/", th: "วัน/อวน", erForm: "uanr [uar]", erEx: "วาร์ (肉串儿 chuànr)" },
+  { key: "uen (un)", group: "3. สระห่อปาก ตระกูล u (合口呼)", gClass: "th-g3", ipa: "/u̯ən/", th: "เวิน/อุน", erForm: "unr [uər]", erEx: "อุนร์ (冰棍儿 gùnr)" },
+  { key: "uang", group: "3. สระห่อปาก ตระกูล u (合口呼)", gClass: "th-g3", ipa: "/u̯ɑŋ/", th: "วาง/อวง", erForm: "uangr [uɑ̃r]", erEx: "วาง-ร์ (蛋黄儿 huángr)" },
+  { key: "ueng", group: "3. สระห่อปาก ตระกูล u (合口呼)", gClass: "th-g3", ipa: "/u̯əŋ/", th: "เวิง", erForm: "uengr [uə̃r]", erEx: "เวิง-ร์ (老翁儿 wēngr)" },
+  { key: "ü", group: "4. สระปากจู๋ ตระกูล ü (撮口呼)", gClass: "th-g4", ipa: "/y/", th: "อวี", erForm: "ür [yər]", erEx: "เอวียร์ (金鱼儿 yúr)" },
+  { key: "üe", group: "4. สระปากจู๋ ตระกูล ü (撮口呼)", gClass: "th-g4", ipa: "/y̯ɛ/", th: "เอวีย", erForm: "üer [yɛr]", erEx: "เอวียร์ (月牙儿 yuèr)" },
+  { key: "üan", group: "4. สระปากจู๋ ตระกูล ü (撮口呼)", gClass: "th-g4", ipa: "/y̯ɛn/", th: "เอวียน", erForm: "üanr [yar]", erEx: "เอวียร์ (圆圈儿 quānr)" },
+  { key: "ün", group: "4. สระปากจู๋ ตระกูล ü (撮口呼)", gClass: "th-g4", ipa: "/yn/", th: "ยวิน", erForm: "ünr [yər]", erEx: "เอวียร์ (合群儿 qúnr)" }
+];
+
+const INITIALS_DATA = [
+  { sym: "b", aliases: ["b"], desc: "ริมฝีปาก (ไม่พ่นลม)", map: {"a":"ba","o":"bo","ai":"bai","ei":"bei","ao":"bao","an":"ban","en":"ben","ang":"bang","eng":"beng","i":"bi","iao":"biao","ie":"bie","ian":"bian","in":"bin","ing":"bing","u":"bu"} },
+  { sym: "p", aliases: ["p"], desc: "ริมฝีปาก (พ่นลมแรง)", map: {"a":"pa","o":"po","ai":"pai","ei":"pei","ao":"pao","ou":"pou","an":"pan","en":"pen","ang":"pang","eng":"peng","i":"pi","iao":"piao","ie":"pie","ian":"pian","in":"pin","ing":"ping","u":"pu"} },
+  { sym: "m", aliases: ["m"], desc: "ริมฝีปาก (นาสิก)", map: {"a":"ma","o":"mo","e":"me","ai":"mai","ei":"mei","ao":"mao","ou":"mou","an":"man","en":"men","ang":"mang","eng":"meng","i":"mi","iao":"miao","ie":"mie","iou (iu)":"miu","ian":"mian","in":"min","ing":"ming","u":"mu"} },
+  { sym: "f", aliases: ["f"], desc: "ฟันบนแตะริมฝีปากล่าง", map: {"a":"fa","o":"fo","ei":"fei","ou":"fou","an":"fan","en":"fen","ang":"fang","eng":"feng","u":"fu"} },
+  { sym: "d", aliases: ["d"], desc: "ปลายลิ้นแตะปุ่มเหงือก (ไม่พ่นลม)", map: {"a":"da","e":"de","ai":"dai","ei":"dei","ao":"dao","ou":"dou","an":"dan","en":"den*","ang":"dang","eng":"deng","ong":"dong","i":"di","ia":"dia*","iao":"diao","ie":"die","iou (iu)":"diu","ian":"dian","ing":"ding","u":"du","uo":"duo","uei (ui)":"dui","uan":"duan","uen (un)":"dun"} },
+  { sym: "t", aliases: ["t"], desc: "ปลายลิ้นแตะปุ่มเหงือก (พ่นลม)", map: {"a":"ta","e":"te","ai":"tai","ao":"tao","ou":"tou","an":"tan","ang":"tang","eng":"teng","ong":"tong","i":"ti","iao":"tiao","ie":"tie","ian":"tian","ing":"ting","u":"tu","uo":"tuo","uei (ui)":"tui","uan":"tuan","uen (un)":"tun"} },
+  { sym: "n", aliases: ["n"], desc: "ปลายลิ้นปุ่มเหงือก (นาสิก)", map: {"a":"na","e":"ne","ai":"nai","ei":"nei","ao":"nao","ou":"nou","an":"nan","en":"nen","ang":"nang","eng":"neng","ong":"nong","i":"ni","iao":"niao","ie":"nie","iou (iu)":"niu","ian":"nian","in":"nin","iang":"niang","ing":"ning","u":"nu","uo":"nuo","uan":"nuan","ü":"nü","üe":"nüe"} },
+  { sym: "l", aliases: ["l"], desc: "ปลายลิ้นปุ่มเหงือก (ลมออกข้างลิ้น)", map: {"a":"la","o":"lo*","e":"le","ai":"lai","ei":"lei","ao":"lao","ou":"lou","an":"lan","ang":"lang","eng":"leng","ong":"long","i":"li","ia":"lia","iao":"liao","ie":"lie","iou (iu)":"liu","ian":"lian","in":"lin","iang":"liang","ing":"ling","u":"lu","uo":"luo","uan":"luan","uen (un)":"lun","ü":"lü","üe":"lüe"} },
+  { sym: "z", aliases: ["z"], desc: "ลิ้นเหยียดตรงแตะหลังฟัน (ไม่พ่นลม)", map: {"a":"za","e":"ze","-i":"zi","ai":"zai","ei":"zei","ao":"zao","ou":"zou","an":"zan","en":"zen","ang":"zang","eng":"zeng","ong":"zong","u":"zu","uo":"zuo","uei (ui)":"zui","uan":"zuan","uen (un)":"zun"} },
+  { sym: "c", aliases: ["c"], desc: "ลิ้นเหยียดตรงแตะหลังฟัน (พ่นลม)", map: {"a":"ca","e":"ce","-i":"ci","ai":"cai","ao":"cao","ou":"cou","an":"can","en":"cen","ang":"cang","eng":"ceng","ong":"cong","u":"cu","uo":"cuo","uei (ui)":"cui","uan":"cuan","uen (un)":"cun"} },
+  { sym: "s", aliases: ["s"], desc: "ลิ้นเหยียดตรงจ่อหลังฟัน (เสียดแทรก)", map: {"a":"sa","e":"se","-i":"si","ai":"sai","ao":"sao","ou":"sou","an":"san","en":"sen","ang":"sang","eng":"seng","ong":"song","u":"su","uo":"suo","uei (ui)":"sui","uan":"suan","uen (un)":"sun"} },
+  { sym: "zh", aliases: ["zh"], desc: "ปลายลิ้นม้วนแตะเพดานหน้า (ไม่พ่นลม)", map: {"a":"zha","e":"zhe","-i":"zhi","ai":"zhai","ei":"zhei","ao":"zhao","ou":"zhou","an":"zhan","en":"zhen","ang":"zhang","eng":"zheng","ong":"zhong","u":"zhu","ua":"zhua","uo":"zhuo","uai":"zhuai","uei (ui)":"zhui","uan":"zhuan","uen (un)":"zhun","uang":"zhuang"} },
+  { sym: "ch", aliases: ["ch"], desc: "ปลายลิ้นม้วนแตะเพดานหน้า (พ่นลม)", map: {"a":"cha","e":"che","-i":"chi","ai":"chai","ao":"chao","ou":"chou","an":"chan","en":"chen","ang":"chang","eng":"cheng","ong":"chong","u":"chu","ua":"chua","uo":"chuo","uai":"chuai","uei (ui)":"chui","uan":"chuan","uen (un)":"chun","uang":"chuang"} },
+  { sym: "sh", aliases: ["sh"], desc: "ปลายลิ้นม้วนจ่อเพดานหน้า (เสียดแทรก)", map: {"a":"sha","e":"she","-i":"shi","ai":"shai","ei":"shei","ao":"shao","ou":"shou","an":"shan","en":"shen","ang":"shang","eng":"sheng","u":"shu","ua":"shua","uo":"shuo","uai":"shuai","uei (ui)":"shui","uan":"shuan","uen (un)":"shun","uang":"shuang"} },
+  { sym: "r", aliases: ["r"], desc: "ปลายลิ้นม้วน + สั่นเส้นเสียง", map: {"e":"re","-i":"ri","ao":"rao","ou":"rou","an":"ran","en":"ren","ang":"rang","eng":"reng","ong":"rong","u":"ru","ua":"rua*","uo":"ruo","uei (ui)":"rui","uan":"ruan","uen (un)":"run"} },
+  { sym: "j", aliases: ["j"], desc: "หน้าลิ้นแนบเพดานแข็ง (ไม่พ่นลม)", map: {"i":"ji","ia":"jia","iao":"jiao","ie":"jie","iou (iu)":"jiu","ian":"jian","in":"jin","iang":"jiang","ing":"jing","iong":"jiong","ü":"ju","üe":"jue","üan":"juan","ün":"jun"} },
+  { sym: "q", aliases: ["q"], desc: "หน้าลิ้นแนบเพดานแข็ง (พ่นลม)", map: {"i":"qi","ia":"qia","iao":"qiao","ie":"qie","iou (iu)":"qiu","ian":"qian","in":"qin","iang":"qiang","ing":"qing","iong":"qiong","ü":"qu","üe":"que","üan":"quan","ün":"qun"} },
+  { sym: "x", aliases: ["x"], desc: "หน้าลิ้นชิดเพดานแข็ง (เสียดแทรก)", map: {"i":"xi","ia":"xia","iao":"xiao","ie":"xie","iou (iu)":"xiu","ian":"xian","in":"xin","iang":"xiang","ing":"xing","iong":"xiong","ü":"xu","üe":"xue","üan":"xuan","ün":"xun"} },
+  { sym: "g", aliases: ["g"], desc: "โคนลิ้นแตะเพดานอ่อน (ไม่พ่นลม)", map: {"a":"ga","e":"ge","ai":"gai","ei":"gei","ao":"gao","ou":"gou","an":"gan","en":"gen","ang":"gang","eng":"geng","ong":"gong","u":"gu","ua":"gua","uo":"guo","uai":"guai","uei (ui)":"gui","uan":"guan","uen (un)":"gun","uang":"guang"} },
+  { sym: "k", aliases: ["k"], desc: "โคนลิ้นแตะเพดานอ่อน (พ่นลม)", map: {"a":"ka","e":"ke","ai":"kai","ei":"kei","ao":"kao","ou":"kou","an":"kan","en":"ken","ang":"kang","eng":"keng","ong":"kong","u":"ku","ua":"kua","uo":"kuo","uai":"kuai","uei (ui)":"kui","uan":"kuan","uen (un)":"kun","uang":"kuang"} },
+  { sym: "h", aliases: ["h"], desc: "โคนลิ้นใกล้เพดานอ่อน (เสียดแทรก)", map: {"a":"ha","e":"he","ai":"hai","ei":"hei","ao":"hao","ou":"hou","an":"han","en":"hen","ang":"hang","eng":"heng","ong":"hong","u":"hu","ua":"hua","uo":"huo","uai":"huai","uei (ui)":"hui","uan":"huan","uen (un)":"hun","uang":"huang"} },
+  { sym: "零声母 (y/w)", aliases: ["y", "w", "0", "zero", "零"], isZero: true, desc: "ไร้พยัญชนะต้น / กึ่งสระ y, w", map: {"a":"a","o":"o / yo*","e":"e","er":"er","ai":"ai","ei":"ei","ao":"ao","ou":"ou","an":"an","en":"en","ang":"ang","eng":"eng","i":"yi","ia":"ya","iao":"yao","ie":"ye","iou (iu)":"you","ian":"yan","in":"yin","iang":"yang","ing":"ying","iong":"yong","u":"wu","ua":"wa","uo":"wo","uai":"wai","uei (ui)":"wei","uan":"wan","uen (un)":"wen","uang":"wang","ueng":"weng","ü":"yu","üe":"yue","üan":"yuan","ün":"yun"} }
+];
+
+const ALL_VALID_SYLLABLES_SET = new Set();
+INITIALS_DATA.forEach(row => {
+  Object.values(row.map).forEach(val => {
+    if (!val) return;
+    val.split("/").forEach(p => {
+      const clean = p.replace(/[*★]/g, "").trim().toLowerCase();
+      if (clean) ALL_VALID_SYLLABLES_SET.add(clean);
+    });
+  });
+});
+ALL_VALID_SYLLABLES_SET.add("nü");
+ALL_VALID_SYLLABLES_SET.add("lü");
+ALL_VALID_SYLLABLES_SET.add("nüe");
+ALL_VALID_SYLLABLES_SET.add("lüe");
+
+/* =======================================================
+   0. HELPERS + ICONS
+   ======================================================= */
+const $ = id => document.getElementById(id);
+const RM = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+function escHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function jsArg(s) { return escHtml(JSON.stringify(String(s))); }
+function lsGet(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function cleanSyl(v) { return String(v).replace(/[*★]/g, "").split("/")[0].trim().toLowerCase(); }
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+const ICONS = {
+  speaker: "M11 5 6 9H3v6h3l5 4V5z M15.5 8.5a5 5 0 0 1 0 7 M18.5 5.5a9 9 0 0 1 0 13",
+  home: "M3 11 12 4l9 7 M5 10v10h14V10",
+  book: "M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z",
+  flask: "M9 3h6 M10 3v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3 M7.5 14h9",
+  grid: "M4 4h16v16H4z M4 10h16 M4 15h16 M10 4v16 M15 4v16",
+  target: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M12 12h.01",
+  sun: "M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10z M12 1v2 M12 21v2 M4.2 4.2l1.4 1.4 M18.4 18.4l1.4 1.4 M1 12h2 M21 12h2 M4.2 19.8l1.4-1.4 M18.4 5.6l1.4-1.4",
+  moon: "M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z",
+  check: "M5 12.5l4.5 4.5L19 7",
+  x: "M6 6l12 12 M18 6 6 18",
+  shuffle: "M16 3h5v5 M4 20 21 3 M21 16v5h-5 M15 15l6 6 M4 4l5 5",
+  arrowR: "M5 12h14 M13 6l6 6-6 6",
+  arrowL: "M19 12H5 M11 6l-6 6 6 6",
+  refresh: "M20 11a8 8 0 1 0-2.3 5.7 M20 4v7h-7"
+};
+function ic(name, cls) { return `<svg class="ic${cls ? " " + cls : ""}" viewBox="0 0 24 24" aria-hidden="true"><path d="${ICONS[name]}"/></svg>`; }
+function fillIcons(root) { (root || document).querySelectorAll("i[data-ic]").forEach(e => { e.outerHTML = ic(e.dataset.ic); }); }
+
+function confetti(x, y, n) {
+  if (RM) return;
+  const colors = [cssVar("--t1"), cssVar("--t2"), cssVar("--t3"), cssVar("--t4"), cssVar("--yellow")];
+  for (let i = 0; i < (n || 18); i++) {
+    const p = document.createElement("span");
+    p.className = "particle";
+    const a = Math.random() * Math.PI * 2, d = 50 + Math.random() * 90;
+    p.style.left = x + "px"; p.style.top = y + "px";
+    p.style.background = colors[i % colors.length];
+    p.style.setProperty("--tx", Math.cos(a) * d + "px");
+    p.style.setProperty("--ty", Math.sin(a) * d - 30 + "px");
+    document.body.appendChild(p);
+    p.addEventListener("animationend", () => p.remove());
+  }
+}
+function confettiAt(el, n) { if (!el) return; const r = el.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2, n); }
+
+/* =======================================================
+   1. TONE MARKS & คำจีนพื้นฐาน
+   ======================================================= */
+const TONE_VOWELS = { a: ["ā", "á", "ǎ", "à"], o: ["ō", "ó", "ǒ", "ò"], e: ["ē", "é", "ě", "è"], i: ["ī", "í", "ǐ", "ì"], u: ["ū", "ú", "ǔ", "ù"], "ü": ["ǖ", "ǘ", "ǚ", "ǜ"] };
+const MARK_OF = {};
+Object.entries(TONE_VOWELS).forEach(([b, arr]) => arr.forEach((m, i) => { MARK_OF[m] = [b, i + 1]; }));
+const TONE_INFO = { 1: { mark: "ā" }, 2: { mark: "á" }, 3: { mark: "ǎ" }, 4: { mark: "à" }, 0: { mark: "a" } };
+function toNumbered(py) {
+  let t = 5, out = "";
+  for (const ch of String(py).normalize("NFC").toLowerCase()) {
+    if (MARK_OF[ch]) { out += MARK_OF[ch][0]; t = MARK_OF[ch][1]; } else out += ch;
+  }
+  return out + t;
+}
+function normalizeAnswer(input) {
+  let s = String(input || "").toLowerCase().trim().replace(/\s+/g, "").replace(/u:/g, "ü").replace(/v/g, "ü");
+  let key;
+  if (/[0-5]$/.test(s)) key = s.slice(0, -1) + (s.slice(-1) === "0" ? "5" : s.slice(-1));
+  else key = toNumbered(s);
+  return key.replace(/^([jqxy])ü/, "$1u");
+}
+
+const CHAR_SRC = "mā 妈 แม่|má 麻 ป่าน|mǎ 马 ม้า|mà 骂 ด่า|bā 八 แปด|bà 爸 พ่อ|bái 白 ขาว|bǎi 百 ร้อย|běi 北 ทิศเหนือ|bēi 杯 แก้ว|bǐ 笔 ปากกา|bù 不 ไม่|bāo 包 กระเป๋า|pà 怕 กลัว|pí 皮 หนัง|píng 瓶 ขวด|mǐ 米 ข้าวสาร|mén 门 ประตู|míng 名 ชื่อ|māo 猫 แมว|mǎi 买 ซื้อ|mài 卖 ขาย|mèi 妹 น้องสาว|fēi 飞 บิน|fàn 饭 ข้าว|fáng 房 บ้าน|fēng 风 ลม|dà 大 ใหญ่|dì 弟 น้องชาย|diǎn 点 จุด|dōng 东 ทิศตะวันออก|duō 多 มาก|duì 对 ถูกต้อง|tā 他 เขา|tiān 天 ฟ้า|táng 糖 น้ำตาล|tóu 头 หัว|tīng 听 ฟัง|nǐ 你 คุณ|nǚ 女 ผู้หญิง|nán 男 ผู้ชาย|nián 年 ปี|niú 牛 วัว|lái 来 มา|lǎo 老 แก่|lù 路 ถนน|lǜ 绿 สีเขียว|liù 六 หก|lěng 冷 หนาว|lùn 论 อภิปราย|gāo 高 สูง|gǒu 狗 หมา|gè 个 อัน (ลักษณนาม)|guó 国 ประเทศ|guì 贵 แพง|kàn 看 ดู|kě 渴 กระหายน้ำ|kuài 快 เร็ว|kǒu 口 ปาก|hǎo 好 ดี|hē 喝 ดื่ม|hóng 红 สีแดง|huā 花 ดอกไม้|huǒ 火 ไฟ|hěn 很 มาก|huáng 黄 สีเหลือง|jiā 家 บ้าน|jiǔ 九 เก้า|jīn 金 ทอง|jiào 叫 เรียก|jú 橘 ส้ม|qī 七 เจ็ด|qù 去 ไป|qián 钱 เงิน|qǐng 请 เชิญ|xī 西 ทิศตะวันตก|xiǎo 小 เล็ก|xué 学 เรียน|xīn 心 หัวใจ|xiè 谢 ขอบคุณ|xuě 雪 หิมะ|zài 在 อยู่|zǒu 走 เดิน|zì 字 ตัวอักษร|zuò 坐 นั่ง|zǎo 早 เช้า|cài 菜 ผัก/อาหาร|cí 词 คำศัพท์|cóng 从 จาก|sān 三 สาม|sì 四 สี่|suì 岁 ขวบ|zhōng 中 กลาง|zhè 这 นี่|zhǐ 纸 กระดาษ|zhū 猪 หมู|chá 茶 ชา|chī 吃 กิน|chē 车 รถ|chuán 船 เรือ|shū 书 หนังสือ|shí 十 สิบ|shì 是 ใช่/เป็น|shuǐ 水 น้ำ|shǒu 手 มือ|shān 山 ภูเขา|shuō 说 พูด|rén 人 คน|rè 热 ร้อน|ròu 肉 เนื้อ|rì 日 ดวงอาทิตย์|yī 一 หนึ่ง|yā 鸭 เป็ด|yè 夜 กลางคืน|yú 鱼 ปลา|yǔ 雨 ฝน|yuè 月 ดวงจันทร์|yào 要 ต้องการ|yǒu 有 มี|yáng 羊 แพะ|yuǎn 远 ไกล|yún 云 เมฆ|yòng 用 ใช้|wǒ 我 ฉัน|wǔ 五 ห้า|wèn 问 ถาม|wàn 万 หมื่น|wài 外 ข้างนอก|wēng 翁 ชายชรา|ài 爱 รัก|è 饿 หิว|èr 二 สอง|ān 安 สงบ";
+const CHARS = CHAR_SRC.split("|").map(s => {
+  const parts = s.trim().split(" ");
+  return { py: parts[0], zh: parts[1], th: parts.slice(2).join(" "), key: toNumbered(parts[0]) };
+});
+
+/* =======================================================
+   2. เสียง: ไฟล์อัดเสียงคนจริง (ไม่ใช้เสียงสังเคราะห์)
+   ======================================================= */
+const AVAIL = new Set(["a1", "a2", "a3", "a4", "ai1", "ai2", "ai3", "ai4", "an1", "an2", "an3", "an4", "ang1", "ang2", "ang3", "ang4", "ao1", "ao2", "ao3", "ao4", "ba1", "ba2", "ba3", "ba4", "bai1", "bai2", "bai3", "bai4", "ban1", "ban2", "ban3", "ban4", "bang1", "bang2", "bang3", "bang4", "bao1", "bao2", "bao3", "bao4", "bei1", "bei2", "bei3", "bei4", "ben1", "ben2", "ben3", "ben4", "beng1", "beng2", "beng3", "beng4", "bi1", "bi2", "bi3", "bi4", "bian1", "bian2", "bian3", "bian4", "biao1", "biao2", "biao3", "biao4", "bie1", "bie2", "bie3", "bie4", "bin1", "bin2", "bin3", "bin4", "bing1", "bing2", "bing3", "bing4", "bo1", "bo2", "bo3", "bo4", "bu1", "bu2", "bu3", "bu4", "ca1", "ca2", "ca3", "ca4", "cai1", "cai2", "cai3", "cai4", "can1", "can2", "can3", "can4", "cang1", "cang2", "cang3", "cang4", "cao1", "cao2", "cao3", "cao4", "ce1", "ce2", "ce3", "ce4", "cen1", "cen2", "cen3", "cen4", "ceng1", "ceng2", "ceng3", "ceng4", "cha1", "cha2", "cha3", "cha4", "chai1", "chai2", "chai3", "chai4", "chan1", "chan2", "chan3", "chan4", "chang1", "chang2", "chang3", "chang4", "chao1", "chao2", "chao3", "chao4", "che1", "che2", "che3", "che4", "chen1", "chen2", "chen3", "chen4", "cheng1", "cheng2", "cheng3", "cheng4", "chi1", "chi2", "chi3", "chi4", "chong1", "chong2", "chong3", "chong4", "chou1", "chou2", "chou3", "chou4", "chu1", "chu2", "chu3", "chu4", "chua1", "chua2", "chua3", "chua4", "chuai1", "chuai2", "chuai3", "chuai4", "chuan1", "chuan2", "chuan3", "chuan4", "chuang1", "chuang2", "chuang3", "chuang4", "chui1", "chui2", "chui3", "chui4", "chun1", "chun2", "chun3", "chun4", "chuo1", "chuo2", "chuo3", "chuo4", "ci1", "ci2", "ci3", "ci4", "cong1", "cong2", "cong3", "cong4", "cou1", "cou2", "cou3", "cou4", "cu1", "cu2", "cu3", "cu4", "cuan1", "cuan2", "cuan3", "cuan4", "cui1", "cui2", "cui3", "cui4", "cun1", "cun2", "cun3", "cun4", "cuo1", "cuo2", "cuo3", "cuo4", "da1", "da2", "da3", "da4", "dai1", "dai2", "dai3", "dai4", "dan1", "dan2", "dan3", "dan4", "dang1", "dang2", "dang3", "dang4", "dao1", "dao2", "dao3", "dao4", "de1", "de2", "de3", "de4", "dei1", "dei2", "dei3", "dei4", "den1", "den2", "den3", "den4", "deng1", "deng2", "deng3", "deng4", "di1", "di2", "di3", "di4", "dia1", "dia2", "dia3", "dia4", "dian1", "dian2", "dian3", "dian4", "diao1", "diao2", "diao3", "diao4", "die1", "die2", "die3", "die4", "ding1", "ding2", "ding3", "ding4", "diu1", "diu2", "diu3", "diu4", "dong1", "dong2", "dong3", "dong4", "dou1", "dou2", "dou3", "dou4", "du1", "du2", "du3", "du4", "duan1", "duan2", "duan3", "duan4", "dui1", "dui2", "dui3", "dui4", "dun1", "dun2", "dun3", "dun4", "duo1", "duo2", "duo3", "duo4", "e1", "e2", "e3", "e4", "ei1", "ei2", "ei3", "ei4", "en1", "en2", "en3", "en4", "eng1", "eng2", "eng3", "eng4", "er1", "er2", "er3", "er4", "fa1", "fa2", "fa3", "fa4", "fan1", "fan2", "fan3", "fan4", "fang1", "fang2", "fang3", "fang4", "fei1", "fei2", "fei3", "fei4", "fen1", "fen2", "fen3", "fen4", "feng1", "feng2", "feng3", "feng4", "fo1", "fo2", "fo3", "fo4", "fou1", "fou2", "fou3", "fou4", "fu1", "fu2", "fu3", "fu4", "ga1", "ga2", "ga3", "ga4", "gai1", "gai2", "gai3", "gai4", "gan1", "gan2", "gan3", "gan4", "gang1", "gang2", "gang3", "gang4", "gao1", "gao2", "gao3", "gao4", "ge1", "ge2", "ge3", "ge4", "gei1", "gei2", "gei3", "gei4", "gen1", "gen2", "gen3", "gen4", "geng1", "geng2", "geng3", "geng4", "gong1", "gong2", "gong3", "gong4", "gou1", "gou2", "gou3", "gou4", "gu1", "gu2", "gu3", "gu4", "gua1", "gua2", "gua3", "gua4", "guai1", "guai2", "guai3", "guai4", "guan1", "guan2", "guan3", "guan4", "guang1", "guang2", "guang3", "guang4", "gui1", "gui2", "gui3", "gui4", "gun1", "gun2", "gun3", "gun4", "guo1", "guo2", "guo3", "guo4", "ha1", "ha2", "ha3", "ha4", "hai1", "hai2", "hai3", "hai4", "han1", "han2", "han3", "han4", "hang1", "hang2", "hang3", "hang4", "hao1", "hao2", "hao3", "hao4", "he1", "he2", "he3", "he4", "hei1", "hei2", "hei3", "hei4", "hen1", "hen2", "hen3", "hen4", "heng1", "heng2", "heng3", "heng4", "hong1", "hong2", "hong3", "hong4", "hou1", "hou2", "hou3", "hou4", "hu1", "hu2", "hu3", "hu4", "hua1", "hua2", "hua3", "hua4", "huai1", "huai2", "huai3", "huai4", "huan1", "huan2", "huan3", "huan4", "huang1", "huang2", "huang3", "huang4", "hui1", "hui2", "hui3", "hui4", "hun1", "hun2", "hun3", "hun4", "huo1", "huo2", "huo3", "huo4", "ji1", "ji2", "ji3", "ji4", "jia1", "jia2", "jia3", "jia4", "jian1", "jian2", "jian3", "jian4", "jiang1", "jiang2", "jiang3", "jiang4", "jiao1", "jiao2", "jiao3", "jiao4", "jie1", "jie2", "jie3", "jie4", "jin1", "jin2", "jin3", "jin4", "jing1", "jing2", "jing3", "jing4", "jiong1", "jiong2", "jiong3", "jiong4", "jiu1", "jiu2", "jiu3", "jiu4", "ju1", "ju2", "ju3", "ju4", "juan1", "juan2", "juan3", "juan4", "jue1", "jue2", "jue3", "jue4", "jun1", "jun2", "jun3", "jun4", "ka1", "ka2", "ka3", "ka4", "kai1", "kai2", "kai3", "kai4", "kan1", "kan2", "kan3", "kan4", "kang1", "kang2", "kang3", "kang4", "kao1", "kao2", "kao3", "kao4", "ke1", "ke2", "ke3", "ke4", "kei1", "kei2", "kei3", "kei4", "ken1", "ken2", "ken3", "ken4", "keng1", "keng2", "keng3", "keng4", "kong1", "kong2", "kong3", "kong4", "kou1", "kou2", "kou3", "kou4", "ku1", "ku2", "ku3", "ku4", "kua1", "kua2", "kua3", "kua4", "kuai1", "kuai2", "kuai3", "kuai4", "kuan1", "kuan2", "kuan3", "kuan4", "kuang1", "kuang2", "kuang3", "kuang4", "kui1", "kui2", "kui3", "kui4", "kun1", "kun2", "kun3", "kun4", "kuo1", "kuo2", "kuo3", "kuo4", "la1", "la2", "la3", "la4", "lai1", "lai2", "lai3", "lai4", "lan1", "lan2", "lan3", "lan4", "lang1", "lang2", "lang3", "lang4", "lao1", "lao2", "lao3", "lao4", "le1", "le2", "le3", "le4", "lei1", "lei2", "lei3", "lei4", "leng1", "leng2", "leng3", "leng4", "li1", "li2", "li3", "li4", "lia1", "lia2", "lia3", "lia4", "lian1", "lian2", "lian3", "lian4", "liang1", "liang2", "liang3", "liang4", "liao1", "liao2", "liao3", "liao4", "lie1", "lie2", "lie3", "lie4", "lin1", "lin2", "lin3", "lin4", "ling1", "ling2", "ling3", "ling4", "liu1", "liu2", "liu3", "liu4", "lo1", "lo2", "lo3", "lo4", "long1", "long2", "long3", "long4", "lou1", "lou2", "lou3", "lou4", "lu1", "lu2", "lu3", "lu4", "luan1", "luan2", "luan3", "luan4", "lun1", "lun2", "lun3", "lun4", "luo1", "luo2", "luo3", "luo4", "lv1", "lv2", "lv3", "lv4", "lve1", "lve2", "lve3", "lve4", "ma1", "ma2", "ma3", "ma4", "mai1", "mai2", "mai3", "mai4", "man1", "man2", "man3", "man4", "mang1", "mang2", "mang3", "mang4", "mao1", "mao2", "mao3", "mao4", "me1", "me2", "me3", "me4", "mei1", "mei2", "mei3", "mei4", "men1", "men2", "men3", "men4", "meng1", "meng2", "meng3", "meng4", "mi1", "mi2", "mi3", "mi4", "mian1", "mian2", "mian3", "mian4", "miao1", "miao2", "miao3", "miao4", "mie1", "mie2", "mie3", "mie4", "min1", "min2", "min3", "min4", "ming1", "ming2", "ming3", "ming4", "miu1", "miu2", "miu3", "miu4", "mo1", "mo2", "mo3", "mo4", "mou1", "mou2", "mou3", "mou4", "mu1", "mu2", "mu3", "mu4", "na1", "na2", "na3", "na4", "nai1", "nai2", "nai3", "nai4", "nan1", "nan2", "nan3", "nan4", "nang1", "nang2", "nang3", "nang4", "nao1", "nao2", "nao3", "nao4", "ne1", "ne2", "ne3", "ne4", "nei1", "nei2", "nei3", "nei4", "nen1", "nen2", "nen3", "nen4", "neng1", "neng2", "neng3", "neng4", "ni1", "ni2", "ni3", "ni4", "nian1", "nian2", "nian3", "nian4", "niang1", "niang2", "niang3", "niang4", "niao1", "niao2", "niao3", "niao4", "nie1", "nie2", "nie3", "nie4", "nin1", "nin2", "nin3", "nin4", "ning1", "ning2", "ning3", "ning4", "niu1", "niu2", "niu3", "niu4", "nong1", "nong2", "nong3", "nong4", "nou1", "nou2", "nou3", "nou4", "nu1", "nu2", "nu3", "nu4", "nuan1", "nuan2", "nuan3", "nuan4", "nuo1", "nuo2", "nuo3", "nuo4", "nv1", "nv2", "nv3", "nv4", "nve1", "nve2", "nve3", "nve4", "o1", "o2", "o3", "o4", "ou1", "ou2", "ou3", "ou4", "pa1", "pa2", "pa3", "pa4", "pai1", "pai2", "pai3", "pai4", "pan1", "pan2", "pan3", "pan4", "pang1", "pang2", "pang3", "pang4", "pao1", "pao2", "pao3", "pao4", "pei1", "pei2", "pei3", "pei4", "pen1", "pen2", "pen3", "pen4", "peng1", "peng2", "peng3", "peng4", "pi1", "pi2", "pi3", "pi4", "pian1", "pian2", "pian3", "pian4", "piao1", "piao2", "piao3", "piao4", "pie1", "pie2", "pie3", "pie4", "pin1", "pin2", "pin3", "pin4", "ping1", "ping2", "ping3", "ping4", "po1", "po2", "po3", "po4", "pou1", "pou2", "pou3", "pou4", "pu1", "pu2", "pu3", "pu4", "qi1", "qi2", "qi3", "qi4", "qia1", "qia2", "qia3", "qia4", "qian1", "qian2", "qian3", "qian4", "qiang1", "qiang2", "qiang3", "qiang4", "qiao1", "qiao2", "qiao3", "qiao4", "qie1", "qie2", "qie3", "qie4", "qin1", "qin2", "qin3", "qin4", "qing1", "qing2", "qing3", "qing4", "qiong1", "qiong2", "qiong3", "qiong4", "qiu1", "qiu2", "qiu3", "qiu4", "qu1", "qu2", "qu3", "qu4", "quan1", "quan2", "quan3", "quan4", "que1", "que2", "que3", "que4", "qun1", "qun2", "qun3", "qun4", "ran1", "ran2", "ran3", "ran4", "rang1", "rang2", "rang3", "rang4", "rao1", "rao2", "rao3", "rao4", "re1", "re2", "re3", "re4", "ren1", "ren2", "ren3", "ren4", "reng1", "reng2", "reng3", "reng4", "ri1", "ri2", "ri3", "ri4", "rong1", "rong2", "rong3", "rong4", "rou1", "rou2", "rou3", "rou4", "ru1", "ru2", "ru3", "ru4", "rua1", "rua2", "rua3", "rua4", "ruan1", "ruan2", "ruan3", "ruan4", "rui1", "rui2", "rui3", "rui4", "run1", "run2", "run3", "run4", "ruo1", "ruo2", "ruo3", "ruo4", "sa1", "sa2", "sa3", "sa4", "sai1", "sai2", "sai3", "sai4", "san1", "san2", "san3", "san4", "sang1", "sang2", "sang3", "sang4", "sao1", "sao2", "sao3", "sao4", "se1", "se2", "se3", "se4", "sen1", "sen2", "sen3", "sen4", "seng1", "seng2", "seng3", "seng4", "sha1", "sha2", "sha3", "sha4", "shai1", "shai2", "shai3", "shai4", "shan1", "shan2", "shan3", "shan4", "shang1", "shang2", "shang3", "shang4", "shao1", "shao2", "shao3", "shao4", "she1", "she2", "she3", "she4", "shei1", "shei2", "shei3", "shei4", "shen1", "shen2", "shen3", "shen4", "sheng1", "sheng2", "sheng3", "sheng4", "shi1", "shi2", "shi3", "shi4", "shou1", "shou2", "shou3", "shou4", "shu1", "shu2", "shu3", "shu4", "shua1", "shua2", "shua3", "shua4", "shuai1", "shuai2", "shuai3", "shuai4", "shuan1", "shuan2", "shuan3", "shuan4", "shuang1", "shuang2", "shuang3", "shuang4", "shui1", "shui2", "shui3", "shui4", "shun1", "shun2", "shun3", "shun4", "shuo1", "shuo2", "shuo3", "shuo4", "si1", "si2", "si3", "si4", "song1", "song2", "song3", "song4", "sou1", "sou2", "sou3", "sou4", "su1", "su2", "su3", "su4", "suan1", "suan2", "suan3", "suan4", "sui1", "sui2", "sui3", "sui4", "sun1", "sun2", "sun3", "sun4", "suo1", "suo2", "suo3", "suo4", "ta1", "ta2", "ta3", "ta4", "tai1", "tai2", "tai3", "tai4", "tan1", "tan2", "tan3", "tan4", "tang1", "tang2", "tang3", "tang4", "tao1", "tao2", "tao3", "tao4", "te1", "te2", "te3", "te4", "teng1", "teng2", "teng3", "teng4", "ti1", "ti2", "ti3", "ti4", "tian1", "tian2", "tian3", "tian4", "tiao1", "tiao2", "tiao3", "tiao4", "tie1", "tie2", "tie3", "tie4", "ting1", "ting2", "ting3", "ting4", "tong1", "tong2", "tong3", "tong4", "tou1", "tou2", "tou3", "tou4", "tu1", "tu2", "tu3", "tu4", "tuan1", "tuan2", "tuan3", "tuan4", "tui1", "tui2", "tui3", "tui4", "tun1", "tun2", "tun3", "tun4", "tuo1", "tuo2", "tuo3", "tuo4", "wa1", "wa2", "wa3", "wa4", "wai1", "wai2", "wai3", "wai4", "wan1", "wan2", "wan3", "wan4", "wang1", "wang2", "wang3", "wang4", "wei1", "wei2", "wei3", "wei4", "wen1", "wen2", "wen3", "wen4", "weng1", "weng2", "weng3", "weng4", "wo1", "wo2", "wo3", "wo4", "wu1", "wu2", "wu3", "wu4", "xi1", "xi2", "xi3", "xi4", "xia1", "xia2", "xia3", "xia4", "xian1", "xian2", "xian3", "xian4", "xiang1", "xiang2", "xiang3", "xiang4", "xiao1", "xiao2", "xiao3", "xiao4", "xie1", "xie2", "xie3", "xie4", "xin1", "xin2", "xin3", "xin4", "xing1", "xing2", "xing3", "xing4", "xiong1", "xiong2", "xiong3", "xiong4", "xiu1", "xiu2", "xiu3", "xiu4", "xu1", "xu2", "xu3", "xu4", "xuan1", "xuan2", "xuan3", "xuan4", "xue1", "xue2", "xue3", "xue4", "xun1", "xun2", "xun3", "xun4", "ya1", "ya2", "ya3", "ya4", "yan1", "yan2", "yan3", "yan4", "yang1", "yang2", "yang3", "yang4", "yao1", "yao2", "yao3", "yao4", "ye1", "ye2", "ye3", "ye4", "yi1", "yi2", "yi3", "yi4", "yin1", "yin2", "yin3", "yin4", "ying1", "ying2", "ying3", "ying4", "yong1", "yong2", "yong3", "yong4", "you1", "you2", "you3", "you4", "yu1", "yu2", "yu3", "yu4", "yuan1", "yuan2", "yuan3", "yuan4", "yue1", "yue2", "yue3", "yue4", "yun1", "yun2", "yun3", "yun4", "za1", "za2", "za3", "za4", "zai1", "zai2", "zai3", "zai4", "zan1", "zan2", "zan3", "zan4", "zang1", "zang2", "zang3", "zang4", "zao1", "zao2", "zao3", "zao4", "ze1", "ze2", "ze3", "ze4", "zei1", "zei2", "zei3", "zei4", "zen1", "zen2", "zen3", "zen4", "zeng1", "zeng2", "zeng3", "zeng4", "zha1", "zha2", "zha3", "zha4", "zhai1", "zhai2", "zhai3", "zhai4", "zhan1", "zhan2", "zhan3", "zhan4", "zhang1", "zhang2", "zhang3", "zhang4", "zhao1", "zhao2", "zhao3", "zhao4", "zhe1", "zhe2", "zhe3", "zhe4", "zhei1", "zhei2", "zhei3", "zhei4", "zhen1", "zhen2", "zhen3", "zhen4", "zheng1", "zheng2", "zheng3", "zheng4", "zhi1", "zhi2", "zhi3", "zhi4", "zhong1", "zhong2", "zhong3", "zhong4", "zhou1", "zhou2", "zhou3", "zhou4", "zhu1", "zhu2", "zhu3", "zhu4", "zhua1", "zhua2", "zhua3", "zhua4", "zhuai1", "zhuai2", "zhuai3", "zhuai4", "zhuan1", "zhuan2", "zhuan3", "zhuan4", "zhuang1", "zhuang2", "zhuang3", "zhuang4", "zhui1", "zhui2", "zhui3", "zhui4", "zhun1", "zhun2", "zhun3", "zhun4", "zhuo1", "zhuo2", "zhuo3", "zhuo4", "zi1", "zi2", "zi3", "zi4", "zong1", "zong2", "zong3", "zong4", "zou1", "zou2", "zou3", "zou4", "zu1", "zu2", "zu3", "zu4", "zuan1", "zuan2", "zuan3", "zuan4", "zui1", "zui2", "zui3", "zui4", "zun1", "zun2", "zun3", "zun4", "zuo1", "zuo2", "zuo3", "zuo4"]);
+const WORD_AUDIO = {"一会儿": "4e00-4f1a-513f", "可以": "53ef-4ee5", "儿子": "513f-5b50", "不是": "4e0d-662f", "没事儿": "6ca1-4e8b-513f", "一点儿": "4e00-70b9-513f", "画儿": "753b-513f", "一块儿": "4e00-5757-513f", "玩儿": "73a9-513f", "老头儿": "8001-5934-513f", "女儿": "5973-513f", "谢谢": "8c22-8c22", "不要": "4e0d-8981", "好玩儿": "597d-73a9-513f", "小孩儿": "5c0f-5b69-513f", "空儿": "7a7a-513f"};
+const REMOTE_SYL = "https://raw.githubusercontent.com/hugolpz/audio-cmn/master/64k/syllabs/cmn-";
+const REMOTE_WORD = "https://raw.githubusercontent.com/hugolpz/audio-cmn/master/64k/hsk/cmn-";
+let playToken = 0, curAudio = null, toastT = 0, audioFailShown = false;
+
+function toast(html, warn, ms) {
+  const t = $("toast");
+  $("toastText").innerHTML = html;
+  t.classList.toggle("warn", !!warn);
+  t.classList.add("show");
+  clearTimeout(toastT);
+  toastT = setTimeout(() => t.classList.remove("show"), ms || (warn ? 3200 : 2400));
+}
+function fileKey(key) { return key.replace(/ü/g, "v"); }
+function playUrl(urls, opts) {
+  const token = playToken;
+  return new Promise(resolve => {
+    let i = 0;
+    const attempt = () => {
+      if (token !== playToken || i >= urls.length) { resolve(false); return; }
+      const a = new Audio(urls[i++]);
+      let settled = false;
+      const finish = ok => { if (settled) return; settled = true; resolve(ok); };
+      const fail = () => { if (settled) return; settled = true; attempt(); };
+      a.volume = (opts && opts.volume) || 1;
+      a.playbackRate = (opts && opts.rate) || 1;
+      curAudio = a;
+      a.onended = () => finish(true);
+      a.onerror = fail;
+      a.onpause = () => { if (!a.ended) finish(false); };
+      const p = a.play();
+      if (p && p.catch) p.catch(err => { if (err && (err.name === "NotAllowedError" || err.name === "AbortError")) finish(false); else fail(); });
+    };
+    attempt();
+  });
+}
+// เล่นพยางค์เดียว เช่น "zhong1" (เลข 5 = เสียงเบา)
+function playKey(key) {
+  let k = fileKey(key), opts;
+  if (k.endsWith("5")) {
+    // ไม่มีไฟล์เสียงเบาแยก: ใช้เสียง 1 แบบสั้นและเบาแทน
+    k = k.slice(0, -1) + "1"; opts = { volume: 0.5, rate: 1.3 };
+  }
+  if (!AVAIL.has(k)) return Promise.resolve(false);
+  return playUrl([`audio/syl/${k}.mp3`, `${REMOTE_SYL}${k}.mp3`], opts);
+}
+function stopAudio() { playToken++; if (curAudio) { try { curAudio.pause(); } catch (e) {} } }
+async function playSeq(keys, label) {
+  stopAudio();
+  const token = playToken;
+  if (label) toast(label);
+  let ok = true;
+  for (const k of keys) {
+    if (token !== playToken) return;
+    const r = await playKey(k);
+    if (!r) ok = false;
+    await sleep(60);
+  }
+  if (!ok && token === playToken) audioFail();
+}
+async function playWord(zh, keys, label) {
+  stopAudio();
+  const token = playToken;
+  if (label) toast(label);
+  const hex = WORD_AUDIO[zh];
+  if (hex) {
+    const ok = await playUrl([`audio/word/${hex}.mp3`, `${REMOTE_WORD}${encodeURIComponent(zh)}.mp3`]);
+    if (ok || token !== playToken) return;
+  }
+  if (keys && keys.length) { await playSeq(keys); }
+}
+function audioFail() {
+  if (audioFailShown) return;
+  audioFailShown = true;
+  toast("เล่นเสียงไม่ได้ — ให้วางโฟลเดอร์ audio ไว้ข้างไฟล์นี้ หรือเชื่อมต่ออินเทอร์เน็ต", true, 5000);
+  setTimeout(() => { audioFailShown = false; }, 8000);
+}
+// ฟังก์ชันหลักที่ทุกปุ่มใช้: say("ni2 hao3", "你好")
+function say(keys, zh, label) {
+  const ks = String(keys).trim().split(/\s+/);
+  const lbl = label || (zh ? `<span class="zh">${escHtml(zh)}</span> <span class="py">${escHtml(ks.map(numToMark).join(" "))}</span>` : `<span class="py">${escHtml(ks.map(numToMark).join(" "))}</span>`);
+  if (zh && WORD_AUDIO[zh]) playWord(zh, ks, lbl); else playSeq(ks, lbl);
+}
+function numToMark(k) {
+  const t = +k.slice(-1), base = k.slice(0, -1).replace(/v/g, "ü");
+  if (!(t >= 1 && t <= 4)) return base;
+  const r = applyToneToSyllable(base);
+  return r.forms[t - 1] || base;
+}
+function sayBtn(keys, zh, text) {
+  return `<button type="button" class="chip-say" onclick="say(${jsArg(keys)}, ${jsArg(zh || "")})">${ic("speaker")}${text}</button>`;
+}
+
+/* =======================================================
+   3. TONE-MARK PLACEMENT (กฎ 标调)
+   ======================================================= */
+function applyToneToSyllable(rawSyl) {
+  let s = (rawSyl || "").toLowerCase().trim();
+  if (!s) return { forms: ["", "", "", ""], rule: "", neutral: "", idx: -1 };
+  if (/^[jqxy]ü/.test(s)) s = s.replace("ü", "u");
+  let idx = -1, v = "", rule = "";
+  if (s.includes("a")) { idx = s.indexOf("a"); v = "a"; rule = "มี a → วางบน a เสมอ (อ้าปากกว้างสุด)"; }
+  else if (s.includes("o")) { idx = s.indexOf("o"); v = "o"; rule = "ไม่มี a แต่มี o → วางบน o"; }
+  else if (s.includes("e")) { idx = s.indexOf("e"); v = "e"; rule = "ไม่มี a, o แต่มี e → วางบน e"; }
+  else if (s.includes("iu")) { idx = s.indexOf("u", s.indexOf("iu")); v = "u"; rule = "เจอคู่ iu → วางบนตัวหลัง คือ u"; }
+  else if (s.includes("ui")) { idx = s.indexOf("i", s.indexOf("ui")); v = "i"; rule = "เจอคู่ ui → วางบนตัวหลัง คือ i (ตัดจุดบน i)"; }
+  else {
+    for (const c of ["i", "u", "ü"]) if (s.includes(c)) { idx = s.indexOf(c); v = c; rule = `มีสระตัวเดียวคือ ${c} → วางบน ${c}${c === "i" ? " (ตัดจุดบน i)" : ""}`; break; }
+  }
+  if (idx === -1) return { forms: [s, s, s, s], rule: "ไม่มีสระ", neutral: s, idx };
+  return { forms: [0, 1, 2, 3].map(t => s.slice(0, idx) + TONE_VOWELS[v][t] + s.slice(idx + 1)), rule, neutral: s, idx };
+}
+function colorMark(py, t) {
+  return [...py].map(ch => MARK_OF[ch] ? `<span style="color:var(--t${t})">${ch}</span>` : escHtml(ch)).join("");
+}
+
+/* =======================================================
+   4. ภาพปากด้านข้าง (ลิ้น · ริมฝีปาก · เพดานอ่อน)
+   ======================================================= */
+const TAIL = " L200 200 C190 180 172 168 150 164 C110 158 70 146 46 134 Z";
+const TONGUE = {
+  REST: "M58 124 C64 118 70 114 80 112 C100 108 118 106 134 108 C148 110 160 114 170 124 C176 132 182 144 184 160",
+  ALV: "M60 98 C60 91 66 89 71 94 C86 106 104 108 120 108 C138 108 156 112 168 122 C176 132 182 144 184 160",
+  DENT: "M57 106 C57 100 62 99 67 103 C86 112 104 110 122 108 C140 107 156 112 168 122 C176 132 182 144 184 160",
+  RETRO: "M72 118 C68 104 72 90 80 85 C86 82 88 88 84 94 C82 104 100 110 124 110 C150 110 176 130 184 160",
+  PAL: "M56 120 C58 106 72 92 96 86 C112 83 128 84 142 90 C156 98 168 110 176 126 C180 136 183 148 184 160",
+  VEL: "M57 120 C66 114 92 110 112 104 C126 98 138 88 150 88 C160 88 170 98 176 114 C180 128 183 144 184 160",
+  HIFRONT: "M56 122 C58 110 72 98 96 92 C112 89 128 90 142 96 C156 102 168 114 176 128 C180 138 183 148 184 160",
+  HIBACK: "M57 122 C66 118 90 114 110 108 C124 102 136 94 150 94 C160 94 170 102 176 116 C180 130 183 144 184 160",
+  MID: "M58 124 C66 116 82 110 100 106 C118 102 134 100 148 104 C160 108 170 118 176 130 C180 140 183 150 184 160",
+  O: "M58 124 C66 118 84 114 104 110 C120 106 134 100 148 100 C160 100 170 110 176 124 C180 136 183 148 184 160",
+  A: "M58 132 C66 128 84 126 104 126 C122 126 140 126 154 128 C166 132 174 140 178 148 C181 154 183 158 184 160",
+  ER: "M60 120 C64 108 74 98 86 96 C92 95 94 100 90 104 C88 110 104 114 126 112 C150 112 176 130 184 160"
+};
+const ULIP = {
+  OPEN: "M24 79 C14 83 9 93 14 100 C24 103 37 102 47 100 L47 88 C40 83 32 80 24 79 Z",
+  CLOSED: "M24 79 C14 83 9 96 13 106 C24 108 37 107 47 105 L47 88 C40 83 32 80 24 79 Z",
+  ROUND: "M24 79 C10 82 3 93 6 102 C20 104 35 103 47 100 L47 88 C40 83 32 80 24 79 Z",
+  SPREAD: "M24 79 C18 84 16 92 19 97 C28 99 38 99 47 98 L47 88 C40 83 32 80 24 79 Z",
+  LABIODENT: "M24 79 C14 83 10 91 14 96 C24 98 37 97 47 96 L47 88 C40 83 32 80 24 79 Z",
+  WIDE: "M24 79 C14 83 9 93 14 100 C24 103 37 102 47 100 L47 88 C40 83 32 80 24 79 Z"
+};
+const LLIP = {
+  OPEN: "M47 114 C37 112 22 112 15 117 C14 125 22 132 34 134 L46 134 C47 128 47 120 47 114 Z",
+  CLOSED: "M47 106 C37 106 22 106 13 108 C12 118 20 128 34 132 L46 133 C47 124 47 114 47 106 Z",
+  ROUND: "M47 112 C35 110 14 110 6 114 C6 124 18 132 34 134 L46 134 C47 128 47 120 47 112 Z",
+  SPREAD: "M47 112 C40 112 28 112 21 114 C19 122 25 130 34 134 L46 134 C47 128 47 120 47 112 Z",
+  LABIODENT: "M53 103 C42 101 28 103 21 108 C17 118 24 128 34 132 L46 133 C47 124 50 112 53 103 Z",
+  WIDE: "M47 124 C37 122 22 122 15 126 C14 134 22 142 34 144 L46 144 C47 138 47 130 47 124 Z"
+};
+const VELUM = {
+  UP: "M146 82 C164 82 184 84 203 92 C203 95 203 97 202 99 C186 96 166 94 146 90 Z",
+  DOWN: "M146 82 C160 86 170 98 172 116 C168 118 162 114 158 106 C154 98 150 92 146 90 Z"
+};
+const NUM_BADGES = [[1, -2, 118, "ริมฝีปาก"], [2, 34, 108, "ฟัน"], [3, 68, 77, "ปุ่มเหงือก"], [4, 108, 72, "เพดานแข็ง"], [5, 176, 74, "เพดานอ่อน"], [6, 108, 52, "โพรงจมูก"], [7, 122, 128, "ลิ้น"], [8, 196, 176, "ลำคอ"]];
+
+function mouthSVG(cfg, opt) {
+  cfg = cfg || {}; opt = opt || {};
+  const mk = cfg.mark || [0, 0];
+  return `<svg class="mouth2" viewBox="-14 26 234 176" role="img" aria-label="${escHtml(opt.aria || "ภาพปากด้านข้าง")}">
+    <path class="ln" d="M34 42 C22 46 10 58 8 68 C8 74 14 78 24 79"/>
+    <path class="ln" d="M34 42 C80 32 140 34 170 44 C192 52 204 70 204 92 L204 200"/>
+    <path class="tg" data-p="tg" d="${TONGUE[cfg.tongue || "REST"] + TAIL}"/>
+    <path class="tg-line" data-p="tgl" d="${TONGUE[cfg.tongue || "REST"]}"/>
+    <path class="ln" d="M46 134 C70 146 110 158 150 164 C172 168 190 180 200 200"/>
+    <path class="ln" d="M58 92 C62 86 68 84 78 83 C104 80 128 80 146 84"/>
+    <path class="vel" data-p="vel" d="${VELUM[cfg.velum || "UP"]}"/>
+    <path class="lip" data-p="ll" d="${LLIP[cfg.lips || "OPEN"]}"/>
+    <path class="tooth" d="M48 112 L57 112 L58 126 L47 126 Z"/>
+    <path class="tooth" d="M46 88 L58 88 L57 104 L49 104 Z"/>
+    <path class="lip" data-p="ul" d="${ULIP[cfg.lips || "OPEN"]}"/>
+    <path class="nasal" data-p="nasal" d="M188 150 C196 112 194 80 174 64 C140 48 70 50 14 68" style="opacity:${cfg.nas ? 1 : 0}"/>
+    <g class="puff" data-p="puff" style="opacity:${cfg.asp ? 1 : 0}"><path d="M2 94 q-6 9 0 18"/><path d="M-6 90 q-8 13 0 26"/></g>
+    <circle class="mk${cfg.near ? " near" : ""}" data-p="mk" cx="${mk[0]}" cy="${mk[1]}" r="6.5" style="opacity:${cfg.mark ? 1 : 0}"/>
+    ${opt.badges ? NUM_BADGES.map(([n, x, y]) => `<g class="badge"><circle cx="${x}" cy="${y}" r="8"/><text x="${x}" y="${y}">${n}</text></g>`).join("") : ""}
+  </svg>`;
+}
+function updateMouth(root, cfg) {
+  const svg = root.querySelector(".mouth2");
+  if (!svg) return;
+  const set = (p, d) => { const el = svg.querySelector(`[data-p="${p}"]`); if (!el) return; el.setAttribute("d", d); el.style.d = `path("${d}")`; };
+  set("tg", TONGUE[cfg.tongue || "REST"] + TAIL);
+  set("tgl", TONGUE[cfg.tongue || "REST"]);
+  set("ul", ULIP[cfg.lips || "OPEN"]);
+  set("ll", LLIP[cfg.lips || "OPEN"]);
+  set("vel", VELUM[cfg.velum || "UP"]);
+  svg.querySelector('[data-p="nasal"]').style.opacity = cfg.nas ? 1 : 0;
+  svg.querySelector('[data-p="puff"]').style.opacity = cfg.asp ? 1 : 0;
+  const mk = svg.querySelector('[data-p="mk"]');
+  mk.style.opacity = cfg.mark ? 1 : 0;
+  if (cfg.mark) { mk.setAttribute("cx", cfg.mark[0]); mk.setAttribute("cy", cfg.mark[1]); }
+  mk.classList.toggle("near", !!cfg.near);
+}
+
+// ข้อมูลการออกเสียงพยัญชนะทั้ง 23 ตัว
+const M_LIPS = [16, 106], M_LD = [52, 104], M_ALV = [64, 90], M_DENT = [57, 101], M_RET = [83, 84], M_PAL = [98, 85], M_VEL = [150, 87];
+const INIT = {
+  b: { th: "ป", place: "ริมฝีปากบน–ล่าง", manner: "ระเบิด · ไม่พ่นลม", lips: "CLOSED", mark: M_LIPS, read: "bo1", ex: ["八", "ba1"], trap: "ไม่ใช่ บ", how: "ปิดริมฝีปากสนิท แล้วเปิดออกเบา ๆ ไม่มีลมพุ่ง — เหมือน \"ป\" ในภาษาไทย" },
+  p: { th: "พ", place: "ริมฝีปากบน–ล่าง", manner: "ระเบิด · พ่นลม", asp: 1, lips: "CLOSED", mark: M_LIPS, read: "po1", ex: ["怕", "pa4"], how: "ตำแหน่งเดียวกับ b แต่ปล่อยลมพุ่งออกแรง ๆ — เหมือน \"พ\"" },
+  m: { th: "ม", place: "ริมฝีปากบน–ล่าง", manner: "นาสิก (ลมออกจมูก)", nas: 1, velum: "DOWN", lips: "CLOSED", mark: M_LIPS, read: "mo1", ex: ["妈", "ma1"], how: "ปิดปาก ลดเพดานอ่อนลงให้ลมออกทางจมูก — เหมือน \"ม\"" },
+  f: { th: "ฟ", place: "ฟันบน + ริมฝีปากล่าง", manner: "เสียดแทรก", lips: "LABIODENT", mark: M_LD, near: 1, read: "fo1", ex: ["飞", "fei1"], how: "ฟันบนแตะริมฝีปากล่างเบา ๆ แล้วเป่าลมลอดออกมา — เหมือน \"ฟ\"" },
+  d: { th: "ต", place: "ปลายลิ้น + ปุ่มเหงือก", manner: "ระเบิด · ไม่พ่นลม", tongue: "ALV", mark: M_ALV, read: "de1", ex: ["大", "da4"], trap: "ไม่ใช่ ด", how: "ปลายลิ้นแตะปุ่มเหงือกหลังฟันบน แล้วปล่อยออกโดยไม่มีลมพุ่ง — เหมือน \"ต\"" },
+  t: { th: "ท", place: "ปลายลิ้น + ปุ่มเหงือก", manner: "ระเบิด · พ่นลม", asp: 1, tongue: "ALV", mark: M_ALV, read: "te4", ex: ["他", "ta1"], how: "ตำแหน่งเดียวกับ d แต่ปล่อยลมพุ่งออกมา — เหมือน \"ท\"" },
+  n: { th: "น", place: "ปลายลิ้น + ปุ่มเหงือก", manner: "นาสิก (ลมออกจมูก)", nas: 1, velum: "DOWN", tongue: "ALV", mark: M_ALV, read: "ne4", ex: ["你", "ni3"], how: "ปลายลิ้นแตะปุ่มเหงือก ลมออกทางจมูก — เหมือน \"น\"" },
+  l: { th: "ล", place: "ปลายลิ้น + ปุ่มเหงือก", manner: "ข้างลิ้น (ลมออกสองข้างลิ้น)", tongue: "ALV", mark: M_ALV, read: "le4", ex: ["来", "lai2"], how: "ปลายลิ้นแตะปุ่มเหงือก ปล่อยลมไหลออกทางข้างลิ้นทั้งสองข้าง — เหมือน \"ล\" (ไม่ใช่ ร)" },
+  g: { th: "ก", place: "โคนลิ้น + เพดานอ่อน", manner: "ระเบิด · ไม่พ่นลม", tongue: "VEL", mark: M_VEL, read: "ge1", ex: ["高", "gao1"], how: "ยกโคนลิ้นแตะเพดานอ่อน แล้วปล่อยโดยไม่มีลมพุ่ง — เหมือน \"ก\"" },
+  k: { th: "ค", place: "โคนลิ้น + เพดานอ่อน", manner: "ระเบิด · พ่นลม", asp: 1, tongue: "VEL", mark: M_VEL, read: "ke1", ex: ["看", "kan4"], how: "ตำแหน่งเดียวกับ g แต่ปล่อยลมพุ่งออกมา — เหมือน \"ค\"" },
+  h: { th: "ฮ (ขูดคอ)", place: "โคนลิ้น + เพดานอ่อน", manner: "เสียดแทรก", tongue: "VEL", mark: M_VEL, near: 1, read: "he1", ex: ["好", "hao3"], how: "ยกโคนลิ้นเข้าใกล้เพดานอ่อนแต่ไม่แตะ ลมขูดผ่านเป็นเสียงแหบเล็กน้อย — หนักกว่า \"ฮ\" ไทย" },
+  j: { th: "จ (ลิ้นแบน)", place: "หน้าลิ้น + เพดานแข็ง", manner: "กักเสียดแทรก · ไม่พ่นลม", tongue: "PAL", lips: "SPREAD", mark: M_PAL, read: "ji1", ex: ["家", "jia1"], how: "ปลายลิ้นกดหลังฟันล่าง ยกกลางลิ้นแนบเพดานแข็ง ยิ้มกว้าง แล้วปล่อยโดยไม่มีลมพุ่ง" },
+  q: { th: "ช (ลิ้นแบน)", place: "หน้าลิ้น + เพดานแข็ง", manner: "กักเสียดแทรก · พ่นลม", asp: 1, tongue: "PAL", lips: "SPREAD", mark: M_PAL, read: "qi1", ex: ["七", "qi1"], how: "ตำแหน่งเดียวกับ j แต่ปล่อยลมพุ่งออกมา — คล้าย \"ช\" แบบยิ้ม" },
+  x: { th: "ซ (ลิ้นแบน)", place: "หน้าลิ้น + เพดานแข็ง", manner: "เสียดแทรก", tongue: "PAL", lips: "SPREAD", mark: M_PAL, near: 1, read: "xi1", ex: ["西", "xi1"], how: "ท่าเดียวกับ j แต่ไม่แตะสนิท ปล่อยลมลอดออกเป็นเสียง \"ซ\" แบบยิ้ม" },
+  z: { th: "จ+ซ (ts)", place: "ปลายลิ้น + หลังฟันบน", manner: "กักเสียดแทรก · ไม่พ่นลม", tongue: "DENT", mark: M_DENT, read: "zi1", ex: ["字", "zi4"], how: "ปลายลิ้นแตะหลังฟันบน กักลมแล้วปล่อยลอดไรฟันเป็นเสียง \"ts\" ไม่มีลมพุ่ง" },
+  c: { th: "ช+ซ (ts')", place: "ปลายลิ้น + หลังฟันบน", manner: "กักเสียดแทรก · พ่นลม", asp: 1, tongue: "DENT", mark: M_DENT, read: "ci1", ex: ["菜", "cai4"], how: "ตำแหน่งเดียวกับ z แต่มีลมพุ่งตามออกมา — \"ts\" แบบมีลม" },
+  s: { th: "ซ", place: "ปลายลิ้น + หลังฟันบน", manner: "เสียดแทรก", tongue: "DENT", mark: M_DENT, near: 1, read: "si1", ex: ["三", "san1"], how: "ปลายลิ้นเข้าใกล้หลังฟันบน ลมลอดออกเป็นเสียง \"ซ\" — เหมือน ซ ไทย" },
+  zh: { th: "จ (ม้วนลิ้น)", place: "ปลายลิ้นม้วน + ต้นเพดานแข็ง", manner: "กักเสียดแทรก · ไม่พ่นลม", tongue: "RETRO", mark: M_RET, read: "zhi1", ex: ["中", "zhong1"], how: "ม้วนปลายลิ้นขึ้นแตะหลังปุ่มเหงือก (ไม่ต้องม้วนสุด) แล้วปล่อยโดยไม่มีลมพุ่ง" },
+  ch: { th: "ช (ม้วนลิ้น)", place: "ปลายลิ้นม้วน + ต้นเพดานแข็ง", manner: "กักเสียดแทรก · พ่นลม", asp: 1, tongue: "RETRO", mark: M_RET, read: "chi1", ex: ["吃", "chi1"], how: "ท่าเดียวกับ zh แต่ปล่อยลมพุ่งออกมา" },
+  sh: { th: "ซ (ม้วนลิ้น)", place: "ปลายลิ้นม้วน + ต้นเพดานแข็ง", manner: "เสียดแทรก", tongue: "RETRO", mark: M_RET, near: 1, read: "shi1", ex: ["是", "shi4"], how: "ม้วนลิ้นแบบ zh แต่ไม่แตะสนิท ปล่อยลมลอดออก — เสียง \"ซ\" ที่ทุ้มกว่า" },
+  r: { th: "ร (ม้วนลิ้น)", place: "ปลายลิ้นม้วน + ต้นเพดานแข็ง", manner: "เสียดแทรก · ก้อง", tongue: "RETRO", mark: M_RET, near: 1, read: "ri4", ex: ["人", "ren2"], how: "ม้วนลิ้นแบบ sh แต่สั่นเส้นเสียงไปด้วย ได้เสียงคล้าย \"ร\" ผสม \"ย\" ไม่ต้องรัวลิ้น" },
+  y: { th: "ย", place: "เหมือนสระ i (อี)", manner: "กึ่งสระ", tongue: "HIFRONT", lips: "SPREAD", read: "yi1", ex: ["一", "yi1"], how: "ใช้นำหน้าสระตระกูล i และ ü เมื่อไม่มีพยัญชนะต้น ลิ้นอยู่ท่าเดียวกับสระ อี" },
+  w: { th: "ว", place: "เหมือนสระ u (อู)", manner: "กึ่งสระ", tongue: "HIBACK", lips: "ROUND", read: "wu1", ex: ["我", "wo3"], how: "ใช้นำหน้าสระตระกูล u เมื่อไม่มีพยัญชนะต้น ห่อปากท่าเดียวกับสระ อู" }
+};
+const INIT_GROUPS = [["ริมฝีปาก", ["b", "p", "m", "f"]], ["ปลายลิ้น + ปุ่มเหงือก", ["d", "t", "n", "l"]], ["โคนลิ้น", ["g", "k", "h"]], ["ลิ้นแบน", ["j", "q", "x"]], ["ลิ้นตรงหลังฟัน", ["z", "c", "s"]], ["ม้วนลิ้น", ["zh", "ch", "sh", "r"]], ["กึ่งสระ", ["y", "w"]]];
+const VOW = {
+  a: { th: "อา", place: "ลิ้นต่ำ · ปากกว้าง", manner: "สระเดี่ยว", tongue: "A", lips: "WIDE", read: "a1", how: "อ้าปากกว้าง วางลิ้นต่ำและผ่อนคลาย — เหมือน \"อา\"" },
+  o: { th: "โอ / ออ", place: "ลิ้นค่อนหลัง · ห่อปากกลม", manner: "สระเดี่ยว", tongue: "O", lips: "ROUND", read: "o1", how: "ห่อปากกลม ลิ้นค่อนไปด้านหลัง เสียงอยู่ระหว่าง \"โอ\" กับ \"ออ\"" },
+  e: { th: "เออ", place: "ลิ้นกลางค่อนหลัง · ปากไม่ห่อ", manner: "สระเดี่ยว", tongue: "MID", lips: "OPEN", read: "e4", trap: "ไม่ใช่ เอ", how: "ปากเปิดสบาย ๆ ไม่ห่อ ลิ้นกลางค่อนหลัง — เหมือน \"เออ\" (ห้ามอ่านเป็น เอ)" },
+  i: { th: "อี", place: "ลิ้นสูงด้านหน้า · ยิ้ม", manner: "สระเดี่ยว", tongue: "HIFRONT", lips: "SPREAD", read: "yi1", how: "ยิ้มกว้าง ยกลิ้นส่วนหน้าขึ้นสูง — เหมือน \"อี\"" },
+  u: { th: "อู", place: "ลิ้นสูงด้านหลัง · ห่อปากจู๋", manner: "สระเดี่ยว", tongue: "HIBACK", lips: "ROUND", read: "wu1", how: "ห่อปากจู๋ ยกลิ้นส่วนหลังขึ้นสูง — เหมือน \"อู\"" },
+  "ü": { th: "อวี", place: "ลิ้นแบบ อี · ปากแบบ อู", manner: "สระเดี่ยว", tongue: "HIFRONT", lips: "ROUND", read: "yu1", trap: "ไม่มีในไทย", how: "วางลิ้นเหมือนพูด \"อี\" แต่ห่อปากจู๋เหมือน \"อู\" แล้วออกเสียงค้างไว้" },
+  er: { th: "เออร์", place: "ลิ้นม้วนขึ้นไม่แตะเพดาน", manner: "สระพิเศษ (ม้วนลิ้น)", tongue: "ER", lips: "OPEN", read: "er2", how: "เริ่มจาก \"เออ\" แล้วม้วนปลายลิ้นขึ้นโดยไม่แตะเพดาน" }
+};
+
+// ตัวสำรวจการวางลิ้น (ใช้ได้หลายจุด)
+const XP = {};
+function explorer(id, set, groups, isVow) {
+  XP[id] = { set, isVow };
+  const first = groups[0][1][0];
+  return `<div class="xp" id="${id}">
+    <div class="xp-groups">${groups.map(([label, keys]) => `
+      <div class="xp-g"><h4>${label}</h4><div class="xp-keys">${keys.map(k => `<button type="button" class="xk${isVow ? " vow" : ""}${set[k].trap ? " trap" : ""}" data-k="${k}" onclick="xpPick('${id}', ${jsArg(k)})"><b>${k}</b><small>${set[k].th.split(" (")[0]}</small></button>`).join("")}</div></div>`).join("")}
+      <div class="xp-legend"><span><i style="background:var(--yellow)"></i>จุดที่แตะ</span><span><i style="background:var(--card); border-style:dashed"></i>เข้าใกล้ (ไม่แตะ)</span><span><i style="background:var(--t3)"></i>ลมพุ่ง / ลมออกจมูก</span><span><i style="background:var(--t2)"></i>กับดักคนไทย</span></div>
+    </div>
+    <div class="xp-panel">${mouthSVG(set[first])}<div class="xp-info"></div></div>
+  </div>`;
+}
+function xpPick(id, k, silent) {
+  const x = XP[id], root = $(id);
+  if (!x || !root) return;
+  const d = x.set[k];
+  root.querySelectorAll(".xk").forEach(b => b.classList.toggle("on", b.dataset.k === k));
+  updateMouth(root, d);
+  const info = root.querySelector(".xp-info");
+  const tags = [`<span>${d.place}</span>`, `<span class="${d.asp ? "asp" : d.nas ? "nas" : ""}">${d.manner}</span>`];
+  if (d.trap) tags.push(`<span class="trap">${d.trap}</span>`);
+  info.innerHTML = `<div class="xp-anim">
+    <div class="xp-title"><span class="L py" style="color:var(${x.isVow ? "--fin" : "--ini"})">${k}</span><span class="eq">≈ ${d.th}</span></div>
+    <div class="xp-tags">${tags.join("")}</div>
+    <p class="xp-how">${d.how}</p>
+    <div style="margin-top:8px;">${sayBtn(d.read, "", "อ่านว่า " + numToMark(d.read))}${d.ex ? sayBtn(d.ex[1], d.ex[0], `<span class="zh">${d.ex[0]}</span> ${numToMark(d.ex[1])}`) : ""}</div>
+  </div>`;
+  if (!silent) say(d.read);
+}
+
+/* =======================================================
+   5. NAVIGATION
+   ======================================================= */
+const VIEWS = ["home", "learn", "lab", "chart", "practice"];
+let view = "home";
+function go(v, opts) {
+  if (!VIEWS.includes(v)) v = "home";
+  view = v;
+  stopAudio();
+  document.querySelectorAll(".view").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
+  document.querySelectorAll("#nav button, #tabbar button").forEach(b => b.classList.toggle("on", b.dataset.v === v));
+  try { history.replaceState(null, "", "#" + v); } catch (e) {}
+  if (!(opts && opts.keep)) window.scrollTo({ top: 0, behavior: "instant" });
+  if (v === "home") { renderHero(); updateHomeCta(); }
+  if (v === "learn") renderStep(0);
+  if (v === "lab") renderLab();
+  if (v === "chart") buildChart();
+  if (v === "practice") { if (!g1.cur) g1.next(false); if (!g2cur) g2New(false); }
+}
+
+/* =======================================================
+   6. HOME
+   ======================================================= */
+const HERO = [[1, "妈", "แม่"], [2, "麻", "ป่าน"], [3, "马", "ม้า"], [4, "骂", "ด่า"]];
+const MARK_PATHS = { 1: "M6 11 L34 11", 2: "M13 18 L29 4", 3: "M7 5 L20 17 L33 5", 4: "M11 4 L27 18" };
+function renderHero() {
+  $("heroWord").innerHTML = HERO.map(([t, zh, th], i) => `
+    <button type="button" class="hm" style="--d:${0.3 + i * 0.35}s" onclick="say('ma${t}', '${zh}')" aria-label="ฟัง m${TONE_INFO[t].mark}">
+      <span>m<span class="v">a<svg class="mk-svg" viewBox="0 0 40 22" aria-hidden="true"><path pathLength="1" d="${MARK_PATHS[t]}" style="stroke:var(--t${t})"/></svg></span></span>
+      <span class="zh-under">${zh} ${th}</span>
+      <span class="bar" style="background:var(--t${t})"></span>
+    </button>`).join("");
+}
+function updateHomeCta() {
+  const s = lsGet("pyv4Step", 0), done = lsGet("pyv4Done", false);
+  $("ctaLearn").innerHTML = (done ? "ทบทวนบทเรียน" : s > 0 ? `เรียนต่อ ขั้นที่ ${s + 1}` : "เริ่มเรียนเลย") + ic("arrowR");
+  $("pathLearnGo").innerHTML = (done ? "เรียนจบแล้ว · ทบทวน" : s > 0 ? `ต่อขั้นที่ ${s + 1}` : "เริ่ม") + " " + ic("arrowR");
+}
+
+/* =======================================================
+   7. LEARN — 15 การ์ด
+   ======================================================= */
+function markSvg(t) {
+  if (!t) return `<svg viewBox="0 0 40 22" width="44" height="26" aria-hidden="true"><circle cx="20" cy="11" r="4.5" style="fill:var(--t0)"/></svg>`;
+  return `<svg viewBox="0 0 40 22" width="44" height="26" aria-hidden="true" style="overflow:visible"><path d="${MARK_PATHS[t]}" style="fill:none; stroke:var(--t${t}); stroke-width:5; stroke-linecap:round; stroke-linejoin:round"/></svg>`;
+}
+const ASM = [
+  { zh: "中", ini: "zh", fin: "ong", t: 1, py: "zhōng", key: "zhong1", th: "กลาง" },
+  { zh: "好", ini: "h", fin: "ao", t: 3, py: "hǎo", key: "hao3", th: "ดี" },
+  { zh: "学", ini: "x", fin: "üe", t: 2, py: "xué", key: "xue2", th: "เรียน", note: "ü ถอดหมวกหลัง x (ขั้นที่ 11)" },
+  { zh: "爱", ini: "", fin: "ai", t: 4, py: "ài", key: "ai4", th: "รัก", note: "ไม่มีพยัญชนะต้นก็ได้" },
+  { zh: "谢谢", ini: "x", fin: "ie", t: 0, py: "xie", key: "xie4 xie5", th: "ขอบคุณ", note: "ตัวหลังของ xièxie อ่านเบา" }
+];
+function renderAsm(i) {
+  const a = ASM[i];
+  const rest = a.ini ? a.py.slice(a.ini.length) : a.py;
+  $("asmBox").innerHTML = `
+    <div class="asm">
+      <div class="asm-pieces">
+        <div class="piece ini" style="--d:0s"><b>${a.ini || "—"}</b><span>พยัญชนะต้น 声母<small>${a.ini ? "เสียงแรกของพยางค์" : "ไม่มีก็ได้"}</small></span></div>
+        <div class="piece fin" style="--d:.15s"><b>${a.fin}</b><span>สระ 韵母<small>ส่วนที่ตามมา</small></span></div>
+        <div class="piece ton" style="--d:.3s; background:var(--t${a.t}-bg)"><b>${markSvg(a.t)}</b><span>วรรณยุกต์ 声调<small>${a.t ? "เสียง " + a.t : "เสียงเบา"}</small></span></div>
+      </div>
+      <div class="asm-plus">=</div>
+      <button type="button" class="asm-out" style="border:none;background:none;" onclick="say(${jsArg(a.key)}, ${jsArg(a.zh)})">
+        <div class="big">${a.ini ? `<span class="i">${a.ini}</span>` : ""}<span class="f">${colorMark(rest, a.t)}</span></div>
+        <div class="zhc zh">${a.zh}</div>
+        <div class="muted" style="font-weight:600;">${a.th}${a.note ? " · " + a.note : ""} · กดฟัง</div>
+      </button>
+    </div>`;
+  document.querySelectorAll("#asmEx button").forEach((b, k) => b.classList.toggle("on", k === i));
+}
+
+const TONE_CONT = { 1: "M6 6 L64 6", 2: "M6 18 L64 6", 3: "M6 22 L22 30 L64 10", 4: "M6 6 L64 30" };
+let heard = new Set();
+function stepToneTap(t, el) {
+  say("ma" + t, HERO[t - 1][1]);
+  el.classList.add("was");
+  el.classList.remove("playing"); void el.offsetWidth; el.classList.add("playing");
+  heard.add(t);
+  $("heardCount").innerHTML = heard.size >= 4 ? "ฟังครบ 4 เสียงแล้ว — ลองฟังซ้ำแล้วเทียบดูว่าต่างกันยังไง" : `ฟังแล้ว ${heard.size} / 4`;
+  if (heard.size === 4 && !el.dataset.cele) { el.dataset.cele = 1; confettiAt(el, 24); }
+}
+
+const PG = { 1: "M50 30 L320 30", 2: "M50 110 L320 30", 3: "M50 150 L120 190 L320 70", 4: "M50 30 L320 190" };
+const PG_DUR = { 1: 650, 2: 600, 3: 750, 4: 450 };
+let pgRAF = 0;
+function pgShow(t) {
+  const svg = $("pgSvg");
+  if (!svg) return;
+  svg.classList.add("focus");
+  svg.querySelectorAll(".pg-path").forEach(p => p.classList.toggle("on", p.id === "pg" + t));
+  document.querySelectorAll("#thaiTone button").forEach(b => b.classList.toggle("on", +b.dataset.t === t));
+  if (t) say("ma" + t, HERO[t - 1][1]); else say("xie4 xie5", "谢谢");
+  const dot = $("pgDot");
+  if (!t || RM) { dot.classList.remove("show"); return; }
+  const path = $("pg" + t), len = path.getTotalLength(), dur = PG_DUR[t];
+  if (path.animate) path.animate([{ strokeDasharray: len, strokeDashoffset: len }, { strokeDasharray: len, strokeDashoffset: 0 }], { duration: dur });
+  dot.style.fill = `var(--t${t})`;
+  dot.classList.add("show");
+  cancelAnimationFrame(pgRAF);
+  const st = performance.now();
+  const step = now => {
+    const k = Math.min(1, (now - st) / dur), p = path.getPointAtLength(len * k);
+    dot.setAttribute("cx", p.x); dot.setAttribute("cy", p.y);
+    if (k < 1) pgRAF = requestAnimationFrame(step); else setTimeout(() => dot.classList.remove("show"), 500);
+  };
+  pgRAF = requestAnimationFrame(step);
+}
+
+const MG = [
+  { s: "hao", t: 3, zh: "好", th: "ดี" }, { s: "gui", t: 4, zh: "贵", th: "แพง" }, { s: "xue", t: 2, zh: "学", th: "เรียน" },
+  { s: "liu", t: 4, zh: "六", th: "หก" }, { s: "duo", t: 1, zh: "多", th: "มาก" }, { s: "jia", t: 1, zh: "家", th: "บ้าน" }, { s: "shui", t: 3, zh: "水", th: "น้ำ" }
+];
+let mgIdx = 0, mgDone = false;
+function renderMg() {
+  const m = MG[mgIdx];
+  mgDone = false;
+  $("mgPrompt").innerHTML = `ใส่ <b style="color:var(--t${m.t})">เสียง ${m.t}</b> ให้คำว่า <b class="py">${m.s}</b> — แตะตัวอักษรที่เครื่องหมายควรอยู่`;
+  $("mgWord").innerHTML = [...m.s].map((ch, i) => `<button type="button" class="${"aoeiuü".includes(ch) ? "" : "cons"}" style="--tc:var(--t${m.t})" onclick="mgTap(${i}, this)">${ch}</button>`).join("");
+  $("mgMsg").innerHTML = `<span class="muted">ข้อ ${mgIdx + 1} / ${MG.length}</span>`;
+}
+function mgTap(i, el) {
+  if (mgDone) return;
+  const m = MG[mgIdx], res = applyToneToSyllable(m.s);
+  if (i === res.idx) {
+    mgDone = true;
+    el.textContent = res.forms[m.t - 1][i];
+    el.classList.add("hit");
+    confettiAt(el, 14);
+    say(m.s + m.t, m.zh);
+    $("mgMsg").innerHTML = `<span class="ok-msg">${ic("check")}ถูกต้อง</span> <b class="py">${res.forms[m.t - 1]}</b> ${m.zh} (${m.th}) — ${res.rule}<br><button type="button" class="btn sm yellow" style="margin-top:8px;" onclick="mgNext()">ข้อต่อไป ${ic("arrowR")}</button>`;
+  } else {
+    el.classList.remove("miss"); void el.offsetWidth; el.classList.add("miss");
+    $("mgMsg").innerHTML = "aoeiuü".includes(m.s[i])
+      ? `ยังไม่ใช่ — ดูลำดับ a → o → e ก่อน ถ้าเป็นคู่ iu / ui ให้ตัวหลังได้`
+      : `${m.s[i]} เป็นพยัญชนะ — เครื่องหมายวางบน "สระ" เท่านั้น`;
+  }
+}
+function mgNext() { mgIdx = (mgIdx + 1) % MG.length; renderMg(); }
+
+function hatPlay() {
+  const u = document.querySelector("#hatBox .uu");
+  if (!u) return;
+  u.classList.remove("off"); void u.offsetWidth; u.classList.add("off");
+  say("qu4", "去");
+}
+
+function tileBtn(L, eq, zh, key, opts) {
+  opts = opts || {};
+  return `<button type="button" class="tile${opts.vow ? " vow" : ""}${opts.trap ? " trap" : ""}" onclick="say(${jsArg(key)}, ${jsArg(zh)})">
+    ${opts.trap ? `<span class="flag">${opts.trap}</span>` : ""}
+    <div class="L">${L}</div><div class="eq">${eq}</div><div class="ex"><span class="zh">${zh}</span> ${numToMark(key)}</div>
+  </button>`;
+}
+function frow(py, th, zh, key, trap) {
+  return `<button type="button" class="frow${trap ? " trap" : ""}" onclick="say(${jsArg(key)}, ${jsArg(zh)})">
+    <span class="py">${py}</span><span class="th">${th}${trap ? ` <small style="font-weight:600; color:var(--t2);">· ${trap}</small>` : ""}</span><span class="ex"><span class="zh">${zh}</span> ${numToMark(key)}</span></button>`;
+}
+function xfBtn(a, b, zh, key) {
+  return `<button type="button" class="xf" onclick="say(${jsArg(key)}, ${jsArg(zh)})"><span class="a">${a}</span><span class="arr">→</span><span class="b">${b}</span><span class="muted" style="font-size:13px; margin-left:auto;"><span class="zh">${zh}</span> ${numToMark(key)}</span></button>`;
+}
+function callout(kind, tag, html) { return `<div class="callout ${kind}"><span class="tagl">${tag}</span><div>${html}</div></div>`; }
+
+function erEx(zh, py, keysOrNull, ipa) {
+  const pyHtml = escHtml(py).replace(/r$/, '<span class="r">r</span>');
+  if (keysOrNull === null) return `<div><span class="zh">${zh}</span><span class="py">${pyHtml}</span><small>[${ipa}] · ไม่มีไฟล์เสียง</small></div>`;
+  return `<button type="button" onclick="say(${jsArg(keysOrNull)}, ${jsArg(zh)})">${ic("speaker")}<span class="zh">${zh}</span><span class="py">${pyHtml}</span><small>[${ipa}]</small></button>`;
+}
+
+const STEPS = [
+  {
+    k: "เริ่มจากศูนย์", t: "พินอินคืออะไร?",
+    lead: "ตัวอักษรจีน (汉字) ดูแล้ว<b>เดาเสียงไม่ออกเลย</b> พินอิน (拼音 pīnyīn) จึงเป็น \"คำอ่าน\" ที่เขียนด้วยตัวอักษรโรมัน คิดซะว่าเป็น<b>ซับคาราโอเกะ</b>ของภาษาจีน",
+    body: () => `
+      <span class="try">ลองกดการ์ดเพื่อฟัง</span>
+      <div class="ruby-row">
+        ${[["你好", ["nǐ", "hǎo"], "สวัสดี", "ni2 hao3"], ["谢谢", ["xiè", "xie"], "ขอบคุณ", "xie4 xie5"], ["中国", ["Zhōng", "guó"], "ประเทศจีน", "zhong1 guo2"], ["拼音", ["pīn", "yīn"], "พินอิน", "pin1 yin1"]].map(([w, p, th, k]) => `
+          <button type="button" class="ruby" onclick="say(${jsArg(k)}, ${jsArg(w)})">
+            <div class="rp">${p.map(x => `<span>${x}</span>`).join("")}</div>
+            <div class="rc">${[...w].map(x => `<span>${x}</span>`).join("")}</div>
+            <small>${th}</small>
+          </button>`).join("")}
+      </div>
+      <div class="karaoke"><b>สังเกต:</b> ตัวจีน 1 ตัว = พินอิน 1 พยางค์เสมอ · คนจีนเองก็เรียนพินอินตอนเด็ก และใช้พินอินพิมพ์ภาษาจีนในมือถือทุกวัน</div>`
+  },
+  {
+    k: "โครงสร้าง", t: "1 พยางค์ = ต่อจาก 3 ชิ้น",
+    lead: "พินอินทุกพยางค์ประกอบจากชิ้นส่วน 3 ชิ้น เหมือนตัวต่อ: <b style=\"color:var(--ini)\">พยัญชนะต้น</b> + <b style=\"color:var(--fin)\">สระ</b> + <b>วรรณยุกต์</b> (เครื่องหมายบนหัว)",
+    body: () => `
+      <div id="asmBox"></div>
+      <div class="asm-examples" id="asmEx">${ASM.map((a, i) => `<button type="button" onclick="renderAsm(${i})"><span class="zh">${a.zh}</span> ${a.zh === "谢谢" ? "xièxie" : a.py}</button>`).join("")}</div>`,
+    enter: () => renderAsm(0)
+  },
+  {
+    k: "หัวใจของภาษาจีน", t: "เสียงวรรณยุกต์: พูดผิดเสียง = ความหมายเปลี่ยน",
+    lead: "ภาษาจีนกลางมี <b>4 เสียง + เสียงเบา</b> เครื่องหมายบนสระบอกว่าต้องออกเสียงแบบไหน (ภาษาไทยเราก็มีวรรณยุกต์ คนไทยจึงได้เปรียบมาก)",
+    body: () => `
+      <span class="try">กดฟังให้ครบทั้ง 4 ใบ</span>
+      <div class="tone-grid">${HERO.map(([t, zh, th]) => `
+        <button type="button" class="tone-btn" style="--tc:var(--t${t}); --tb:var(--t${t}-bg)" onclick="stepToneTap(${t}, this)">
+          <span class="heard">${ic("check")}</span>
+          <span class="py">m${TONE_INFO[t].mark}</span>
+          <span class="zh">${zh}</span><span class="mean">${th}</span>
+          <svg class="cont" viewBox="0 0 70 36"><path d="${TONE_CONT[t]}"/></svg>
+        </button>`).join("")}</div>
+      <p style="text-align:center; margin-top:12px; font-weight:600;" id="heardCount">ฟังแล้ว 0 / 4</p>
+      ${callout("r", "ระวัง", `ถ้าอยากพูดว่า "ม้า" <b class="py">mǎ</b> แต่ออกเสียงเป็น <b class="py">mā</b> — กลายเป็น "แม่" ทันที`)}
+      ${callout("", "เสียงเบา", `<b>轻声</b> ไม่มีเครื่องหมาย พูดสั้น ๆ เบา ๆ ต่อท้ายคำ เช่น ${sayBtn("xie4 xie5", "谢谢", "谢谢 xièxie")} ตัวหลังอ่านเบา`)}`,
+    enter: () => { heard = new Set(); }
+  },
+  {
+    k: "หัวใจของภาษาจีน", t: "เห็นเสียงเป็นภาพ + เทียบกับเสียงไทย",
+    lead: "นักภาษาศาสตร์แบ่งความสูงของเสียงเป็น <b>5 ระดับ</b> (1 = ต่ำสุด, 5 = สูงสุด) เส้นกราฟคือ \"ทางเดินของเสียง\" ตั้งแต่ต้นจนจบพยางค์ กดแต่ละเสียงเพื่อฟังและดูจุดวิ่งตามเส้น",
+    body: () => `
+      <div class="pitch-wrap">
+        <svg class="pitch-svg" id="pgSvg" viewBox="0 0 360 220">
+          ${[5, 4, 3, 2, 1].map((n, i) => `<line class="pg-line" x1="40" y1="${30 + i * 40}" x2="335" y2="${30 + i * 40}"/><text class="pg-num" x="18" y="${35 + i * 40}">${n}</text>`).join("")}
+          ${[1, 2, 3, 4].map(t => `<path class="pg-path" id="pg${t}" d="${PG[t]}" style="stroke:var(--t${t})"/>`).join("")}
+          <path class="pg-path" id="pg0" d="M168 140 L202 140" style="stroke:var(--t0); stroke-dasharray:2 10;"/>
+          <circle id="pgDot" r="10" cx="50" cy="30" stroke="#17171c" stroke-width="2.5"/>
+        </svg>
+        <div class="thai-tone" id="thaiTone">
+          ${[[1, "mā", "เหมือน \"มา\" แต่สูงกว่าปกติ ลากค้างไว้", "55 · สูงราบ เหมือนร้องโน้ตสูงยาว ๆ"],
+             [2, "má", "เหมือน \"ม๋า\" (เสียงจัตวา)", "35 · กลาง → สูง เหมือนถามว่า \"ห๊ะ?\""],
+             [3, "mǎ", "เหมือน \"หม่า\" (เสียงเอก) ต่ำลึก", "214 · ต่ำ → ลงลึก → เชิดปลายนิดหน่อย"],
+             [4, "mà", "เหมือน \"ม่า\" (เสียงโท) แต่สั้นและเด็ดขาด", "51 · สูงสุดดิ่งลงต่ำสุด เหมือนตะคอก \"ไม่!\""],
+             [0, "xie", "สั้น เบา ไม่มีทำนองของตัวเอง", "เสียงเบา · ฟังตัวหลังของ 谢谢 xièxie"]].map(([t, py, b, s]) => `
+            <button type="button" data-t="${t}" style="--tc:var(--t${t}); --tb:var(--t${t}-bg)" onclick="pgShow(${t})"><span class="py">${py}</span><span><b>${b}</b><small>${s}</small></span></button>`).join("")}
+        </div>
+      </div>
+      ${callout("y", "หมายเหตุ", `การเทียบเสียงไทยเป็นแค่ <b>ทางลัดช่วยจำ</b> เสียงจริงต้องฟังแล้วเลียนแบบ กดฟังซ้ำได้หลาย ๆ รอบ`)}`
+  },
+  {
+    k: "เช็กความเข้าใจ", t: "ทดสอบหูหน่อย",
+    lead: "ฟังพยางค์ แล้วเลือกว่าเป็นเสียงไหน ไม่ต้องกลัวผิด หูจะเก่งขึ้นจากการฟังบ่อย ๆ",
+    body: () => `
+      <div class="qbox" id="sqBox">
+        <button type="button" class="q-play pulse" onclick="sq.play()" aria-label="ฟังเสียง">${ic("speaker")}</button>
+        <div class="q-reveal" id="sqReveal"></div>
+        <div class="q-opts" id="sqOpts"></div>
+      </div>
+      <div class="deck-nav"><span id="sqSum" style="font-weight:600;"></span><button type="button" class="btn sm" onclick="sq.next(true)">ข้อต่อไป</button></div>`,
+    enter: () => { sq.right = sq.total = 0; sq.next(false); }
+  },
+  {
+    k: "พยัญชนะ", t: "แผนที่ในปาก: รู้จักอวัยวะที่ใช้ออกเสียง",
+    lead: "ก่อนดูพยัญชนะทีละตัว มารู้จัก \"แผนที่\" ของปากด้านข้างกันก่อน ภาพนี้คือหน้าคนที่หันไปทางซ้าย ทุกภาพในบทต่อไปใช้แผนที่เดียวกันนี้",
+    body: () => `
+      <div class="mouth-legend">
+        <div>${mouthSVG({ tongue: "REST" }, { badges: 1, aria: "แผนที่ปากด้านข้างพร้อมหมายเลข" })}</div>
+        <ul class="legend-list">
+          ${NUM_BADGES.map(([n, , , name]) => `<li><span class="n">${n}</span><span><b>${name}</b><small>${{ 1: "ปิด–เปิด หรือห่อปาก", 2: "ใช้กับ f และกลุ่ม z c s", 3: "สันนูนหลังฟันบน ใช้กับ d t n l", 4: "หลังคาปากส่วนแข็ง ใช้กับ j q x และ zh ch sh r", 5: "หลังคาปากส่วนนิ่ม ใช้กับ g k h · ลดลงเมื่อออกเสียงขึ้นจมูก", 6: "ลมออกทางนี้เมื่อเป็นเสียง m n ng", 7: "ส่วนที่ขยับมากที่สุด สีชมพูในภาพ", 8: "ต้นทางของลม" }[n]}</small></span></li>`).join("")}
+        </ul>
+      </div>
+      <div class="terms">
+        <div class="term"><b>พ่นลม (送气)</b><span>มีลมพุ่งออกมาตอนปล่อยเสียง เช่น p t k q c ch — เอามือไว้หน้าปากจะรู้สึกได้</span></div>
+        <div class="term"><b>นาสิก (鼻音)</b><span>ลมออกทางจมูก เพราะเพดานอ่อนลดลง เช่น m n</span></div>
+        <div class="term"><b>เสียดแทรก (擦音)</b><span>ลิ้นเข้าใกล้แต่ไม่แตะ ลมลอดออกเป็นเสียงซ่า เช่น f h x s sh</span></div>
+      </div>`
+  },
+  {
+    k: "พยัญชนะ", t: "พยัญชนะครบ 23 ตัว: ดูวิธีวางลิ้นทีละตัว",
+    lead: "กดตัวอักษรเพื่อฟังเสียง และดูว่าลิ้นแตะตรงไหน ลมออกทางไหน ตัวที่มี <b style=\"color:var(--t2)\">จุดแดง</b> คือกับดักที่คนไทยมักอ่านผิด",
+    body: () => explorer("xpInit", INIT, INIT_GROUPS, false),
+    enter: () => xpPick("xpInit", "b", true)
+  },
+  {
+    k: "พยัญชนะ", t: "3 แก๊งลิ้นที่ไทยไม่มี: เทียบกันชัด ๆ",
+    lead: "j q x · z c s · zh ch sh ฟังคล้าย <b>จ ช ซ</b> เหมือนกันทั้ง 3 แก๊ง ต่างกันแค่ <b>ตำแหน่งลิ้น</b> — ดูภาพสามภาพเทียบกัน แล้วฟังเรียงกัน",
+    body: () => `
+      <div class="gangs">
+        <div class="gang">${mouthSVG(INIT.j)}<h3>แก๊งลิ้นแบน <span class="py">j q x</span></h3><p>ปลายลิ้นกดหลังฟันล่าง ยกกลางลิ้นแนบเพดาน ยิ้มกว้าง · ตามด้วย i หรือ ü เท่านั้น</p>
+          <div class="gang-keys">${["j", "q", "x"].map(l => `<button type="button" onclick="say(${jsArg(INIT[l].ex[1])}, ${jsArg(INIT[l].ex[0])})"><b>${l}</b><small>${INIT[l].th.split(" ")[0]} · <span class="zh">${INIT[l].ex[0]}</span> ${numToMark(INIT[l].ex[1])}</small></button>`).join("")}</div></div>
+        <div class="gang">${mouthSVG(INIT.z)}<h3>แก๊งลิ้นตรง <span class="py">z c s</span></h3><p>ปลายลิ้นแตะหลังฟันบน เสียงลอดไรฟันแบบ "ts" (เหมือนคำว่า pizza)</p>
+          <div class="gang-keys">${["z", "c", "s"].map(l => `<button type="button" onclick="say(${jsArg(INIT[l].ex[1])}, ${jsArg(INIT[l].ex[0])})"><b>${l}</b><small>${INIT[l].th.split(" ")[0]} · <span class="zh">${INIT[l].ex[0]}</span> ${numToMark(INIT[l].ex[1])}</small></button>`).join("")}</div></div>
+        <div class="gang">${mouthSVG(INIT.zh)}<h3>แก๊งม้วนลิ้น <span class="py">zh ch sh r</span></h3><p>ม้วนปลายลิ้นขึ้นแตะต้นเพดานแข็ง (ไม่ต้องม้วนสุด) เสียงจะทุ้มลง</p>
+          <div class="gang-keys">${["zh", "ch", "sh", "r"].map(l => `<button type="button" onclick="say(${jsArg(INIT[l].ex[1])}, ${jsArg(INIT[l].ex[0])})"><b>${l}</b><small>${INIT[l].th.split(" ")[0]} · <span class="zh">${INIT[l].ex[0]}</span> ${numToMark(INIT[l].ex[1])}</small></button>`).join("")}</div></div>
+      </div>
+      ${callout("y minimal", "ฟังเทียบ", `กดเรียงจากซ้ายไปขวา (สระเดียวกัน ต่างแค่พยัญชนะ):<br>
+        ${sayBtn("ji1", "", "jī")} ${sayBtn("zi1", "", "zī")} ${sayBtn("zhi1", "", "zhī")} &nbsp;·&nbsp; ${sayBtn("qi1", "", "qī")} ${sayBtn("ci1", "", "cī")} ${sayBtn("chi1", "", "chī")} &nbsp;·&nbsp; ${sayBtn("xi1", "", "xī")} ${sayBtn("si1", "", "sī")} ${sayBtn("shi1", "", "shī")}`)}`
+  },
+  {
+    k: "สระ", t: "สระเดี่ยว 6 ตัว + er: ดูรูปปากและลิ้น",
+    lead: "สระทุกตัวในพินอินแตกแขนงมาจาก 6 ตัวนี้ จำ <b>รูปปาก</b> และ <b>ตำแหน่งลิ้น</b> ให้ได้ ที่เหลือคือการต่อเสียง",
+    body: () => explorer("xpVow", VOW, [["สระเดี่ยว", ["a", "o", "e", "i", "u", "ü"]], ["สระพิเศษ", ["er"]]], true) +
+      callout("y", "เทคนิค ü", `ทำปากจู๋เหมือนจะพูด "อู" แล้วพูด "อี" ทั้งที่ปากยังจู๋อยู่ — ฟังเทียบ ${sayBtn("wu3", "五", "五 wǔ (อู)")} กับ ${sayBtn("yu2", "鱼", "鱼 yú (อวี)")}`),
+    enter: () => xpPick("xpVow", "a", true)
+  },
+  {
+    k: "สระ", t: "สระผสม: แค่ต่อเสียง (แต่มีกับดัก)",
+    lead: "สระผสมส่วนใหญ่อ่านตรงตัวเหมือนต่อเสียงภาษาไทย แถวที่ <b>ไฮไลต์</b> คือกับดักที่คนไทยอ่านผิดบ่อย กดแถวไหนก็ได้เพื่อฟังคำตัวอย่าง",
+    body: () => `
+      <div class="fin-groups">
+        <div class="fin-group"><h4>ตระกูล a · o · e</h4>
+          ${frow("ai", "ไอ", "爱", "ai4")}${frow("ei", "เอย", "北", "bei3")}${frow("ao", "เอา", "好", "hao3")}${frow("ou", "โอว", "狗", "gou3")}
+          ${frow("an", "อัน", "安", "an1")}${frow("en", "เอิน", "门", "men2", "ไม่ใช่ เอน")}${frow("ang", "อัง", "忙", "mang2")}${frow("eng", "เอิง", "冷", "leng3", "ไม่ใช่ เอง")}${frow("ong", "อง", "中", "zhong1")}
+        </div>
+        <div class="fin-group"><h4>ตระกูล i (อี)</h4>
+          ${frow("ia", "เอีย", "家", "jia1")}${frow("ie", "เอีย (เย)", "谢", "xie4", "ไม่ใช่ อิเอะ")}${frow("iao", "เอียว", "小", "xiao3")}${frow("iu", "อิว (โยว)", "六", "liu4")}
+          ${frow("ian", "เอียน", "天", "tian1", "ไม่ใช่ อิอัน")}${frow("in", "อิน", "心", "xin1")}${frow("iang", "เอียง", "羊", "yang2")}${frow("ing", "อิง", "听", "ting1")}${frow("iong", "อยง", "用", "yong4")}
+        </div>
+        <div class="fin-group"><h4>ตระกูล u (อู)</h4>
+          ${frow("ua", "วา", "花", "hua1")}${frow("uo", "วอ", "我", "wo3")}${frow("uai", "ไว", "快", "kuai4")}${frow("ui", "เวย", "贵", "gui4", "ไม่ใช่ อุย")}
+          ${frow("uan", "วัน", "万", "wan4")}${frow("un", "เวิน (อุน)", "问", "wen4")}${frow("uang", "วาง", "黄", "huang2")}${frow("ueng", "เวิง", "翁", "weng1")}
+        </div>
+        <div class="fin-group"><h4>ตระกูล ü (อวี)</h4>
+          ${frow("üe", "เอวีย", "学", "xue2")}${frow("üan", "เอวียน", "远", "yuan3")}${frow("ün", "อวิน", "云", "yun2")}
+          ${callout("", "สังเกต", "คำตัวอย่างเขียนว่า xue, yuan, yun — จุดบน ü หายไปไหน? ดูขั้นถัดไป")}
+        </div>
+      </div>`
+  },
+  {
+    k: "กฎการเขียน", t: "กฎการเขียน 3 ข้อ (ไขทุกความสงสัย)",
+    lead: "บางทีพินอินที่ <b>เขียน</b> ไม่ตรงกับชิ้นส่วนที่เอามาต่อ เพราะมีกฎการเขียน 3 ข้อนี้ เข้าใจแล้วจะไม่งงอีกเลย",
+    body: () => `
+      <div class="rules3">
+        <div class="rule"><span class="no">กฎ 1</span><h3>ไม่มีพยัญชนะต้น → ใช้ y / w</h3><p>สระตระกูล i · u · ü ขึ้นต้นคำเองไม่ได้ ต้องใส่ y หรือ w นำหน้า</p>
+          ${xfBtn("i", "<em>y</em>i", "一", "yi1")}${xfBtn("ia", "<em>y</em>a", "鸭", "ya1")}${xfBtn("ie", "<em>y</em>e", "夜", "ye4")}${xfBtn("u", "<em>w</em>u", "五", "wu3")}${xfBtn("uo", "<em>w</em>o", "我", "wo3")}${xfBtn("ü", "<em>y</em>u", "鱼", "yu2")}${xfBtn("üe", "<em>y</em>ue", "月", "yue4")}</div>
+        <div class="rule"><span class="no">กฎ 2</span><h3>ü เจอ j q x y → ถอดหมวก</h3><p>ตัด 2 จุดออก แต่ <b>ยังอ่าน "อวี" เหมือนเดิม</b> เพราะ j q x y ไม่เคยเจอกับ u (อู) อยู่แล้ว จึงไม่มีทางสับสน</p>
+          <div class="hat" id="hatBox" onclick="hatPlay()" title="กดเพื่อดูอีกครั้ง"><span>q<span class="uu">u<i></i><i></i></span></span><span class="arrow">=</span><span class="zh" style="font-size:38px;">去</span></div>
+          <button type="button" class="btn sm" onclick="hatPlay()" style="width:100%;">${ic("refresh")}ดูถอดหมวกอีกครั้ง</button>
+          <p style="margin-top:10px;">แต่ <b>n, l</b> ต้องเก็บจุดไว้ เพราะ nu กับ nü เป็นคนละคำ: ${sayBtn("nv3", "女", "女 nǚ ผู้หญิง")} ${sayBtn("nu4", "怒", "怒 nù โกรธ")}</p></div>
+        <div class="rule"><span class="no">กฎ 3</span><h3>iou · uei · uen → ย่อเมื่อมีพยัญชนะ</h3><p>เขียนสั้นลง แต่ยังออกเสียงเต็ม (ไม่มีพยัญชนะต้นเขียน you · wei · wen)</p>
+          ${xfBtn("l+iou", "l<em>iu</em>", "六", "liu4")}${xfBtn("g+uei", "g<em>ui</em>", "贵", "gui4")}${xfBtn("l+uen", "l<em>un</em>", "论", "lun4")}
+          ${callout("", "ลองดู", "ไปเล่นใน <b>ห้องแล็บ</b> — ระบบจะโชว์กฎพวกนี้ทำงานทีละขั้น")}</div>
+      </div>`,
+    enter: () => setTimeout(() => { const u = document.querySelector("#hatBox .uu"); if (u) u.classList.add("off"); }, 400)
+  },
+  {
+    k: "เครื่องหมายวรรณยุกต์", t: "วางเครื่องหมายตรงไหน? (มินิเกม)",
+    lead: "เครื่องหมายวางบน <b>สระ</b> เสมอ ถ้ามีหลายตัว ให้ตัวที่ <b>อ้าปากกว้างกว่า</b> ได้ก่อน และถ้าเจอคู่ <b class=\"py\">iu</b> หรือ <b class=\"py\">ui</b> ให้ตัวหลังได้",
+    body: () => `
+      <div class="order"><span>a</span><i>›</i><span>o</span><i>›</i><span>e</span><i>›</i><span>i</span><span>u</span><span>ü</span></div>
+      <div class="qbox mg">
+        <div id="mgPrompt" style="font-weight:600;"></div>
+        <div class="mg-word" id="mgWord"></div>
+        <div class="mg-msg" id="mgMsg"></div>
+      </div>`,
+    enter: () => { mgIdx = 0; renderMg(); }
+  },
+  {
+    k: "พูดจริง", t: "เสียงเปลี่ยนเวลาพูดจริง (变调)",
+    lead: "บางคำ <b>เขียน</b> อย่างหนึ่ง แต่ <b>พูด</b> อีกอย่าง เพื่อให้ออกเสียงง่ายขึ้น จำแค่ 3 กรณีนี้ก็พอ",
+    body: () => `
+      <div class="sandhi">
+        <div class="sd"><h3>เสียง 3 + เสียง 3</h3><div class="formula"><s>nǐ</s> → <span style="color:var(--t2)">ní</span> hǎo</div><p>ตัวแรกกลายเป็นเสียง 2 แต่ยัง <b>เขียน</b> nǐ hǎo เหมือนเดิม</p>${sayBtn("ni2 hao3", "你好", "你好 สวัสดี")}${sayBtn("ke2 yi3", "可以", "可以 ได้")}${sayBtn("hen2 hao3", "很好", "很好 ดีมาก")}</div>
+        <div class="sd"><h3>不 bù + เสียง 4</h3><div class="formula"><s>bù</s> → <span style="color:var(--t2)">bú</span> shì</div><p>ถ้าคำหลังเป็นเสียง 4 → พูด bú · นอกนั้นคง bù</p>${sayBtn("bu2 shi4", "不是", "不是 ไม่ใช่")}${sayBtn("bu2 yao4", "不要", "不要 ไม่เอา")}${sayBtn("bu4 hao3", "不好", "不好 ไม่ดี (คง bù)")}</div>
+        <div class="sd"><h3>一 yī เปลี่ยนตามคำหลัง</h3><div class="formula"><span style="color:var(--t2)">yí</span> gè · <span style="color:var(--t4)">yì</span> tiān</div><p>หน้าเสียง 4 → yí · หน้าเสียงอื่น → yì · นับเลขเดี่ยว ๆ → yī</p>${sayBtn("yi2 ge4", "一个", "一个 หนึ่งอัน")}${sayBtn("yi4 tian1", "一天", "一天 หนึ่งวัน")}${sayBtn("di4 yi1", "第一", "第一 ที่หนึ่ง")}</div>
+      </div>`
+  },
+  {
+    k: "พูดจริง", t: "儿化音: เติม -r ท้ายคำ",
+    lead: "ภาษาพูด (โดยเฉพาะทางเหนือและปักกิ่ง) ชอบเติม 儿 ท้ายคำ แต่ <b>ไม่ได้อ่านเป็นพยางค์ใหม่</b> — แค่ม้วนลิ้นตอนท้ายพยางค์ก่อนหน้า",
+    body: () => `
+      <div class="er-write"><span>huà</span><span class="muted">+</span><span class="zh">儿</span><span class="muted">=</span><span>huà<span class="r">r</span></span><small>วิธีเขียน: เติม r ต่อท้ายพินอินเฉย ๆ · แต่เสียงที่ออกจริงจะเปลี่ยนตามสระ 5 แบบด้านล่าง</small></div>
+      <div class="er-rules">
+        <div class="er"><span class="no">แบบ 1</span><h3>ลงท้าย a o e u</h3><p>ม้วนลิ้นต่อท้ายได้เลย สระไม่เปลี่ยน</p>
+          <div class="er-ex">${erEx("画儿", "huàr", "hua4", "xuar")}${erEx("老头儿", "lǎotóur", "lao3 tou2", "tʰour")}</div></div>
+        <div class="er"><span class="no">แบบ 2</span><h3>ลงท้าย -i หรือ -n</h3><p>ตัด i / n ทิ้ง แล้วม้วนลิ้นต่อจากสระที่เหลือ</p>
+          <div class="er-ex">${erEx("小孩儿", "xiǎoháir", "xiao3 hai2", "xar")}${erEx("一块儿", "yíkuàir", "yi2 kuai4", "kʰuar")}${erEx("好玩儿", "hǎowánr", "hao3 wan2", "uar")}${erEx("一点儿", "yìdiǎnr", "yi4 dian3", "tiar")}</div></div>
+        <div class="er"><span class="no">แบบ 3</span><h3>ลงท้าย -ng</h3><p>ตัด ng ทิ้ง แต่ทำเสียงขึ้นจมูกที่สระ แล้วม้วนลิ้น</p>
+          <div class="er-ex">${erEx("空儿", "kòngr", "kong4", "kʰõr")}${erEx("帮忙儿", "bāngmángr", null, "mãr")}</div></div>
+        <div class="er"><span class="no">แบบ 4</span><h3>สระ i หรือ ü ตัวเดียว</h3><p>คงสระไว้ แล้วเติมเสียง "เออร์" ต่อท้าย</p>
+          <div class="er-ex">${erEx("小鸡儿", "xiǎojīr", null, "tɕiər")}${erEx("金鱼儿", "jīnyúr", null, "yər")}</div></div>
+        <div class="er"><span class="no">แบบ 5</span><h3>-i หลัง z c s zh ch sh r</h3><p>เสียง "อือ" เปลี่ยนเป็น "เออร์"</p>
+          <div class="er-ex">${erEx("没事儿", "méishìr", "mei2 shi4", "ʂər")}${erEx("一会儿", "yíhuìr", "yi2 hui4", "xuər")}</div></div>
+      </div>
+      ${callout("y", "อย่าสับสน", `ถ้า 儿 อ่านเป็นพยางค์เต็ม <b class="py">ér</b> แปลว่า "ลูก" — ไม่ใช่ 儿化 เช่น ${sayBtn("er2 zi5", "儿子", "儿子 érzi ลูกชาย")} ${sayBtn("nv3 er2", "女儿", "女儿 nǚ'ér ลูกสาว")}`)}
+      <details class="er-all"><summary>ดูรูป 儿化 ของสระครบทุกตัว</summary><div class="er-grid">${FINALS_DATA.filter(f => f.erForm !== "—").map(f => `<div><b>${f.key === "-i" ? "-i" : f.key.split(" (")[0]}</b>${escHtml(f.erForm)} · <span class="muted">${escHtml(f.erEx)}</span></div>`).join("")}</div></details>`
+  },
+  {
+    k: "จบบทเรียน", t: "",
+    lead: "",
+    body: () => `
+      <div class="finish">
+        <button type="button" class="big" onclick="say('hen2 hao3', '很好')">很好！<small>hěn hǎo · เยี่ยมมาก</small></button>
+        <h2>อ่านพินอินเป็นแล้ว</h2>
+        <p class="lead" style="margin:0 auto;">คุณรู้จักครบทั้ง 3 ชิ้น (พยัญชนะ · สระ · วรรณยุกต์), ตำแหน่งลิ้นของทุกเสียง, กฎการเขียน, การวางเครื่องหมาย, เสียงเปลี่ยน และ 儿化 ขั้นต่อไปคือ <b>ฟังและพูดตามบ่อย ๆ</b></p>
+        <div class="finish-paths">
+          <button type="button" class="btn yellow" onclick="go('lab')">${ic("flask")}ไปห้องแล็บ</button>
+          <button type="button" class="btn" onclick="go('practice')">${ic("target")}ฝึกหู ฝึกสะกด</button>
+          <button type="button" class="btn" onclick="go('chart')">${ic("grid")}ดูตารางพินอิน</button>
+        </div>
+      </div>`,
+    enter: () => { lsSet("pyv4Done", true); setTimeout(() => confettiAt(document.querySelector(".finish .big"), 40), 300); }
+  }
+];
+
+let stepIdx = Math.min(lsGet("pyv4Step", 0), STEPS.length - 1);
+function renderStep(dir) {
+  const s = STEPS[stepIdx];
+  const card = $("stepCard");
+  card.innerHTML = `${s.t ? `<div class="step-kicker">ขั้นที่ ${stepIdx + 1} · ${s.k}</div><h2>${s.t}</h2><p class="lead">${s.lead}</p>` : ""}<div class="step-body">${s.body()}</div>`;
+  card.classList.remove("step-anim-next", "step-anim-prev");
+  if (dir) { void card.offsetWidth; card.classList.add(dir > 0 ? "step-anim-next" : "step-anim-prev"); }
+  $("deckCount").textContent = `${stepIdx + 1} / ${STEPS.length}`;
+  $("segs").innerHTML = STEPS.map((_, i) => `<i class="${i < stepIdx ? "done" : i === stepIdx ? "cur" : ""}" onclick="stepJump(${i})" title="ขั้นที่ ${i + 1}"></i>`).join("");
+  $("prevBtn").disabled = stepIdx === 0;
+  $("nextBtn").innerHTML = stepIdx === STEPS.length - 1 ? "กลับหน้าแรก" : "ถัดไป " + ic("arrowR");
+  lsSet("pyv4Step", stepIdx);
+  if (s.enter) s.enter();
+}
+function stepGo(d) {
+  if (d > 0 && stepIdx === STEPS.length - 1) { go("home"); return; }
+  const n = stepIdx + d;
+  if (n < 0 || n >= STEPS.length) return;
+  stopAudio();
+  stepIdx = n;
+  renderStep(d);
+  const top = $("v-learn").getBoundingClientRect().top + window.scrollY - 80;
+  if (window.scrollY > top) window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+function stepJump(i) { const d = i > stepIdx ? 1 : -1; stopAudio(); stepIdx = i; renderStep(d); }
+
+/* =======================================================
+   8. QUIZ — ฟังแล้วตอบเสียง
+   ======================================================= */
+const QUIZ_POOL = CHARS.filter(c => +c.key.slice(-1) <= 4);
+class ToneQuiz {
+  constructor(o) { Object.assign(this, o); this.cur = null; this.answered = false; this.right = 0; this.total = 0; this.streak = 0; this.best = o.bestKey ? lsGet(o.bestKey, 0) : 0; }
+  next(autoplay) {
+    let w;
+    do { w = QUIZ_POOL[Math.floor(Math.random() * QUIZ_POOL.length)]; } while (w === this.cur);
+    this.cur = w; this.answered = false;
+    $(this.reveal).innerHTML = `<span class="muted" style="font-weight:600;">กดปุ่มเสียง แล้วเลือกเสียงด้านล่าง</span>`;
+    $(this.opts).innerHTML = [1, 2, 3, 4].map(t => `<button type="button" class="q-opt" data-t="${t}" style="--tc:var(--t${t})" onclick="${this.name}.answer(${t}, this)"><span class="py">${TONE_INFO[t].mark}</span>เสียง ${t}</button>`).join("");
+    this.paint();
+    if (autoplay) setTimeout(() => this.play(), 200);
+  }
+  play() { if (this.cur) playSeq([this.cur.key], `${ic("speaker")} ฟังให้ดี…`); }
+  answer(t, btn) {
+    if (this.answered || !this.cur) return;
+    this.answered = true;
+    const w = this.cur, ans = +w.key.slice(-1), ok = t === ans;
+    this.total++;
+    $(this.opts).querySelectorAll(".q-opt").forEach(b => {
+      b.disabled = true;
+      if (+b.dataset.t === ans) b.classList.add("right"); else if (+b.dataset.t === t) b.classList.add("wrong");
+    });
+    $(this.reveal).innerHTML = `<div class="zh">${w.zh}</div><div class="py" style="color:var(--t${ans})">${w.py}</div><div class="muted" style="font-weight:600;">${w.th} · เสียง ${ans}</div>`;
+    if (ok) {
+      this.right++; this.streak++;
+      if (this.streak > this.best) { this.best = this.streak; if (this.bestKey) lsSet(this.bestKey, this.best); }
+      confettiAt(btn || $(this.opts), 16);
+    } else {
+      this.streak = 0;
+      const box = $(this.box); box.classList.remove("shake"); void box.offsetWidth; box.classList.add("shake");
+      setTimeout(() => say(w.key, w.zh), 350);
+    }
+    this.paint();
+  }
+  paint() {
+    if (this.sumEl) { const el = $(this.sumEl); if (el) el.textContent = this.total ? `ตอบถูก ${this.right} / ${this.total} ข้อ` : ""; }
+    if (this.scoreEl) {
+      $(this.scoreEl).textContent = `ถูก ${this.right}/${this.total}`;
+      $(this.streakEl).textContent = `ติดกัน ${this.streak}`;
+      $(this.bestEl).textContent = `สูงสุด ${this.best}`;
+    }
+  }
+}
+const sq = new ToneQuiz({ name: "sq", box: "sqBox", reveal: "sqReveal", opts: "sqOpts", sumEl: "sqSum" });
+const g1 = new ToneQuiz({ name: "g1", box: "g1Box", reveal: "g1Reveal", opts: "g1Opts", scoreEl: "g1Score", streakEl: "g1Streak", bestEl: "g1Best", bestKey: "pyv4Best1" });
+function g1Play() { g1.play(); }
+
+let g2cur = null, g2done = false, g2hint = 0;
+const g2 = { right: 0, total: 0, streak: 0, best: lsGet("pyv4Best2", 0) };
+function g2Paint() {
+  $("g2Score").textContent = `ถูก ${g2.right}/${g2.total}`;
+  $("g2Streak").textContent = `ติดกัน ${g2.streak}`;
+  $("g2Best").textContent = `สูงสุด ${g2.best}`;
+}
+function g2New(autoplay) {
+  let w;
+  do { w = QUIZ_POOL[Math.floor(Math.random() * QUIZ_POOL.length)]; } while (w === g2cur);
+  g2cur = w; g2done = false; g2hint = 0;
+  $("g2Input").value = "";
+  $("g2Reveal").innerHTML = `<span class="muted" style="font-weight:600;">กดปุ่มเสียง แล้วพิมพ์พินอินที่ได้ยิน</span>`;
+  g2Paint();
+  if (autoplay) { setTimeout(g2Play, 200); $("g2Input").focus({ preventScroll: true }); }
+}
+function g2Play() { if (g2cur) playSeq([g2cur.key], `${ic("speaker")} ฟังให้ดี…`); }
+function g2Hint() {
+  if (!g2cur || g2done) return;
+  g2hint++;
+  const base = g2cur.key.slice(0, -1), t = g2cur.key.slice(-1);
+  const ini = (base.match(/^(zh|ch|sh|[bpmfdtnlgkhjqxzcsryw])/) || [""])[0];
+  $("g2Reveal").innerHTML = g2hint === 1
+    ? `คำใบ้: ขึ้นต้นด้วย <b class="py">${ini || "(ไม่มีพยัญชนะต้น)"}</b> · ความหมาย: ${g2cur.th}`
+    : `คำใบ้: ขึ้นต้นด้วย <b class="py">${ini || "—"}</b> · เป็น <b style="color:var(--t${t})">เสียง ${t}</b> · ความหมาย: ${g2cur.th}`;
+}
+function g2Check() {
+  if (!g2cur) return;
+  const raw = $("g2Input").value;
+  if (g2done) { g2New(true); return; }
+  if (!raw.trim()) { $("g2Input").focus(); return; }
+  g2done = true;
+  const user = normalizeAnswer(raw), ans = g2cur.key, t = ans.slice(-1);
+  const ok = user === ans;
+  g2.total++;
+  let msg;
+  if (ok) {
+    g2.right++; g2.streak++;
+    if (g2.streak > g2.best) { g2.best = g2.streak; lsSet("pyv4Best2", g2.best); }
+    msg = `<span class="ok-msg">${ic("check")}ถูกต้อง</span>`;
+    confettiAt($("g2Box"), 18);
+  } else {
+    g2.streak = 0;
+    const sameBase = user.slice(0, -1) === ans.slice(0, -1), sameTone = user.slice(-1) === t;
+    msg = sameBase ? `<span class="mid-msg">สะกดถูกแล้ว แต่เป็นเสียง ${t} ไม่ใช่เสียง ${user.slice(-1)}</span>` : sameTone ? `<span class="mid-msg">เสียงถูกแล้ว แต่สะกดยังไม่ตรง</span>` : `<span class="bad-msg">${ic("x")}ยังไม่ถูก ลองฟังอีกครั้ง</span>`;
+    const box = $("g2Box"); box.classList.remove("shake"); void box.offsetWidth; box.classList.add("shake");
+  }
+  $("g2Reveal").innerHTML = `<div>${msg}</div><div class="zh">${g2cur.zh}</div><div class="py" style="color:var(--t${t})">${g2cur.py} <span class="muted" style="font-size:15px;">(${ans})</span></div><div class="muted" style="font-weight:600;">${g2cur.th} · กด Enter เพื่อไปข้อต่อไป</div>`;
+  say(g2cur.key, g2cur.zh);
+  g2Paint();
+}
+
+/* =======================================================
+   9. LAB — ห้องแล็บประกอบพยางค์
+   ======================================================= */
+const INI_LIST = [["b", "ป"], ["p", "พ"], ["m", "ม"], ["f", "ฟ"], ["d", "ต"], ["t", "ท"], ["n", "น"], ["l", "ล"], ["g", "ก"], ["k", "ค"], ["h", "ฮ"],
+  ["j", "จ แบน"], ["q", "ช แบน"], ["x", "ซ แบน"], ["z", "จ+ซ"], ["c", "ช+ซ"], ["s", "ซ"], ["zh", "จ ม้วน"], ["ch", "ช ม้วน"], ["sh", "ซ ม้วน"], ["r", "ร ม้วน"], ["", "ไม่มี"]];
+const ITH = {};
+INI_LIST.forEach(([s, t]) => { ITH[s] = t; });
+const ZERO_ROW = INITIALS_DATA.find(r => r.isZero);
+function rowFor(s) { return s ? INITIALS_DATA.find(r => r.sym === s) : ZERO_ROW; }
+function finFull(key) { return key === "-i" ? "i" : key.split(" (")[0]; }
+const FIN_BY_KEY = {};
+FINALS_DATA.forEach(f => { FIN_BY_KEY[f.key] = f; });
+const FAM_NAMES = { "th-g1": "สระปากเปิด (开口呼)", "th-g2": "ตระกูล i (齐齿呼)", "th-g3": "ตระกูล u (合口呼)", "th-g4": "ตระกูล ü (撮口呼)" };
+const lab = lsGet("pyv4Lab", { ini: "zh", fin: "ong", t: 1 });
+if (!FIN_BY_KEY[lab.fin] || ITH[lab.ini] === undefined) Object.assign(lab, { ini: "zh", fin: "ong", t: 1 });
+
+function labCompute() {
+  const row = rowFor(lab.ini), raw = row.map[lab.fin] || "";
+  const full = finFull(lab.fin);
+  if (!raw) return { valid: false, start: lab.ini + full };
+  const written = cleanSyl(raw);
+  const steps = [{ f: (lab.ini ? `<span style="color:var(--ini)">${lab.ini}</span> + ` : "") + `<span style="color:var(--fin)">${full}</span>`, n: lab.ini ? "เอาพยัญชนะต้นกับสระมาต่อกัน" : "ไม่มีพยัญชนะต้น — มีแต่สระ" }];
+  const start = lab.ini + full;
+  if (lab.fin === "-i") steps.push({ f: written, n: `i หลัง ${lab.ini} อ่านว่า "อือ" ไม่ใช่ "อี" (ลิ้นค้างอยู่ตำแหน่งเดิม)` });
+  else if (written !== start) {
+    let why;
+    if (!lab.ini) {
+      if (full[0] === "ü") why = "กฎ 1: ไม่มีพยัญชนะต้น → เติม y และ ü ถอดหมวก";
+      else if (full[0] === "i") why = ["i", "in", "ing"].includes(full) ? "กฎ 1: i ตัวเดียว → เติม y ข้างหน้า" : "กฎ 1: เปลี่ยน i ตัวหน้าเป็น y";
+      else if (full[0] === "u") why = full === "u" ? "กฎ 1: u ตัวเดียว → เติม w ข้างหน้า" : "กฎ 1: เปลี่ยน u ตัวหน้าเป็น w";
+      else why = "รูปเขียนเมื่อไม่มีพยัญชนะต้น";
+    } else if (full[0] === "ü") why = `กฎ 2: ü เจอ ${lab.ini} → ถอดหมวก (ยังอ่าน "อวี")`;
+    else why = `กฎ 3: มีพยัญชนะต้น → ${full} ย่อเหลือ ${written.slice(lab.ini.length)}`;
+    steps.push({ f: written, n: why });
+  }
+  let final = written;
+  if (lab.t) {
+    const res = applyToneToSyllable(written);
+    final = res.forms[lab.t - 1];
+    steps.push({ f: colorMark(final, lab.t), n: `ใส่เสียง ${lab.t}: ${res.rule}` });
+  } else steps.push({ f: final, n: "เสียงเบา: ไม่ต้องใส่เครื่องหมาย พูดสั้น ๆ เบา ๆ (ไม่มีไฟล์อัดแยก ระบบเล่นเสียง 1 แบบสั้นและเบาแทน)" });
+  const key = written + (lab.t || 5);
+  return { valid: true, written, final, steps, key, colloq: raw.split("/")[0].includes("*"), hasAudio: AVAIL.has(fileKey(written + (lab.t || 1))) };
+}
+
+function renderLab() {
+  const row = rowFor(lab.ini);
+  $("pkIni").innerHTML = INI_LIST.map(([s, th]) => {
+    const can = !!rowFor(s).map[lab.fin];
+    return `<button type="button" class="pbtn${lab.ini === s ? " on" : ""}${can ? "" : " dim"}" onclick="labSet('ini', ${jsArg(s)})">${s || "∅"}<small>${th}</small></button>`;
+  }).join("");
+  let lastG = "", fins = "";
+  FINALS_DATA.forEach(f => {
+    if (f.gClass !== lastG) { fins += `<div class="fam-label">${FAM_NAMES[f.gClass]}</div>`; lastG = f.gClass; }
+    const can = !!row.map[f.key];
+    fins += `<button type="button" class="pbtn${lab.fin === f.key ? " on" : ""}${can ? "" : " dim"}" onclick="labSet('fin', ${jsArg(f.key)})">${f.key === "-i" ? "-i" : finFull(f.key)}<small>${f.th}</small></button>`;
+  });
+  $("pkFin").innerHTML = fins;
+  $("pkTone").innerHTML = [1, 2, 3, 4, 0].map(t => `<button type="button" class="pbtn${lab.t === t ? " on" : ""}" style="--tc:var(--t${t}); --tb:var(--t${t}-bg)" onclick="labSet('t', ${t})"><span class="sym">${TONE_INFO[t].mark}</span><span class="lbl">${t ? "เสียง " + t : "เสียงเบา"}<small>${{ 1: "สูงราบ 55", 2: "ขึ้น 35", 3: "ลง-ขึ้น 214", 4: "ดิ่งลง 51", 0: "สั้น เบา" }[t]}</small></span></button>`).join("");
+
+  const r = labCompute(), big = $("labBig");
+  big.classList.remove("pop", "bad"); void big.offsetWidth;
+  if (!r.valid) {
+    big.classList.add("bad", "pop");
+    big.textContent = r.start;
+    $("labRead").innerHTML = `<span class="bad-msg">${ic("x")}ไม่มีพยางค์นี้ในภาษาจีนกลาง</span>`;
+    const ok = FINALS_DATA.filter(f => row.map[f.key]).map(f => f.key);
+    $("labSteps").innerHTML = `<li style="--k:0"><span><span class="n">พยัญชนะ <b class="py">${lab.ini || "∅"}</b> ประสมได้กับ ${ok.length} สระ (ปุ่มที่ไม่จาง) เช่น:</span><span class="lab-ex" style="margin-top:6px;">${ok.slice(0, 8).map(k => `<button type="button" onclick="labSet('fin', ${jsArg(k)})"><span class="py">${cleanSyl(row.map[k])}</span></button>`).join("")}</span></span></li>`;
+    $("labEx").innerHTML = "";
+  } else {
+    big.classList.add("pop");
+    const ini = lab.ini && r.final.startsWith(lab.ini) ? lab.ini : "";
+    big.innerHTML = (ini ? `<span class="i">${ini}</span>` : "") + `<span class="f">${colorMark(r.final.slice(ini.length), lab.t)}</span>`;
+    const f = FIN_BY_KEY[lab.fin];
+    $("labRead").innerHTML = `อ่านประมาณ: <b style="color:var(--ini)">${lab.ini ? ITH[lab.ini] : "—"}</b> + <b style="color:var(--fin)">${f.th}</b> · <b style="color:var(--t${lab.t})">${lab.t ? "เสียง " + lab.t : "เสียงเบา"}</b>${r.colloq ? " · <span class='muted'>(ใช้ในภาษาพูด)</span>" : ""}${r.hasAudio ? "" : " · <span class='muted'>(ไม่มีไฟล์เสียง)</span>"}`;
+    $("labSteps").innerHTML = r.steps.map((s, k) => `<li style="--k:${k}"><span><span class="f">${s.f}</span><br><span class="n">${s.n}</span></span></li>`).join("");
+    const ex = CHARS.filter(c => c.key.slice(0, -1) === r.written);
+    $("labEx").innerHTML = ex.length
+      ? `<span class="muted" style="width:100%; font-size:14px; font-weight:600;">คำจริงที่ใช้พยางค์นี้:</span>` + ex.map(c => { const t = +c.key.slice(-1) % 5; return `<button type="button" class="${t === lab.t ? "cur" : ""}" onclick="labSet('t', ${t})"><span class="zh">${c.zh}</span><span class="py" style="color:var(--t${t})">${c.py}</span><small>${c.th}</small></button>`; }).join("")
+      : "";
+  }
+  // ภาพปากของพยัญชนะ (หรือสระตัวแรกถ้าไม่มีพยัญชนะ)
+  const vk = finFull(lab.fin)[0];
+  const cfg = lab.ini ? INIT[lab.ini] : (VOW[lab.fin === "er" ? "er" : vk] || VOW.a);
+  const who = lab.ini ? `พยัญชนะ <b class="py" style="color:var(--ini)">${lab.ini}</b>` : `สระ <b class="py" style="color:var(--fin)">${lab.fin === "er" ? "er" : vk}</b>`;
+  $("labMouth").innerHTML = `<div>${mouthSVG(cfg, { aria: "ภาพการวางลิ้น" })}</div><div><b>การวางลิ้นของ${who}</b><br><span class="muted">${cfg.how}</span></div>`;
+  lsSet("pyv4Lab", lab);
+}
+function labSet(k, v) {
+  lab[k] = v;
+  renderLab();
+  if (k === "t") labSpeak();
+}
+function labSpeak() {
+  const r = labCompute();
+  if (!r.valid) { toast("ไม่มีพยางค์นี้ — ลองเลือกสระที่ไม่จาง", true); return; }
+  const c = CHARS.find(x => x.key === r.key);
+  say(r.key, c ? c.zh : "", `<span class="py">${escHtml(r.final)}</span>${c ? ` <span class="zh">${c.zh}</span>` : ""}`);
+}
+function labRandom() {
+  let row, key;
+  do { row = INITIALS_DATA[Math.floor(Math.random() * INITIALS_DATA.length)]; const ks = Object.keys(row.map); key = ks[Math.floor(Math.random() * ks.length)]; } while (!row.map[key] || row.map[key].includes("*"));
+  lab.ini = row.isZero ? "" : row.sym; lab.fin = key; lab.t = 1 + Math.floor(Math.random() * 4);
+  renderLab();
+  labSpeak();
+}
+function openLab(ini, fin) { lab.ini = ini; lab.fin = fin; if (!lab.t) lab.t = 1; go("lab"); labSpeak(); }
+
+/* =======================================================
+   10. CHART
+   ======================================================= */
+let chartBuilt = false;
+function buildChart() {
+  if (chartBuilt) return;
+  chartBuilt = true;
+  const spans = [];
+  FINALS_DATA.forEach(f => { const l = spans[spans.length - 1]; if (l && l.g === f.gClass) l.n++; else spans.push({ g: f.gClass, n: 1 }); });
+  let h = `<table class="chart"><thead><tr class="fam"><th class="corner" rowspan="2" style="background:var(--card); color:var(--ink); vertical-align:bottom; top:0;">พยัญชนะ ↓<br>สระ →</th>`;
+  spans.forEach((s, i) => { h += `<th colspan="${s.n}" class="f${i + 1}" style="height:28px;">${FAM_NAMES[s.g]}</th>`; });
+  h += `</tr><tr class="keys">${FINALS_DATA.map(f => `<th>${f.key === "-i" ? "-i" : finFull(f.key)}<small>${f.th}</small></th>`).join("")}</tr></thead><tbody>`;
+  INITIALS_DATA.forEach(row => {
+    const s = row.isZero ? "" : row.sym;
+    h += `<tr><th>${s || "∅"}<small>${row.isZero ? "ไม่มี (y/w)" : ITH[s]}</small></th>`;
+    FINALS_DATA.forEach(f => {
+      const v = row.map[f.key];
+      if (!v) { h += `<td class="empty"></td>`; return; }
+      const c = cleanSyl(v);
+      h += `<td><button type="button" class="${v.split("/")[0].includes("*") ? "colloq" : ""}" data-syl="${c}" onclick="openLab(${jsArg(s)}, ${jsArg(f.key)})" title="เปิด ${c} ในห้องแล็บ">${c}</button></td>`;
+    });
+    h += `</tr>`;
+  });
+  $("chartBox").innerHTML = h + `</tbody></table>`;
+  $("chartMsg").innerHTML = `<span class="muted">ทั้งหมด ${ALL_VALID_SYLLABLES_SET.size} พยางค์ · ตัวเอียงสีฟ้า = ใช้ในภาษาพูด</span>`;
+}
+let chartT = 0;
+function chartFind() {
+  clearTimeout(chartT);
+  chartT = setTimeout(() => {
+    const raw = $("chartSearch").value;
+    let q = raw.toLowerCase().trim().replace(/v/g, "ü").replace(/[0-5]$/, "");
+    q = toNumbered(q).slice(0, -1).replace(/^([jqxy])ü/, "$1u");
+    document.querySelectorAll(".chart button.found").forEach(b => b.classList.remove("found"));
+    if (!q) { $("chartMsg").innerHTML = `<span class="muted">ทั้งหมด ${ALL_VALID_SYLLABLES_SET.size} พยางค์</span>`; return; }
+    const b = document.querySelector(`.chart button[data-syl="${CSS.escape(q)}"]`);
+    if (b) {
+      b.scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "center", inline: "center" });
+      void b.offsetWidth; b.classList.add("found");
+      $("chartMsg").innerHTML = `<span class="ok-msg">${ic("check")}เจอ <b class="py">${escHtml(q)}</b></span> — กดที่ช่องเพื่อเปิดในห้องแล็บ`;
+    } else {
+      $("chartMsg").innerHTML = `<span class="bad-msg">${ic("x")}ไม่มีพยางค์ <b class="py">${escHtml(q)}</b> ในภาษาจีนกลาง</span>`;
+    }
+  }, 160);
+}
+
+/* =======================================================
+   11. THEME + KEYBOARD + INIT
+   ======================================================= */
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  $("themeBtn").innerHTML = ic(t === "dark" ? "sun" : "moon");
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.content = t === "dark" ? "#121218" : "#fff8ec";
+}
+function toggleTheme(e) {
+  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  const run = () => { applyTheme(next); try { localStorage.setItem("pyv4Theme", next); } catch (err) {} };
+  if (!document.startViewTransition || RM) { run(); return; }
+  const x = e && e.clientX ? e.clientX : innerWidth - 30, y = e && e.clientY ? e.clientY : 30;
+  const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  document.startViewTransition(run).ready.then(() => {
+    document.documentElement.animate({ clipPath: [`circle(0 at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] }, { duration: 550, easing: "cubic-bezier(.16,1,.3,1)", pseudoElement: "::view-transition-new(root)" });
+  }).catch(() => {});
+}
+
+document.addEventListener("keydown", e => {
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "input" || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (view === "learn") {
+    if (e.key === "ArrowRight") stepGo(1);
+    else if (e.key === "ArrowLeft") stepGo(-1);
+  } else if (view === "practice" && e.key.length === 1 && "1234".includes(e.key)) {
+    g1.answer(+e.key, $("g1Opts").querySelector(`[data-t="${e.key}"]`));
+  }
+});
+
+fillIcons();
+applyTheme(document.documentElement.dataset.theme === "dark" ? "dark" : "light");
+const startView = (location.hash || "").replace("#", "");
+go(VIEWS.includes(startView) ? startView : "home", { keep: true });
+</script>
+<script src="../embed.js?v=3"></script>
+</body>
+</html>

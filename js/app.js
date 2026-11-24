@@ -75,7 +75,8 @@ function setTheme(next, origin) {
 function toggleTheme(e) { sfx('pop'); setTheme(currentTheme() === 'dark' ? 'light' : 'dark', e && e.currentTarget); }
 function togglePinyin() { const s = S(); s.showPinyin = !s.showPinyin; applySettings(); Store.save(); sfx(s.showPinyin ? 'on' : 'off'); toast(s.showPinyin ? `${T('แสดงพินอิน')}` : `${T('ซ่อนพินอิน ฝึกอ่านจากตัวจีนล้วน')}`, { icon: s.showPinyin ? 'eye' : 'eye-off', ms: 1800 }); }
 function toggleSound() { const s = S(); s.sfx = !s.sfx; if (s.sfx && !s.vol) s.vol = 60; applySettings(); Store.save(); if (s.sfx) sfx('on'); toast(s.sfx ? `${T('เปิดเสียงเอฟเฟกต์')}` : `${T('ปิดเสียงเอฟเฟกต์')}`, { icon: s.sfx ? 'vol' : 'mute', ms: 1600 }); }
-function aboutDlg() { modal({ title: 'Library of Limu', html: `${T('คลังคำศัพท์ HSK 3.0 · ฝึกจำ ฝึกฟัง ฝึกเขียน')}<br><br>${T('อภิสิทธิ์ แก้วเนตร')} · Aphisit Kaewnet<br><span class="hz" style="font-size:24px;color:var(--ink)">大家好</span>` }); }
+function aboutDlg() { modal({ title: 'Library of Limu', html: `${T('คลังคำศัพท์ HSK 3.0 · ฝึกจำ ฝึกฟัง ฝึกเขียน')}<br><br>${T('อภิสิทธิ์ แก้วเนตร')} · Aphisit Kaewnet<br><span class="hz" style="font-size:24px;color:var(--ink)">大家好</span>`,
+  buttons: [{ label: `${T('ตกลง')}`, cls: 'primary', value: true }, { label: `${T('แหล่งข้อมูลและเครดิต')}`, cls: 'ghost', value: 'credits' }] }).then(v => { if (v === 'credits') Router.go('/credits'); }); }
 
 const STATUS_NAME = { new: `${T('ยังไม่เคยเล่น')}`, learning: `${T('กำลังเรียน')}`, mastered: `${T('จำได้แล้ว')}`, review: `${T('รอทบทวน')}` };
 function wordRowHTML(w, opts = {}) {
@@ -499,7 +500,7 @@ const Book = {
     const body = $('#bkBody'); let sx = 0, sy = 0, tgt = null;
     body.addEventListener('touchstart', e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; tgt = e.target; }, { passive: true });
     body.addEventListener('touchend', e => {
-      if (tgt && tgt.closest && tgt.closest('.matrix-wrapper,.tbl-scroll')) return;
+      if (tgt && tgt.closest && tgt.closest('.matrix-wrapper,.tbl-scroll,.gb-tabs')) return;
       const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
       if (sx > 30 && Math.abs(dx) > 70 && Math.abs(dy) < 60) this.go(this.i + (dx < 0 ? 1 : -1));
     }, { passive: true });
@@ -608,9 +609,11 @@ const Settings = {
     $('#sImport').onclick = () => $('#sImportFile').click();
     $('#sImportFile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) this.importData(f); };
     $$('[data-reset]').forEach(b => b.onclick = () => this.reset(b.dataset.reset));
+    if (typeof Cloud !== 'undefined') Cloud.bindContainer($('#sCloudCard'), false);
   },
   show() {
     const s = S();
+    if (typeof Cloud !== 'undefined') Cloud.updateUI();
     segSet($('#sTheme'), s.theme || 'auto'); segSet($('#sLang'), s.lang || 'th'); segSet($('#sAfterOk'), String(s.afterOk)); segSet($('#sAfterBad'), String(s.afterBad)); segSet($('#sAsk'), s.ask); segSet($('#sQuiz'), s.answer); segSet($('#sTimer'), s.timer);
     $('#sPinyin').checked = s.showPinyin; $('#sTh').checked = s.showTh; $('#sEn').checked = s.showEn;
     $('#sSfx').checked = !!s.sfx; $('#sHaptic').checked = !!s.haptic; $('#sAutoSpeak').checked = !!s.autoSpeak;
@@ -654,7 +657,7 @@ const Settings = {
     if (!(await confirmDlg(txt[0], txt[1] + ` · ${T('ย้อนกลับไม่ได้')}`, `${T('ล้างข้อมูล')}`, true))) return;
     const d = Store.d;
     if (kind === 'review') d.review = [];
-    if (kind === 'stats' || kind === 'all') { d.sessions = []; d.ws = {}; d.stages = {}; d.review = []; d.legacy = { days: {} }; d.last = null; }
+    if (kind === 'stats' || kind === 'all') { d.sessions = []; d.ws = {}; d.stages = {}; d.gram = {}; d.course = {}; d.review = []; d.legacy = { days: {} }; d.last = null; }
     if (kind === 'mywords') { const ids = d.customWords.map(w => `C:${w.zh}:${w.py}`); d.customWords = []; d.review = d.review.filter(id => !ids.includes(id)); ids.forEach(id => delete d.ws[id]); }
     if (kind === 'all') { Store.d = Store.defaults(); Store.d.settings.theme = d.settings.theme; }
     Store.flush(); buildWords(); applySettings(); Custom.c = null; this.show(); toast(`${T('ล้างข้อมูลแล้ว')}`, { icon: 'check' });
@@ -675,13 +678,15 @@ const VIEWS = {
   stats: { el: 'v-stats', nav: 'stats', show: () => StatsView.show(), title: `${T('สถิติ')}` },
   library: { el: 'v-library', nav: 'library', show: () => Library.show(), title: `${T('ชั้นหนังสือ')}` },
   book: { el: 'v-book', nav: 'library', show: a => Book.show(a[0]), title: 'Only Offy' },
+  credits: { el: 'v-credits', nav: 'settings', show: () => Credits.show(), title: `${T('แหล่งข้อมูลและเครดิต')}` },
+  hanzi: { el: 'v-hanzi', nav: 'hanzi', show: a => HanziView.show(a[0]), title: `${T('อักษร')}` },
   settings: { el: 'v-settings', nav: 'settings', show: () => Settings.show(), title: `${T('ตั้งค่า')}` }
 };
 const ROUTE_ALIAS = { levels: 'learn', custom: 'practice', dash: 'stats' };   // links from the previous version
 let currentView = null, currentHash = null;
 /* every page remembers how far down it was scrolled (keyed by its address), like the tabs of a phone app */
 const scrollMem = {};
-const TAB_ROOTS = new Set(['v-home', 'v-learn', 'v-practice', 'v-dict', 'v-stats', 'v-library', 'v-settings']);
+const TAB_ROOTS = new Set(['v-home', 'v-learn', 'v-practice', 'v-dict', 'v-stats', 'v-library', 'v-hanzi', 'v-settings']);
 function renderRoute(h) {
   const { name, args } = Router.parse(h);
   const v = VIEWS[ROUTE_ALIAS[name] || name] || VIEWS.home;
@@ -750,6 +755,10 @@ function boot() {
   $$('.js-theme').forEach(b => b.onclick = toggleTheme);
   $$('.js-pinyin').forEach(b => b.onclick = togglePinyin);
   $$('.js-sound').forEach(b => b.onclick = toggleSound);
+  if (typeof Cloud !== 'undefined') {
+    Cloud.init();
+    $$('.js-cloud-btn').forEach(b => b.onclick = () => Cloud.openModal());
+  }
   $('#brandBtn').onclick = aboutDlg;
   $('#v-home h1').onclick = aboutDlg;
   $('#gAnswer').addEventListener('click', e => Game.onAnswerClick(e));

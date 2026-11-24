@@ -1,7 +1,7 @@
-// Library of Limu · new offy v4 — offline support.
+// Library of Limu · new offy v6 (lab) — offline support.
 // Bump CACHE_NAME whenever app files change so old caches are dropped.
-const CACHE_NAME = 'new-offy-v4-23';
-const CORE_ASSETS = ['./', './index.html', './css/app.css', './css/v4.css', './js/i18n-en.js', './js/core.js', './js/play.js', './js/games.js', './js/app.js', './js/gami.js', './js/scene.js', './js/views.js', './data/words.js', './data/books.js', './manifest.json', './fonts/PinyinSans.woff', './fonts/KaiTi.woff', './icon.svg', './icons/icon-180.png', './icons/icon-192.png'];
+const CACHE_NAME = 'new-offy-v6-17';
+const CORE_ASSETS = ['./', './index.html', './css/app.css', './css/v4.css', './css/five.css', './css/books5.css', './css/cbook.css', './css/ibooks.css', './css/tree.css', './css/digi.css', './css/compose.css', './js/i18n-en.js', './js/core.js', './js/cloud.js', './js/play.js', './js/games.js', './js/app.js', './js/gami.js', './js/scene.js', './js/views.js', './data/words.js', './data/hsk.js', './js/books5.js', './js/gbook.js', './js/cbook.js', './js/ibooks.js', './js/tree.js', './js/digi.js', './js/compose.js', './js/handpad.js', './js/hanzi.js', './js/credits.js', './js/five.js', './data/books.js', './manifest.json', './fonts/PinyinSans.woff', './fonts/KaiTi.woff', './icon.svg', './icons/icon-180.png', './icons/icon-192.png'];
 // The Thai interface fonts come from Google Fonts. They are fetched and kept at install time
 // (the stylesheet and every font file it points to), so even the very first offline start keeps its typeface.
 const FONT_CSS = ['https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+Thai:wght@600;700&display=swap'];
@@ -28,7 +28,7 @@ self.addEventListener('activate', event => {
 // Fonts and the stroke-order library from the CDNs are cached too, so they keep working offline once seen.
 self.addEventListener('fetch', event => {
   const req = event.request;
-  if (req.method !== 'GET' || !/^https?:/.test(req.url)) return;
+  if (req.method !== 'GET' || !/^https?:/.test(req.url) || /\/audio\/course\/|supabase\.co\//.test(req.url)) return;
   const same = new URL(req.url).origin === self.location.origin;
   const net = same ? fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }) : fetch(req);
   event.respondWith(net.then(res => {

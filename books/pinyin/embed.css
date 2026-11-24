@@ -1,0 +1,32 @@
+/* Library of Limu · new offy v6 — พินอินเข้าใจง่าย as VOL 01 of the bookshelf (only with ?embed=1 → html.embed).
+   The book's chapter tabs replace the page's own menu; colours and type follow new offy (soft surfaces, the book's
+   spine colour as accent, IBM Plex Sans Thai · KaiTi · Pinyin Sans). Tone colours stay: they carry meaning.
+   The audio credit (CC BY-SA) stays visible at the bottom. */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+@font-face { font-family: 'KaiTi Web'; src: local('KaiTi'), local('楷体'), local('STKaiti'), url('../../fonts/KaiTi.woff') format('woff'); font-display: swap; }
+@font-face { font-family: 'Pinyin Sans'; src: local('Pinyin Sans'), url('../../fonts/PinyinSans.woff') format('woff'); font-display: swap; }
+
+html.embed {
+  --book: #2c8259;
+  --bg: #f4f2ec; --bg-2: #efece4; --card: #ffffff; --card-2: #faf8f3;
+  --ink: #1b1d1a; --muted: #6c7168; --line: #e2ddd1; --soft-line: #ebe6db; --hard: rgba(60, 48, 24, .07);
+  --yellow: color-mix(in srgb, var(--book) 26%, #ffffff); --soft-y: color-mix(in srgb, var(--book) 11%, transparent);
+  --head: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif; --body: 'IBM Plex Sans Thai', 'IBM Plex Sans', sans-serif;
+  --py: 'Pinyin Sans', 'IBM Plex Sans', sans-serif; --zh: 'KaiTi Web', 'KaiTi', '楷体', 'STKaiti', serif;
+}
+html.embed[data-theme="dark"] {
+  --bg: #111311; --bg-2: #161916; --card: #191c19; --card-2: #1f231f;
+  --ink: #ebeee8; --muted: #9aa096; --line: #2e332e; --soft-line: #252925; --hard: rgba(0, 0, 0, .35);
+  --yellow: color-mix(in srgb, var(--book) 42%, #ffffff); --soft-y: color-mix(in srgb, var(--book) 18%, transparent);
+}
+
+/* the book frame has its own chapter tabs and theme */
+html.embed .topbar, html.embed #tabbar, html.embed #themeBtn { display: none !important; }
+html.embed body { background-image: none; padding-bottom: 0; }
+html.embed .wrap { padding-top: clamp(14px, 2.4vw, 26px); padding-bottom: 28px; }
+
+/* softer surfaces: thin borders, rounder corners, quiet depth */
+html.embed .card, html.embed .tile, html.embed .btn, html.embed .chip, html.embed .inp { border-width: 1.5px; }
+html.embed .foot { font-size: 12px; opacity: .8; padding-bottom: 18px; }
+html.embed h1, html.embed h2, html.embed h3 { letter-spacing: -.005em; }
+html.embed ::selection { background: var(--yellow); }

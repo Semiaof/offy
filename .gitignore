@@ -1,0 +1,5 @@
+# Exclude local personal-study textbook audio & copyrighted course packs from Git / public web deploy
+audio/course/
+data/course/
+.DS_Store
+Thumbs.db

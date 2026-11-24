@@ -411,7 +411,19 @@ const StatsView = {
   },
   sessHTML(s) {
     const p = pct(s.correct, s.total), icn = s.mode === 'dict' ? 'brush' : isGame(s.mode) ? GAME_BY_ID[s.mode].icon : s.kind === 'review' || s.kind === 'retry' ? 'repeat' : s.kind === 'stage' ? 'learn' : 'cards';
-    const det = (s.words || []).map(([id, ok, ms]) => { const w = BY_ID.get(id); return w ? `<span class="wchip ${ok ? 'ok' : 'no'}"><span class="hz">${esc(w.zh)}</span>${ms ? `<small>${(ms / 1000).toFixed(1)}</small>` : ''}</span>` : ''; }).join('');
+    const det = (s.words || []).map(([id, ok, ms]) => {
+      const w = BY_ID.get(id);
+      if (w) return `<span class="wchip ${ok ? 'ok' : 'no'}"><span class="hz">${esc(w.zh)}</span>${ms ? `<small>${(ms / 1000).toFixed(1)}</small>` : ''}</span>`;
+      if (String(id).startsWith('G:')) {
+        const [, gid, ei] = String(id).split(':'), g = window.OFFY_BOOKS5 && window.OFFY_BOOKS5.grammar;
+        const L = g && g.lessons && g.lessons[gid];
+        const txt = L ? (ei && ei.startsWith('e') ? (L.err && L.err[+ei.slice(1)] ? L.err[+ei.slice(1)][1] : gid)
+          : ei && ei.startsWith('u') ? (L.use && L.use[+ei.slice(1)] ? (L.use[+ei.slice(1)].fix || L.use[+ei.slice(1)].zh) : gid)
+          : (L.ex && L.ex[+ei] ? L.ex[+ei][0] : gid)) : gid;
+        return `<span class="wchip ${ok ? 'ok' : 'no'}"><span class="hz">${esc(txt)}</span>${ms ? `<small>${(ms / 1000).toFixed(1)}</small>` : ''}</span>`;
+      }
+      return '';
+    }).join('');
     const tags = [s.mode === 'dict' ? ANS_NAME[s.sub] : isGame(s.mode) ? gameName(s.mode) : s.mode === 'flash' && !s.lg ? ASK_NAME[s.ask || 'zh'] : '', s.mc >= 3 ? `${L('ต่อเนื่อง', 'streak')} ×${s.mc}` : '', s.xp ? `+${s.xp} XP` : ''].filter(Boolean).join(' · ');
     return `<div class="sess"><button class="h"><span class="s-ic">${ic(icn)}</span><span class="m"><b>${esc(sessLabel(s))}${s.partial ? ` <span class="badge">${L('ไม่จบรอบ', 'unfinished')}</span>` : ''}${s.lg ? ` <span class="badge">${L('เวอร์ชันเก่า', 'old version')}</span>` : ''}</b><small>${fmtDate(s.ts)}${s.dur ? ' · ' + fmtClock(s.dur) : ''}${tags ? ' · ' + tags : ''}</small></span>
       <span class="sc"><b>${s.correct}/${s.total}</b>${s.stars ? starsHTML(s.stars, 11) : `<small>${p}%</small>`}</span></button><div class="det">${det || `<small class="muted">${L('ไม่มีรายละเอียดคำ', 'no word details')}</small>`}</div></div>`;

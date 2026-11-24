@@ -94,7 +94,7 @@ body.hide-th .lang-th { display: none !important; }
    3) SHELL + NAVIGATION
    ============================================================ */
 .main { min-height: 100dvh; margin-left: var(--rail); }
-.view { display: none; max-width: 1180px; margin: 0 auto;
+.view { display: none; max-width: none; margin: 0 auto;
   padding: max(18px, env(safe-area-inset-top)) max(var(--pad), env(safe-area-inset-right)) calc(var(--tab) + 28px + env(safe-area-inset-bottom)) max(var(--pad), env(safe-area-inset-left)); }
 .view.active { display: block; }
 .view.active > * { animation: rise .5s var(--ease) backwards; }
@@ -817,8 +817,8 @@ body.immersive .start-bar .btn.primary { flex: 1; }
 .bk.soon .lk { position: absolute; right: 12px; top: 12px; width: 16px; height: 16px; opacity: .6; }
 @media (hover: hover) { .bk:not(.soon):hover { transform: translateY(-6px) rotate(-1.5deg); box-shadow: 0 20px 36px color-mix(in srgb, var(--c) 36%, transparent); } }
 
-.reader { padding: clamp(18px, 3.400vw, 34px); max-width: 860px; margin: 0 auto; }
-#v-book .ph, .pager { max-width: 860px; margin-left: auto; margin-right: auto; }
+.reader { padding: clamp(18px, 2.8vw, 34px); max-width: none; margin: 0 auto; }
+#v-book .ph, .pager { max-width: none; margin-left: auto; margin-right: auto; }
 .pager { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
 .pager .dots { flex: 1; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
 .pager .dots button { width: 8px; height: 8px; border-radius: 99px; background: var(--line-2); padding: 0; transition: width .35s var(--ease), background .3s; position: relative; }

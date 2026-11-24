@@ -1169,3 +1169,29 @@ html[data-vt="scroll"]::view-transition-new(root) { animation: vtScrollIn .46s c
   82% { top: 96%; opacity: .9; }
   100% { top: 100%; opacity: 0; }
 }
+
+/* =====================================================================
+   v5 CLOUD SYNC & CROSS-DEVICE LOGIN UI
+   ===================================================================== */
+.v5-tag { font: 700 11px var(--ui); background: var(--accent-soft); color: var(--accent); padding: 2px 8px; border-radius: 99px; vertical-align: middle; margin-left: 4px; }
+.cloud-pill { display: inline-flex; align-items: center; gap: 7px; border-radius: 99px; padding: 0 13px; height: 34px; font-weight: 600; border: 1px solid var(--line-2); background: var(--surface); }
+.cloud-pill.logged { border-color: color-mix(in srgb, var(--good) 45%, var(--line)); background: color-mix(in srgb, var(--good-soft) 45%, var(--surface)); }
+.cd-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--faint); flex: none; }
+.cd-dot.online { background: var(--good); box-shadow: 0 0 8px var(--good); }
+.cd-dot.syncing { background: var(--gold); animation: pop .6s infinite alternate; }
+.cloud-prof { display: flex; flex-direction: column; gap: 6px; }
+.cp-head { display: flex; align-items: center; gap: 12px; }
+.cp-ava { width: 46px; height: 46px; border-radius: 14px; background: var(--seal); color: #fff6ea; display: grid; place-items: center; font-size: 22px; font-weight: 700; flex: none; filter: url(#rough); }
+.cp-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cp-info b { font-size: 15.5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cp-info small { font-size: 12.5px; color: var(--muted); }
+.cp-badge { font-size: 11.5px; font-weight: 600; color: var(--good); background: var(--good-soft); padding: 2px 8px; border-radius: 99px; }
+.cp-code { font: 700 12.5px monospace; color: var(--ink); background: var(--surface-3); padding: 1px 6px; border-radius: 6px; }
+.cloud-divider { display: flex; align-items: center; gap: 10px; margin: 12px 0 8px; color: var(--muted); font-size: 12px; }
+.cloud-divider::before, .cloud-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.qr-card { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 4px; }
+.qr-box { padding: 12px; border-radius: 18px; background: #fffdf8; border: 2px solid var(--line-2); box-shadow: var(--sh-1); display: grid; place-items: center; }
+.qr-code-badge { text-align: center; background: var(--surface-2); border: 1.5px dashed var(--gold); border-radius: 14px; padding: 8px 20px; }
+.qr-code-badge small { display: block; font-size: 11.5px; color: var(--muted); }
+.qr-code-badge b { font: 800 22px monospace; letter-spacing: 2px; color: var(--seal); }
+.sql-box { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font: 12px/1.45 monospace; overflow-x: auto; color: var(--ink-2); margin: 0; }
