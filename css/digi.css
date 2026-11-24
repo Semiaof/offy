@@ -32,13 +32,16 @@
 .dg-clans button:hover { border-color: var(--line-2); }
 .dg-clans button:active { transform: scale(.94); }
 .dg-clans button.on { border-color: var(--ink); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--ink); }
-.dg-q { flex: 1 0 170px; display: flex; align-items: center; gap: 6px; height: 42px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); }
+.dg-q { flex: 1 1 180px; min-width: 140px; display: flex; align-items: center; gap: 6px; height: 38px; padding: 0 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); }
 .dg-q:focus-within { border-color: var(--accent); }
-.dg-q input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--ink); font: 15px var(--ui); }
-.dg-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 10px 14px 0; font-size: 12.5px; color: var(--muted); }
-.dg-legend span { display: inline-flex; align-items: center; gap: 6px; }
-.dg-legend i { width: 8px; height: 8px; border-radius: 50%; background: var(--sc); }
+.dg-q input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--ink); font: 14.5px var(--ui); }
+.dg-legend { display: flex; flex-wrap: wrap; gap: 6px 8px; padding: 8px 14px 0; font-size: 12px; color: var(--muted); }
+.dg-legend button { flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2); font: 600 12px var(--ui); transition: border-color .16s, background .16s, opacity .16s; }
+.dg-legend button.on { border-color: var(--sc); background: color-mix(in srgb, var(--sc) 14%, var(--surface)); color: var(--ink); }
+.dg-legend i { width: 8px; height: 8px; border-radius: 50%; background: var(--sc); flex: none; }
 .dg-legend b { font-weight: 400; color: var(--sc); }
+.dg-world.sf-on .dg-n:not(.sf-hi) { opacity: .18 !important; }
+.dg-world.sf-on .dg-l:not(.sf-hi) { opacity: .08 !important; }
 .dg-trail { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; padding: 10px 14px 0; }
 .dg-trail button { min-width: 36px; height: 34px; padding: 0 8px; border-radius: 10px; border: 1px solid var(--line); font-family: var(--hz); font-size: 19px; color: var(--muted); background: var(--surface); }
 .dg-trail button.on { color: var(--ink); border-color: var(--ink); }
@@ -77,8 +80,8 @@
 .dg-sec { position: absolute; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 12px; font-weight: 600; color: var(--muted); pointer-events: none; }
 .dg-sec::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--sc); }
 .dg-more { position: absolute; height: 30px; padding: 0 12px; border-radius: 10px; border: 1px dashed var(--line-2); color: var(--accent-ink); font-size: 12px; font-weight: 600; background: var(--surface); white-space: nowrap; }
-.dg-zoom { position: absolute; right: 10px; bottom: 10px; display: grid; gap: 6px; }
-.dg-zoom button { width: 38px; height: 38px; border-radius: 11px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); font-size: 19px; display: grid; place-items: center; box-shadow: var(--sh-1); }
+.dg-zoom { position: absolute; right: 10px; top: 10px; z-index: 4; display: grid; gap: 6px; }
+.dg-zoom button { width: 36px; height: 36px; border-radius: 11px; border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(8px); color: var(--ink-2); font-size: 18px; display: grid; place-items: center; box-shadow: var(--sh-1); }
 .dg-zoom .ic { width: 17px; height: 17px; }
 .dg-hint { position: absolute; left: 12px; bottom: 8px; margin: 0 !important; font-size: 11.5px !important; color: var(--faint); pointer-events: none; }
 .dg-none { position: absolute; left: 50%; top: 60%; transform: translateX(-50%); color: var(--muted); font-size: 13px !important; }
@@ -113,12 +116,15 @@
 .dg-cat { font-family: var(--hz); font-weight: 400; font-size: 22px; color: var(--sc); }
 .dg-reg { display: inline-grid; justify-items: center; font-family: var(--hz); font-weight: 400; font-size: 21px; padding: 0 9px; border-radius: 10px; background: var(--surface-2); }
 .dg-reg small { font: 600 10px var(--ui); color: var(--muted); }
-.dg-wt { margin: 12px 0 4px !important; font-size: 12.5px !important; font-weight: 700; color: var(--muted); }
-.dg-ws { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
-.dg-ws li { display: grid; grid-template-columns: auto auto 1fr; gap: 6px; align-items: baseline; font-size: 13px; padding: 4px 0; border-bottom: 1px solid var(--line); }
-.dg-ws b { font-family: var(--hz); font-weight: 400; font-size: 17px; }
-.dg-ws .pyx { font-size: 11.5px; }
-.dg-ws span:last-child { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dg-wt { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 12px 0 6px !important; font-size: 12.5px !important; font-weight: 700; color: var(--muted); }
+.dg-wt small { font-weight: 500; font-size: 11px; color: var(--faint); }
+.dg-ws { list-style: none; margin: 0; padding: 0; display: grid; gap: 5px; }
+.dg-ws li { display: flex; align-items: center; gap: 6px; padding: 0; border: 0; }
+.dg-wbtn { flex: 1; min-width: 0; display: grid; grid-template-columns: auto auto auto 1fr; gap: 7px; align-items: baseline; text-align: left; padding: 6px 9px; border-radius: 11px; border: 1px solid var(--line); background: var(--surface-2); font-size: 13px; transition: border-color .16s, background .16s; }
+.dg-wbtn:hover { border-color: var(--accent); background: var(--accent-soft); }
+.dg-wbtn b { font-family: var(--hz); font-weight: 400; font-size: 17px; color: var(--ink); }
+.dg-wbtn .pyx { font-size: 11.5px; }
+.dg-wgl { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dg-ws em { font-style: normal; font-size: 9.5px; font-weight: 800; color: var(--faint); border: 1px solid var(--line-2); border-radius: 4px; padding: 0 3px; margin-right: 4px; }
 .dg-go { width: 100%; margin-top: 12px; height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 13px; font-size: 14px; font-weight: 600;
   color: var(--on-accent); background: var(--accent); transition: transform .15s; }
@@ -148,9 +154,29 @@
 @keyframes dgReveal { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: none; } }
 @keyframes dgFade { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .dg-n, .dg-card { animation: none !important; } }
-@media (max-width: 520px) { .dg-view { height: 56dvh; } .dg-stats { grid-template-columns: repeat(2, 1fr); } .dg-hint { display: none; } }
+@media (max-width: 760px) {
+  .dg-title { display: none; }
+  .dg-hud { padding: 8px 10px; gap: 6px; }
+  .dg-clans { padding: 7px 10px; gap: 5px; }
+  .dg-clans button { width: 38px; height: 38px; font-size: 20px; border-radius: 10px; }
+  .dg-legend { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding: 6px 10px 4px; gap: 5px; -webkit-overflow-scrolling: touch; }
+  .dg-legend::-webkit-scrollbar { display: none; }
+  .dg-trail { padding: 6px 10px 0; }
+}
+@media (max-width: 520px) {
+  .dg-view { height: 54dvh; }
+  .dg-stats { grid-template-columns: repeat(2, 1fr); }
+  .dg-hint { display: none; }
+  .dg-n { --hy: -25px; }
+  .dg-hex { width: 50px; height: 50px; font-size: 26px; border-radius: 14px; }
+  .dg-n.r0 { --hy: -34px; }
+  .dg-n.r0 .dg-hex { width: 68px; height: 68px; font-size: 38px; border-radius: 18px; }
+  .dg-n .dg-m { max-width: 76px; font-size: 10px; }
+  .dg-wbtn { grid-template-columns: auto auto 1fr; }
+  .dg-wgl { grid-column: 1 / -1; }
+}
 /* look-alike forms told apart: 阝 left (阜) / right (邑), ⺼ flesh vs 月 moon */
-.dg-side-tag { font-size: 10.5px; font-weight: 700; color: var(--accent-ink, var(--ink)); background: var(--accent-soft, var(--surface)); border-radius: 6px; padding: 1px 6px; white-space: nowrap; }
+.dg-side-tag { font-size: 10px; font-weight: 700; color: var(--accent-ink, var(--ink)); background: var(--accent-soft, var(--surface)); border-radius: 6px; padding: 1px 6px; max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dg-part small { display: block; font: 600 10px var(--ui); color: var(--muted); text-align: center; }
 
 /* ---------- meaning under each character (flashcard language; English in grey when that language has none) ---------- */
@@ -212,4 +238,4 @@
 /* counts per kind live in the key at the top (the ring no longer needs room for labels around it) */
 .dg-legend .dg-cnt { font-style: normal; font-weight: 700; color: var(--ink-2); min-width: 1ch; }
 .dg-legend .dg-cnt:not(:empty)::before { content: "· "; color: var(--muted); font-weight: 400; }
-.dg-legend span.none { opacity: .45; }
+.dg-legend button.none { opacity: .4; cursor: default; }

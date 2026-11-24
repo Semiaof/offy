@@ -90,16 +90,24 @@ const OffyCompose = (() => {
         <p class="cp-lead">${T('เริ่มจากอักษรหรือส่วนประกอบตัวไหนก็ได้')}</p>
         <p class="cp-try"><span>${T('ลองเริ่มจาก')}</span>${[...STARTERS].filter(g => ways(g)).map(g => `<button data-start="${g}" lang="zh-Hans">${g}</button>`).join('')}</p></div>`;
     const g = e.g, x = D.c[g], n = ways(g);
-    const words = x ? (D.cw[g] || []).filter(i => lvOk(D.w[i][2])).slice(0, 4).map(i => { const w = D.w[i]; return `<li><i class="lvq" style="--c:var(--hsk${w[2]})">${LVN(w[2])}</i><b lang="zh-Hans">${esc(w[0])}</b><span class="pyx">${esc(w[1])}</span><span>${esc(w[3])}</span></li>`; }).join('') : '';
+    const mo = typeof HzKit !== 'undefined' ? HzKit.charMean(g, D, null) : { t: x ? (LANG !== 'en' && x[9]) || x[10] || '' : '', fb: false };
+    const dot = typeof HzKit !== 'undefined' ? HzKit.dotHtml(g) : '';
+    const xbar = typeof HzKit !== 'undefined' ? HzKit.crossBar(g, 'compose') : '';
+    const words = x ? (D.cw[g] || []).filter(i => lvOk(D.w[i][2])).slice(0, 6).map(i => {
+      const w = D.w[i];
+      const gl = typeof HzKit !== 'undefined' ? HzKit.wordGloss(w[0], w[3], !!w[4]) : { t: w[3], fb: !w[4] };
+      return `<li><button type="button" class="cp-wbtn" data-cpword="${esc(w[0])}"><i class="lvq" style="--c:var(--hsk${w[2]})">${LVN(w[2])}</i><b lang="zh-Hans">${esc(w[0])}</b><span class="pyx">${esc(w[1])}</span><span class="cp-wgl">${gl.fb ? '<em>EN</em>' : ''}${esc(gl.t)}</span></button><button type="button" class="tr-say" data-say="${esc(w[0])}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></li>`;
+    }).join('') : '';
     return `<div class="cp-center${n ? '' : ' end'}" data-in="${e.z || ''}">
-      <button class="cp-sq${xb(g)}" style="--lc:var(--hsk${x ? x[1] : 'C'})" data-say="${esc(g)}" lang="zh-Hans" aria-label="${esc(g)}">${esc(disp(g))}</button>
+      <button class="cp-sq${xb(g)}" style="--lc:var(--hsk${x ? x[1] : 'C'})" data-say="${esc(g)}" lang="zh-Hans" aria-label="${esc(g)}">${dot}${esc(disp(g))}<span class="cp-say-badge" aria-hidden="true">${ic('vol')}</span></button>
       ${structHTML(g, e.from)}
       <div class="cp-meta">
-        ${x ? `<p class="cp-py"><span class="pyx">${esc(x[0])}</span><em style="--c:var(--hsk${x[1]})">HSK ${LVN(x[1])}</em></p><p class="cp-mean">${esc((LANG !== 'en' && x[9]) || x[10] || '')}</p>`
+        ${x ? `<p class="cp-py"><span class="pyx">${esc(x[0])}</span><em style="--c:var(--hsk${x[1]})">HSK ${LVN(x[1])}</em></p><p class="cp-mean">${esc(mo.t || '')}</p>`
         : `<p class="cp-py"><em class="part">${T('ส่วนประกอบ')}</em>${reach(g) ? ` <span class="muted">${T('อยู่ใน')} ${reach(g)} ${T('ตัว')}</span>` : ''}</p>`}
         ${n ? `<p class="cp-ways">${T('ผสมได้อีก')} <b>${n}</b> ${T('ทาง')}</p>` : `<p class="cp-end">${T('สุดสายแล้ว · ไม่มีอักษร HSK ที่ผสมต่อจากตัวนี้')}</p>`}
       </div>
-      ${words ? `<ul class="cp-ws" aria-label="${T('คำที่ใช้ตัวนี้')}">${words}</ul>` : ''}
+      ${xbar}
+      ${words ? `<div class="cp-ws-wrap"><div class="cp-ws-h"><span>${T('คำที่ใช้ตัวนี้')}</span><small>${T('แตะเพื่อดู 5 ภาษา')}</small></div><ul class="cp-ws" aria-label="${T('คำที่ใช้ตัวนี้')}">${words}</ul></div>` : ''}
     </div>`;
   }
 
@@ -110,9 +118,12 @@ const OffyCompose = (() => {
       const list = (k[z] || []).filter(shown); if (!list.length) return '';
       const lim = st.more[z] ? list.length : PAGE;
       const btns = list.slice(0, lim).map((c, j) => {
-        const l = lvl(c.r);
+        const l = lvl(c.r), cx = D.c[c.r];
+        const dot = typeof HzKit !== 'undefined' ? HzKit.dotHtml(c.r) : '';
+        const mo = cx && typeof HzKit !== 'undefined' ? HzKit.charMean(c.r, D, null) : { t: '' };
+        const sh = mo.t ? (typeof HzKit !== 'undefined' ? HzKit.short(mo.t, 6) : mo.t.slice(0, 6)) : '';
         return `<button class="cp-c${l ? '' : ' part'}${xb(c.r)}" style="--lc:var(--hsk${l || 'C'});--d:${Math.min(j, 14) * 18}ms" data-pick="${esc(c.r)}" data-z="${z}" data-j="${j}" lang="zh-Hans">
-          <b>${esc(disp(c.r))}</b><small>+${esc(c.add.map(disp).join(''))}</small><i>${l ? 'HSK ' + LVN(l) : T('นอก HSK')}</i></button>`;
+          ${dot}<b>${esc(disp(c.r))}</b>${cx && cx[0] ? `<span class="pyx cp-cpy">${esc(cx[0])}</span>` : ''}<small>+${esc(c.add.map(disp).join(''))}${sh ? ` · ${esc(sh)}` : ''}</small><i>${l ? 'HSK ' + LVN(l) : T('นอก HSK')}</i></button>`;
       }).join('');
       return `<section class="cp-z z-${z}"><h4>${zoneIcon(z)}${T(ZN[z])}<span>${list.length}</span></h4>
         <div class="cp-cs">${btns}${list.length > lim ? `<button class="cp-more" data-more="${z}">${T('ดูเพิ่มอีก')} ${list.length - lim} ${T('ตัว')}</button>` : ''}</div></section>`;
@@ -154,6 +165,7 @@ const OffyCompose = (() => {
     host.addEventListener('click', e => {
       const b = e.target.closest('button'); if (!b) return;
       const d = b.dataset;
+      if (d.cpword) { if (typeof HzKit !== 'undefined') HzKit.openWord(d.cpword); else TTS.speak(d.cpword); return; }
       if (d.say) { TTS.speak(d.say); return; }
       if (d.start) { start(d.start); return; }
       if (d.pick) { pick(d.pick, d.z, +d.j); return; }

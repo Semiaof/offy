@@ -30,7 +30,7 @@ const OffyDigi = (() => {
   };
   const ORDER = ['PART', 'ARMOR', 'CHAMPION', 'ULTIMATE', 'VARIANT'];
   const COLW = 210, ROWH = 104, NODE = 92, PAD = 40;
-  const st = { base: '青', trail: ['青'], sel: null, open: {}, tx: 0, ty: 0, k: 1, fitted: false };
+  const st = { base: '青', trail: ['青'], sel: null, open: {}, stageFilter: null, tx: 0, ty: 0, k: 1, fitted: false };
   let D = null, host = null, rad = null, formsOf = null, radOfGlyph = null, tree = null, cur = new Map(), anim = 0;
 
   Object.assign(window.OFFY_EN || {}, {
@@ -92,15 +92,15 @@ const OffyDigi = (() => {
     const cap = st.open[f] ? 999 : 30, more = Math.max(0, kids.length - cap); kids = kids.slice(0, cap);
     const ring1 = parts.concat(kids), n1 = Math.max(ring1.length, 1);
     const stagger = n1 > 14;                                     // big clans: alternate two distances so labels never touch
-    const SG = 84, GAP = stagger ? 54 : 92;                      // room each character needs along the ring
-    const asp = Math.max(.55, Math.min(2.6, viewAspect() * .92)), k = 1 + (asp - 1) * Math.max(0, Math.min(1, (n1 - 6) / 12));
+    const SG = 104, GAP = stagger ? 68 : 116;                    // generous room so pinyin + Thai meaning never collide
+    const asp = Math.max(.84, Math.min(2.4, viewAspect() * .94)), k = 1 + (asp - 1) * Math.max(0, Math.min(1, (n1 - 6) / 12));
     const unit = oval(Math.max(k, 1), Math.max(1 / k, 1)).P;     // perimeter of the oval with its short side = 1
-    const short = Math.max(stagger ? 150 : 118, Math.min(460, n1 * GAP / unit));
+    const short = Math.max(stagger ? 176 : 152, Math.min(480, n1 * GAP / unit));
     const A1 = short * Math.max(k, 1), B1 = short * Math.max(1 / k, 1), E1 = oval(A1, B1);
     const ds = E1.P / n1, top = E1.sAt(-Math.PI / 2), s0 = top - (parts.length ? parts.length * ds / 2 : 0) + ds / 2;
     kids.forEach(k2 => except.add(k2.c));
     const g2cap = stagger ? 0 : kids.length <= 8 ? 4 : 2;
-    const A2 = A1 + 118, B2 = B1 + 118, E2 = g2cap ? oval(A2, B2) : null;
+    const A2 = A1 + 128, B2 = B1 + 128, E2 = g2cap ? oval(A2, B2) : null;
     const tOf = [];
     ring1.forEach((it, i) => {
       const t = E1.tAt(s0 + i * ds); tOf.push(t);
@@ -119,7 +119,7 @@ const OffyDigi = (() => {
       });
     });
     const has2 = nodes.some(n => n.ring === 2);
-    const lab = stagger ? SG + 100 : has2 ? 190 : 96, edge = stagger ? SG + 72 : has2 ? 118 + 72 : 72;   // how far the outermost square and its labels reach
+    const lab = stagger ? SG + 108 : has2 ? 204 : 108, edge = stagger ? SG + 92 : has2 ? 128 + 92 : 94;   // leave ample room for labels below bottom nodes
     const sectors = ORDER.map(s2 => { const idx = ring1.map((it, i) => it.stage === s2 ? i : -1).filter(i => i >= 0); if (!idx.length) return null;
       const t = E1.tAt(s0 + (idx[0] + idx[idx.length - 1]) / 2 * ds);
       return { s: s2, n: idx.length, x: (A1 + lab) * Math.cos(t), y: (B1 + lab) * Math.sin(t) + (Math.sin(t) > .3 ? 18 : 0) }; }).filter(Boolean);
@@ -161,38 +161,47 @@ const OffyDigi = (() => {
   const esc2 = s => esc(s == null ? '' : s);
   const lvOk = l => typeof HzLv === 'undefined' || HzLv.has(l);      // the HSK levels picked on the อักษร page (7 = the 7–9 band)
   const lvTxt = c => { const x = D.c[c]; return x ? 'HSK ' + (x[1] === 7 ? '7-9' : x[1]) : T('หมวดนำ'); };
-  // meaning in the flashcard language (คลังคำ › ภาษา): th = our Thai, en = Unihan, vi = Hán Việt, ja = kun/on word; else English
-  const mLang = () => { try { return typeof f5main === 'function' ? f5main() : LANG; } catch (e) { return LANG; } };
-  const meanOf = c => {
-    const x = D.c[c], L = mLang();
-    if (x) { const v = L === 'th' ? x[9] : L === 'vi' ? x[7] : L === 'ja' ? x[14] : x[10]; return { t: v || x[10] || '', fb: !v }; }
-    const r = radOfGlyph.get(c); if (r) { const v = { th: r[4], en: r[5], vi: r[6], ja: r[7] }[L]; return { t: v || r[5] || '', fb: !v }; }
-    return { t: '', fb: false };
-  };
-  const shortM = s => { const t = String(s).split(/[\/;,，、(（]/)[0].trim(); return [...t].length > 12 ? [...t].slice(0, 11).join('') + '…' : t; };
+  // meaning in the flashcard language (checks our 5-lang/Thai WORDS dictionary first via HzKit)
+  const mLang = () => typeof HzKit !== 'undefined' ? HzKit.lang() : LANG;
+  const meanOf = c => typeof HzKit !== 'undefined' ? HzKit.charMean(c, D, radOfGlyph) : { t: '', fb: false };
+  const shortM = s => typeof HzKit !== 'undefined' ? HzKit.short(s, 11) : String(s || '').slice(0, 11);
   const lvC = c => { const x = D.c[c]; return ` style="--lc:var(--hsk${x ? x[1] : 'C'})"`; };      // outside HSK (radicals, parts): grey     // every character wears its HSK level colour
   const lvQ = l => `<i class="lvq" style="--c:var(--hsk${l})">${l === 7 ? '7–9' : l}</i>`;
-  const nodeInner = (c, stage) => `<i class="dg-hex"${lvC(c)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(c))}</i>${side(c) ? `<span class="dg-side-tag">${esc2(side(c))}` : `<span class="pyx">${esc2(D.c[c] ? D.c[c][0] : (radOfGlyph.get(c) || [])[3] || '')}`}</span>${(m => m.t ? `<small class="dg-m${m.fb ? ' fb' : ''}" lang="${m.fb ? 'en' : mLang()}">${esc2(shortM(m.t))}</small>` : '')(meanOf(c))}`;
+  const nodeInner = (c, stage) => {
+    const dot = typeof HzKit !== 'undefined' ? HzKit.dotHtml(c) : '';
+    const sd = side(c);
+    const pyOrSide = sd
+      ? `<span class="dg-side-tag" title="${esc2(sd)}">${esc2(sd.split(' · ')[0])}</span>`
+      : `<span class="pyx">${esc2(D.c[c] ? D.c[c][0] : (radOfGlyph.get(c) || [])[3] || '')}</span>`;
+    const m = meanOf(c);
+    return `<i class="dg-hex"${lvC(c)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(c))}${dot}</i>${pyOrSide}${m.t ? `<small class="dg-m${m.fb ? ' fb' : ''}" lang="${m.fb ? 'en' : mLang()}">${esc2(shortM(m.t))}</small>` : ''}`;
+  };
   function cardHTML(c, stage, parent) {
     const x = D.c[c], stg = STAGES[stage] || STAGES.ROOKIE, g = show(c);
     const rr = x ? x[3] && rad.get(x[3]) : radOfGlyph.get(c);
-    const words = (D.cw[c] || []).slice(0, 6).map(i => { const w = D.w[i]; return `<li>${lvQ(w[2])}<b lang="zh-Hans">${esc2(w[0])}</b><span class="pyx">${esc2(w[1])}</span><span>${w[4] ? '' : '<em>EN</em>'}${esc2(w[3])}</span></li>`; }).join('');
+    const words = (D.cw[c] || []).slice(0, 8).map(i => {
+      const w = D.w[i];
+      const gl = typeof HzKit !== 'undefined' ? HzKit.wordGloss(w[0], w[3], !!w[4]) : { t: w[3], fb: !w[4] };
+      return `<li><button type="button" class="dg-wbtn" data-dgword="${esc2(w[0])}">${lvQ(w[2])}<b lang="zh-Hans">${esc2(w[0])}</b><span class="pyx">${esc2(w[1])}</span><span class="dg-wgl">${gl.fb ? '<em>EN</em>' : ''}${esc2(gl.t)}</span></button><button type="button" class="tr-say" data-say="${esc2(w[0])}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></li>`;
+    }).join('');
     const cat = parent && x && stageOf(c, parent) ? catalyst(c, parent) : [];
     const parts = x ? (x[4] || []).map(q => `<button class="dg-part${parent && formsOf(parent).has(q) ? ' base' : ''}" data-dgo="${esc2(q)}" lang="zh-Hans">${esc2(show(q))}${side(q) ? `<small>${esc2(side(q))}</small>` : ''}</button>`).join('<i>+</i>') : '';
-    const mo = meanOf(c), meaning = mo.t + (mo.fb || mLang() === 'en' || !x ? '' : ` · ${x[10]}`);
+    const mo = meanOf(c), meaning = mo.t + (mo.fb || mLang() === 'en' || !x || !x[10] ? '' : ` · ${x[10]}`);
     const reg = x ? [[T('ไต้หวัน'), x[8], 'zh-Hant'], [T('ญี่ปุ่น'), x[13], 'ja']].filter(f => f[1]) : [];
-    const twins = side(c) ? ((D.amb || {})[base(c)] || []).filter(no => `${base(c)}@${no}` !== c).map(no => `${base(c)}@${no}`) : [];   // 阝 left ↔ 阝 right
+    const twins = side(c) ? ((D.amb || {})[base(c)] || []).filter(no => `${base(c)}@${no}` !== c).map(no => `${base(c)}@${no}`) : [];
+    const xbar = typeof HzKit !== 'undefined' ? HzKit.crossBar(c, 'digi') : '';
     return `<div class="dg-card s-${stage}">
       <div class="dg-ch"><span class="dg-stage">${esc2(T(stg.th))} <b>${stg.zh}</b></span><span class="dg-id">#${esc2((c.codePointAt(0) || 0).toString(16).toUpperCase())}</span></div>
       <div class="dg-hero"><div class="dg-big" lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(g)}</div>
         <div><p class="dg-py"><span class="pyx">${esc2(x ? x[0] : rr ? rr[3] : '')}</span><button class="dg-say" data-say="${esc2(base(c))}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></p>
           ${meaning ? `<p class="dg-mean">${esc2(meaning)}</p>` : ''}<p class="dg-sd">${esc2(stg.d)}</p></div></div>
+      ${xbar}
       ${x ? `<dl class="dg-stats"><div><dt>HSK</dt><dd>${x[1] === 7 ? '7-9' : x[1]}</dd></div><div><dt>${T('ขีด')}</dt><dd>${esc2(x[2])}</dd></div>${rr ? `<div><dt>部首</dt><dd lang="zh-Hans">${esc2(radG(rr))}</dd></div>` : ''}${x[6] ? `<div><dt>六书</dt><dd lang="zh-Hans">${esc2(x[6])}</dd></div>` : ''}</dl>` : ''}
       ${parts ? `<p class="dg-row"><span>${T('โครงสร้าง')}</span>${parts}</p>` : ''}
       ${twins.length ? `<p class="dg-row"><span>${T('หน้าตาเหมือน แต่คนละตัว')}</span>${twins.map(q => `<button class="dg-part" data-dgo="${esc2(q)}" lang="zh-Hans">${esc2(base(q))}<small>${esc2(side(q))}</small></button>`).join('')}</p>` : ''}
       ${cat.length ? `<p class="dg-row"><span>${T('ส่วนที่เพิ่ม')}</span>${cat.map(q => `<b class="dg-cat" lang="zh-Hans">${esc2(show(q))}</b>`).join(' ')}</p>` : ''}
       ${reg.length ? `<p class="dg-row"><span>${T('รูปเขียนตามภูมิภาค')}</span>${reg.map(([k, v, l]) => `<b class="dg-reg" lang="${l}">${esc2(v)}<small>${k}</small></b>`).join('')}</p>` : ''}
-      ${words ? `<p class="dg-wt">${T('คำที่ใช้ตัวนี้')}</p><ul class="dg-ws">${words}</ul>` : ''}
+      ${words ? `<p class="dg-wt">${T('คำที่ใช้ตัวนี้')} <small>${T('แตะเพื่อดู 5 ภาษา')}</small></p><ul class="dg-ws">${words}</ul>` : ''}
       ${x && (x[4] || []).length > 1 ? `<button class="dg-go" data-evolve="${esc2(c)}">${ic('bolt')}${T('ดูการประกอบอักษร')}</button>` : ''}
     </div>`;
   }
@@ -202,14 +211,17 @@ const OffyDigi = (() => {
   function paint() {
     if (!host) return;
     cancelAnimationFrame(anim); cur = new Map();
+    st.stageFilter = null;
     const focus = st.trail[st.trail.length - 1];
     host.innerHTML = `<div class="dg${radial() ? ' is-radial' : ''}">
-      <header class="dg-hud"><div class="dg-title"><span class="dg-logo">${ic('bolt')}</span><div><b>${T('สายวิวัฒนาการอักษร')}</b><small>Character families · <span lang="zh-Hans">汉字字族图</span></small></div></div>
+      <header class="dg-hud">
+        <div class="dg-title"><span class="dg-logo">${ic('bolt')}</span><div><b>${T('สายวิวัฒนาการอักษร')}</b><small>Character families · <span lang="zh-Hans">汉字字族图</span></small></div></div>
+        <label class="dg-q">${ic('search')}<input maxlength="2" placeholder="${T('ค้นหาตระกูล เช่น 青, 木, 马…')}" value="${CLANS.includes(st.trail[0]) ? '' : esc2(st.trail[0])}"><button class="q-pen" data-handpad=".dg-q input" aria-label="${T('เขียนค้นหา')}">${ic('pen')}</button></label>
         <div class="dg-ctl"><div class="dg-tg dg-vw"><span class="${radial() ? 'on' : ''}" data-view="radial">${T('รอบตัว')}</span><span class="${radial() ? '' : 'on'}" data-view="tree">${T('ด้านขวา')}</span></div>
-          <button class="dg-tg" data-trad aria-pressed="${trad()}"><span class="${trad() ? '' : 'on'}" lang="zh-Hans">简</span><span class="${trad() ? 'on' : ''}" lang="zh-Hant">繁</span></button></div></header>
-      <div class="dg-clans"><span>${T('ตระกูล')}</span>${CLANS.map(c => `<button class="${st.trail[0] === c ? 'on' : ''}" data-base="${c}" lang="zh-Hans">${esc2(show(c))}</button>`).join('')}
-        <label class="dg-q">${ic('search')}<input maxlength="2" placeholder="${T('ค้นหาตระกูลจากส่วนประกอบ')}" value="${CLANS.includes(st.trail[0]) ? '' : esc2(st.trail[0])}"><button class="q-pen" data-handpad=".dg-q input" aria-label="${T('เขียนค้นหา')}">${ic('pen')}</button></label></div>
-      <div class="dg-legend">${ORDER.concat('ROOKIE').map(k => `<span class="s-${k}" data-stage="${k}"><i></i>${T(STAGES[k].th)} <b lang="zh-Hans">${STAGES[k].zh}</b><em class="dg-cnt"></em></span>`).join('')}</div>
+          <button class="dg-tg" data-trad aria-pressed="${trad()}"><span class="${trad() ? '' : 'on'}" lang="zh-Hans">简</span><span class="${trad() ? 'on' : ''}" lang="zh-Hant">繁</span></button></div>
+      </header>
+      <div class="dg-clans"><span>${T('ตระกูล')}</span>${CLANS.map(c => `<button class="${st.trail[0] === c ? 'on' : ''}" data-base="${c}" lang="zh-Hans">${esc2(show(c))}</button>`).join('')}</div>
+      <div class="dg-legend">${ORDER.concat('ROOKIE').map(k => `<button type="button" class="s-${k}" data-stage="${k}" aria-pressed="false"><i></i>${T(STAGES[k].th)} <b lang="zh-Hans">${STAGES[k].zh}</b><em class="dg-cnt"></em></button>`).join('')}</div>
       ${radial() ? `<nav class="dg-trail" aria-label="trail">${trailHTML()}</nav>` : ''}
       <div class="dg-body"><div class="dg-view" tabindex="0" aria-label="${T('ลากเพื่อเลื่อน · หมุนล้อหรือบีบเพื่อซูม')}">
           <div class="dg-world"></div>
@@ -226,6 +238,9 @@ const OffyDigi = (() => {
   let lay = null;
   function drawRadial(f, tween) {
     const world = host.querySelector('.dg-world'); if (!world) return;
+    st.stageFilter = null;
+    world.classList.remove('sf-on');
+    host.querySelectorAll('.dg-legend [data-stage].on').forEach(el => { el.classList.remove('on'); el.setAttribute('aria-pressed', 'false'); });
     const next = layoutRadial(f), prev = cur, from = new Map();
     lay = next;
     // rings + sector labels
@@ -348,8 +363,8 @@ const OffyDigi = (() => {
     }, 160); });
     ro.observe(v);
   }
-  // zoom so the whole oval (and its labels) fits both the width and the height
-  const fitK = (vw, vh) => Math.max(.32, Math.min(1.15, vw / (2 * (lay.outerX + 24)), vh / (2 * (lay.outerY + 24))));
+  // zoom so the whole oval (and its labels below bottom nodes) fits cleanly inside the viewport
+  const fitK = (vw, vh) => Math.max(.34, Math.min(1.12, vw / (2 * (lay.outerX + 34)), vh / (2 * (lay.outerY + 42))));
   function fitRadial() {
     const v = host.querySelector('.dg-view'); if (!v || !lay) return;
     const vw = v.clientWidth || 600, vh = v.clientHeight || 480;
@@ -520,6 +535,23 @@ const OffyDigi = (() => {
       if (d.more) { st.open[d.more] = true; if (radial()) drawRadial(st.trail[st.trail.length - 1], true); else paint(); return; }
       if (d.trad !== undefined) { S().hzTrad = !trad(); Store.save(); paint(); if (typeof OffyTree !== 'undefined' && OffyTree.refresh) OffyTree.refresh(); return; }
       if (d.zoom !== undefined) { const v = host.querySelector('.dg-view'); if (d.zoom === '0') { if (radial()) glideTo(); else drawTree(); } else zoomAt(d.zoom === '1' ? 1.2 : 1 / 1.2, v.clientWidth / 2, v.clientHeight / 2); return; }
+      if (d.dgword) { if (typeof HzKit !== 'undefined') HzKit.openWord(d.dgword); else TTS.speak(d.dgword); return; }
+      if (d.stage && b.closest('.dg-legend')) {
+        if (b.classList.contains('none')) return;
+        st.stageFilter = st.stageFilter === d.stage ? null : d.stage;
+        host.querySelectorAll('.dg-legend [data-stage]').forEach(el => {
+          const on = el.dataset.stage === st.stageFilter;
+          el.classList.toggle('on', on); el.setAttribute('aria-pressed', on);
+        });
+        const world = host.querySelector('.dg-world');
+        if (world) {
+          world.classList.toggle('sf-on', !!st.stageFilter);
+          world.querySelectorAll('.dg-n, .dg-l').forEach(el => {
+            el.classList.toggle('sf-hi', !st.stageFilter || el.classList.contains('r0') || el.classList.contains('s-' + st.stageFilter));
+          });
+        }
+        return;
+      }
       if (d.say) { TTS.speak(d.say); return; }
       if (d.evolve) evolve(d.evolve);
     });
@@ -565,6 +597,7 @@ const OffyDigi = (() => {
       formsOf = g => { if (!fc.has(g)) { const r = radOfGlyph.get(g); fc.set(g, new Set(r ? [r[1], ...r[8].map(f => f[0])].map(f => key(f, r[0])).concat(AMB[r[1]] ? [] : [r[1]]) : [g])); } return fc.get(g); };
       bind(); paint();
     },
-    refresh() { if (host && host.isConnected && D) paint(); }
+    refresh() { if (host && host.isConnected && D) paint(); },
+    focus(c) { if (D && host && host.isConnected) { if (!setBase(c)) toast(T('ยังไม่มีอักษร HSK ที่ต่อยอดจากตัวนี้'), { icon: 'info' }); } }
   };
 })();
