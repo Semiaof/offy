@@ -1,6 +1,6 @@
 // Library of Limu · new offy v6 (lab) — offline support.
 // Bump CACHE_NAME whenever app files change so old caches are dropped.
-const CACHE_NAME = 'new-offy-v6-17';
+const CACHE_NAME = 'new-offy-v6-18';
 const CORE_ASSETS = ['./', './index.html', './css/app.css', './css/v4.css', './css/five.css', './css/books5.css', './css/cbook.css', './css/ibooks.css', './css/tree.css', './css/digi.css', './css/compose.css', './js/i18n-en.js', './js/core.js', './js/cloud.js', './js/play.js', './js/games.js', './js/app.js', './js/gami.js', './js/scene.js', './js/views.js', './data/words.js', './data/hsk.js', './js/books5.js', './js/gbook.js', './js/cbook.js', './js/ibooks.js', './js/tree.js', './js/digi.js', './js/compose.js', './js/handpad.js', './js/hanzi.js', './js/credits.js', './js/five.js', './data/books.js', './manifest.json', './fonts/PinyinSans.woff', './fonts/KaiTi.woff', './icon.svg', './icons/icon-180.png', './icons/icon-192.png'];
 // The Thai interface fonts come from Google Fonts. They are fetched and kept at install time
 // (the stylesheet and every font file it points to), so even the very first offline start keeps its typeface.
