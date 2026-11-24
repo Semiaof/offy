@@ -21,12 +21,12 @@ const OffyDigi = (() => {
   const SRC = 'data/tree.js?v=6';
   const CLANS = ['青', '木', '日', '人', '口', '女', '心', '工', '方', '包', '马', '白'];
   const STAGES = {
-    ROOKIE: { th: 'อักษรตั้งต้น', zh: '基', d: 'จุดเริ่มต้นของตระกูลอักษรนี้' },
-    ARMOR: { th: 'ใช้เป็นส่วนบอกเสียง', zh: '声', d: 'ตัวตั้งต้นเป็นส่วนบอกเสียง (声旁) ประกอบกับส่วนบอกความหมาย' },
-    CHAMPION: { th: 'ใช้เป็นส่วนบอกความหมาย', zh: '形', d: 'ตัวตั้งต้นเป็นส่วนบอกความหมาย (形旁) อีกส่วนบอกเสียง' },
-    ULTIMATE: { th: 'อักษรผสมความหมาย', zh: '会', d: 'รวมความหมายของส่วนประกอบ (会意) หรือซ้อนตัวเดิม' },
-    VARIANT: { th: 'ความสัมพันธ์อื่น', zh: '其', d: 'อักษรชี้บอก (指事) หรือมีตัวตั้งต้นเป็นหมวดนำโดยไม่ระบุบทบาท' },
-    PART: { th: 'ส่วนประกอบ', zh: '件', d: 'ส่วนที่ประกอบขึ้นเป็นตัวนี้' }
+    ROOKIE: { th: 'อักษรตั้งต้น', sh: 'ตั้งต้น', zh: '基', d: 'จุดเริ่มต้นของตระกูลอักษรนี้' },
+    ARMOR: { th: 'ใช้เป็นส่วนบอกเสียง', sh: 'เสียง', zh: '声', d: 'ตัวตั้งต้นเป็นส่วนบอกเสียง (声旁) ประกอบกับส่วนบอกความหมาย' },
+    CHAMPION: { th: 'ใช้เป็นส่วนบอกความหมาย', sh: 'ความหมาย', zh: '形', d: 'ตัวตั้งต้นเป็นส่วนบอกความหมาย (形旁) อีกส่วนบอกเสียง' },
+    ULTIMATE: { th: 'อักษรผสมความหมาย', sh: 'ผสม', zh: '会', d: 'รวมความหมายของส่วนประกอบ (会意) หรือซ้อนตัวเดิม' },
+    VARIANT: { th: 'ความสัมพันธ์อื่น', sh: 'อื่น ๆ', zh: '其', d: 'อักษรชี้บอก (指事) หรือมีตัวตั้งต้นเป็นหมวดนำโดยไม่ระบุบทบาท' },
+    PART: { th: 'ส่วนประกอบ', sh: 'ประกอบ', zh: '件', d: 'ส่วนที่ประกอบขึ้นเป็นตัวนี้' }
   };
   const ORDER = ['PART', 'ARMOR', 'CHAMPION', 'ULTIMATE', 'VARIANT'];
   const COLW = 210, ROWH = 104, NODE = 92, PAD = 40;
@@ -36,7 +36,7 @@ const OffyDigi = (() => {
   Object.assign(window.OFFY_EN || {}, {
     'สายวิวัฒนาการ': 'Character families', 'สายวิวัฒนาการอักษร': 'Character families', 'อักษรตั้งต้น': 'Base character', 'ใช้เป็นส่วนบอกเสียง': 'As sound part', 'ใช้เป็นส่วนบอกความหมาย': 'As meaning part', 'อักษรผสมความหมาย': 'Meaning compound', 'ความสัมพันธ์อื่น': 'Other link', 'ส่วนประกอบ': 'Component',
     'จุดเริ่มต้นของตระกูลอักษรนี้': 'Where this family starts', 'การประกอบอักษร': 'How it is built', 'ดูการประกอบอักษร': 'See how it is built', 'รูปเขียนตามภูมิภาค': 'Regional forms', 'ยังไม่มีอักษร HSK ที่ต่อยอดจากตัวนี้': 'No HSK character builds on this one', 'บอกความหมาย': 'meaning', 'บอกเสียง': 'sound', 'เล่นอีกครั้ง': 'Play again',
-    'ตระกูล': 'Clan', 'ค้นหาตระกูลจากส่วนประกอบ': 'Find a clan by component', 'ทั้งหมด': 'All', 'รอบตัว': 'Radial', 'ด้านขวา': 'Tree',
+    'ตระกูล': 'Clan', 'ค้นหาตระกูลจากส่วนประกอบ': 'Find a clan by component', 'ทั้งหมด': 'All', 'รอบตัว': 'Radial', 'กริด': 'Grid', 'ด้านขวา': 'Tree', 'ขวา': 'Tree', 'ดูทั้งหมดในโหมดกริด': 'See all in Grid',
     'ส่วนที่เพิ่ม': 'Added part', 'โครงสร้าง': 'Structure',
     'คำที่ใช้ตัวนี้': 'Words with it', 'แตะตัวไหนก็ได้เพื่อย้ายมาไว้ตรงกลาง': 'Tap any character to bring it to the centre',
     'ลากเพื่อเลื่อน · หมุนล้อหรือบีบเพื่อซูม': 'Drag to pan · wheel or pinch to zoom',
@@ -51,7 +51,9 @@ const OffyDigi = (() => {
   const side = c => { const [g, no] = String(c).split('@'); if (!no) return ''; const r = rad.get(+no); if (!r) return '';
     return `${g === '阝' ? (no === '170' ? T('ซ้าย') + ' ' : T('ขวา') + ' ') : ''}${r[1]} · ${LANG === 'en' ? r[5] : r[4]}`; };
   const show = c => { const x = D.c[c]; if (x) return trad() && x[8] ? x[8] : c; const r = radOfGlyph.get(c); return r && base(c) === r[1] ? radG(r) : base(c); };
-  const radial = () => (S().digiView || 'radial') === 'radial';
+  const viewMode = () => S().digiView || 'radial';
+  const radial = () => viewMode() === 'radial';
+  const isGrid = () => viewMode() === 'grid';
 
   /* ---------- relations ---------- */
   function stageOf(c, p) {
@@ -89,7 +91,14 @@ const OffyDigi = (() => {
     const parts = partsOf(f).map(q => ({ c: q, stage: 'PART' }));
     const except = new Set([f, ...parts.map(p => p.c)]);
     let kids = kidsOf(f, except).map(c => ({ c, stage: stageOf(c, f) }));
-    const cap = st.open[f] ? 999 : 30, more = Math.max(0, kids.length - cap); kids = kids.slice(0, cap);
+    const mobile = innerWidth < 700;
+    const defaultCap = mobile ? Math.max(8, 12 - parts.length) : 30;
+    // On mobile big clans, pick the lowest-HSK (most useful) characters first so the radial graph stays crisp & readable
+    if (mobile && !st.open[f] && kids.length > defaultCap) {
+      kids = kids.slice().sort((a, b) => ((D.c[a.c] || [])[1] || 9) - ((D.c[b.c] || [])[1] || 9) || ORDER.indexOf(a.stage) - ORDER.indexOf(b.stage));
+    }
+    const cap = st.open[f] ? 999 : defaultCap, more = Math.max(0, kids.length - cap);
+    kids = kids.slice(0, cap).sort((a, b) => ORDER.indexOf(a.stage) - ORDER.indexOf(b.stage) || ((D.c[a.c] || [])[1] || 9) - ((D.c[b.c] || [])[1] || 9));
     const ring1 = parts.concat(kids), n1 = Math.max(ring1.length, 1);
     const stagger = n1 > 14;                                     // big clans: alternate two distances so labels never touch
     const SG = 104, GAP = stagger ? 68 : 116;                    // generous room so pinyin + Thai meaning never collide
@@ -212,26 +221,85 @@ const OffyDigi = (() => {
     if (!host) return;
     cancelAnimationFrame(anim); cur = new Map();
     st.stageFilter = null;
-    const focus = st.trail[st.trail.length - 1];
-    host.innerHTML = `<div class="dg${radial() ? ' is-radial' : ''}">
-      <header class="dg-hud">
-        <div class="dg-title"><span class="dg-logo">${ic('bolt')}</span><div><b>${T('สายวิวัฒนาการอักษร')}</b><small>Character families · <span lang="zh-Hans">汉字字族图</span></small></div></div>
+    const focus = st.trail[st.trail.length - 1], vm = viewMode();
+    host.innerHTML = `<div class="dg${vm === 'radial' ? ' is-radial' : ''}${vm === 'grid' ? ' is-grid' : ''}">
+      <div class="dg-top">
         <label class="dg-q">${ic('search')}<input maxlength="2" placeholder="${T('ค้นหาตระกูล เช่น 青, 木, 马…')}" value="${CLANS.includes(st.trail[0]) ? '' : esc2(st.trail[0])}"><button class="q-pen" data-handpad=".dg-q input" aria-label="${T('เขียนค้นหา')}">${ic('pen')}</button></label>
-        <div class="dg-ctl"><div class="dg-tg dg-vw"><span class="${radial() ? 'on' : ''}" data-view="radial">${T('รอบตัว')}</span><span class="${radial() ? '' : 'on'}" data-view="tree">${T('ด้านขวา')}</span></div>
-          <button class="dg-tg" data-trad aria-pressed="${trad()}"><span class="${trad() ? '' : 'on'}" lang="zh-Hans">简</span><span class="${trad() ? 'on' : ''}" lang="zh-Hant">繁</span></button></div>
-      </header>
-      <div class="dg-clans"><span>${T('ตระกูล')}</span>${CLANS.map(c => `<button class="${st.trail[0] === c ? 'on' : ''}" data-base="${c}" lang="zh-Hans">${esc2(show(c))}</button>`).join('')}</div>
-      <div class="dg-legend">${ORDER.concat('ROOKIE').map(k => `<button type="button" class="s-${k}" data-stage="${k}" aria-pressed="false"><i></i>${T(STAGES[k].th)} <b lang="zh-Hans">${STAGES[k].zh}</b><em class="dg-cnt"></em></button>`).join('')}</div>
-      ${radial() ? `<nav class="dg-trail" aria-label="trail">${trailHTML()}</nav>` : ''}
-      <div class="dg-body"><div class="dg-view" tabindex="0" aria-label="${T('ลากเพื่อเลื่อน · หมุนล้อหรือบีบเพื่อซูม')}">
-          <div class="dg-world"></div>
-          <div class="dg-zoom"><button data-zoom="1" aria-label="zoom in">+</button><button data-zoom="-1" aria-label="zoom out">−</button><button data-zoom="0" aria-label="fit">${ic('repeat')}</button></div>
-          <p class="dg-hint">${radial() ? T('แตะตัวไหนก็ได้เพื่อย้ายมาไว้ตรงกลาง') : T('ลากเพื่อเลื่อน · หมุนล้อหรือบีบเพื่อซูม')}</p></div>
-        <aside class="dg-side"></aside></div>
+      </div>
+      <div class="dg-clans">${CLANS.map(c => `<button class="${st.trail[0] === c ? 'on' : ''}" data-base="${c}" lang="zh-Hans">${esc2(show(c))}</button>`).join('')}</div>
+      <div class="dg-subbar">
+        <div class="dg-tg dg-vw" role="tablist">
+          <span class="${vm === 'radial' ? 'on' : ''}" data-view="radial">${T('รอบตัว')}</span>
+          <span class="${vm === 'grid' ? 'on' : ''}" data-view="grid">${T('กริด')}</span>
+          <span class="${vm === 'tree' ? 'on' : ''}" data-view="tree">${T('ขวา')}</span>
+        </div>
+        <div class="dg-legend">${ORDER.map(k => `<button type="button" class="s-${k}" data-stage="${k}" aria-pressed="false"><i></i><b lang="zh-Hans">${STAGES[k].zh}</b><span>${LANG === 'en' ? T(STAGES[k].th) : STAGES[k].sh}</span><em class="dg-cnt"></em></button>`).join('')}</div>
+      </div>
+      <nav class="dg-trail" aria-label="trail"${st.trail.length > 1 ? '' : ' hidden'}>${trailHTML()}</nav>
+      <div class="dg-body">
+        ${vm === 'grid'
+          ? `<div class="dg-grid-wrap"></div>`
+          : `<div class="dg-view" tabindex="0" aria-label="${T('ลากเพื่อเลื่อน · หมุนล้อหรือบีบเพื่อซูม')}">
+              <div class="dg-world"></div>
+              <div class="dg-zoom"><button data-zoom="1" aria-label="zoom in">+</button><button data-zoom="-1" aria-label="zoom out">−</button><button data-zoom="0" aria-label="fit">${ic('repeat')}</button></div>
+              <div class="dg-more-bar"></div>
+              <p class="dg-hint">${radial() ? T('แตะตัวไหนก็ได้เพื่อย้ายมาไว้ตรงกลาง') : T('ลากเพื่อเลื่อน · หมุนล้อหรือบีบเพื่อซูม')}</p>
+            </div>`}
+        <aside class="dg-side"></aside>
+      </div>
       <div class="dg-fx" hidden></div></div>`;
-    if (radial()) { st.fitted = false; drawRadial(focus, false); }
-    else drawTree();
-    watchShape();
+    if (vm === 'radial') { st.fitted = false; drawRadial(focus, false); watchShape(); }
+    else if (vm === 'grid') drawGrid(focus);
+    else { drawTree(); watchShape(); }
+  }
+
+  /* ---------- grid view (clean mobile-first grouped tiles for big clans) ---------- */
+  function drawGrid(f) {
+    const wrap = host.querySelector('.dg-grid-wrap'); if (!wrap) return;
+    const parts = partsOf(f).map(q => ({ c: q, stage: 'PART' }));
+    const except = new Set([f, ...parts.map(p => p.c)]);
+    const kids = kidsOf(f, except).map(c => ({ c, stage: stageOf(c, f) }));
+    const all = parts.concat(kids);
+    const byStage = new Map();
+    ORDER.forEach(s => byStage.set(s, []));
+    all.forEach(it => { if (byStage.has(it.stage)) byStage.get(it.stage).push(it); });
+    // Sort each group by HSK level ascending
+    byStage.forEach(arr => arr.sort((a, b) => ((D.c[a.c] || [])[1] || 9) - ((D.c[b.c] || [])[1] || 9)));
+
+    host.querySelectorAll('.dg-legend [data-stage]').forEach(el => {
+      const n = (byStage.get(el.dataset.stage) || []).length;
+      el.querySelector('.dg-cnt').textContent = n ? n : '';
+      el.classList.toggle('none', !n);
+    });
+
+    const tr = host.querySelector('.dg-trail');
+    if (tr) { tr.innerHTML = trailHTML(); tr.hidden = st.trail.length <= 1; }
+    host.querySelectorAll('.dg-clans [data-base]').forEach(b => b.classList.toggle('on', b.dataset.base === st.trail[0]));
+
+    const secs = ORDER.map(s => {
+      const arr = byStage.get(s) || [];
+      if (!arr.length) return '';
+      if (st.stageFilter && st.stageFilter !== s) return '';
+      return `<section class="dg-gsec s-${s}">
+        <h4 class="dg-gsh"><i></i><b lang="zh-Hans">${STAGES[s].zh}</b><span>${T(STAGES[s].th)}</span><small>${arr.length}</small></h4>
+        <div class="dg-glist">${arr.map(it => {
+          const c = it.c, x = D.c[c], m = meanOf(c);
+          const dot = typeof HzKit !== 'undefined' ? HzKit.dotHtml(c) : '';
+          const sd = side(c);
+          const py = sd ? sd.split(' · ')[0] : (x ? x[0] : (radOfGlyph.get(c) || [])[3] || '');
+          return `<button type="button" class="dg-gtile${it.stage === 'PART' ? ' is-part' : ''}"${lvC(c)} data-n="${esc2(c)}">
+            ${dot}<b lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(c))}</b>
+            <span class="pyx">${esc2(py)}</span>
+            ${m.t ? `<small class="${m.fb ? 'fb' : ''}">${esc2(shortM(m.t))}</small>` : ''}
+          </button>`;
+        }).join('')}</div>
+      </section>`;
+    }).join('');
+
+    wrap.innerHTML = secs || `<p class="tr-empty">${T('ยังไม่มีอักษร HSK ที่ต่อยอดจากตัวนี้')} (${typeof HzLv === 'undefined' ? '' : HzLv.label()})</p>`;
+    const card = host.querySelector('.dg-side');
+    card.innerHTML = cardHTML(f, stageForFocus(f), st.trail[st.trail.length - 2]);
+    writeBig(f);
   }
 
   /* ---------- radial drawing + tween ---------- */
@@ -265,7 +333,14 @@ const OffyDigi = (() => {
     });
     world.querySelectorAll('.dg-none').forEach(el => el.remove());
     if (!next.nodes.some(n => n.ring === 1 && n.stage !== 'PART')) world.insertAdjacentHTML('beforeend', `<p class="dg-none r" style="transform:translate(-50%,0) translate(0px,${next.B1 * .45 + 40}px)">${T('ยังไม่มีอักษร HSK ที่ต่อยอดจากตัวนี้')} (${typeof HzLv === 'undefined' ? '' : HzLv.label()})</p>`);
-    if (next.more) world.insertAdjacentHTML('beforeend', `<button class="dg-more" data-more="${esc2(f)}" style="transform:translate(-50%,-50%) translate(0px,${next.labelY + 34}px)">+${next.more} ${T('เพิ่มอีก')}</button>`);
+    const moreBar = host.querySelector('.dg-more-bar');
+    if (moreBar) {
+      moreBar.innerHTML = next.more
+        ? (innerWidth < 700
+          ? `<button type="button" class="dg-more-pill" data-view="grid">+${next.more} ${T('เพิ่มอีก')} · ${T('ดูทั้งหมดในโหมดกริด')} →</button>`
+          : `<button type="button" class="dg-more-pill" data-more="${esc2(f)}">+${next.more} ${T('เพิ่มอีก')}</button>`)
+        : '';
+    }
     host.querySelectorAll('.dg-legend [data-stage]').forEach(el => { const n = (next.sectors.find(x => x.s === el.dataset.stage) || {}).n || 0; el.querySelector('.dg-cnt').textContent = n ? n : ''; el.classList.toggle('none', !n && el.dataset.stage !== 'ROOKIE'); });
     if (false) next.sectors.forEach(s => {
       const x = s.x, y = s.y;                                                       // outside the node labels
@@ -298,7 +373,7 @@ const OffyDigi = (() => {
       cur = pos;
     };
     const card = host.querySelector('.dg-side'); card.innerHTML = cardHTML(f, next.nodes[0].stage, st.trail[st.trail.length - 2]);
-    const tr = host.querySelector('.dg-trail'); if (tr) tr.innerHTML = trailHTML();
+    const tr = host.querySelector('.dg-trail'); if (tr) { tr.innerHTML = trailHTML(); tr.hidden = st.trail.length <= 1; }
     host.querySelectorAll('.dg-clans [data-base]').forEach(b => b.classList.toggle('on', b.dataset.base === st.trail[0]));
     writeBig(f);
     if (!tween || matchMedia('(prefers-reduced-motion: reduce)').matches) { frame(TOTAL + 1); fitRadial(); arrive(world); return; }
@@ -386,7 +461,8 @@ const OffyDigi = (() => {
     if (i >= 0) st.trail = st.trail.slice(0, i + 1); else st.trail.push(c);
     if (st.trail.length > 12) st.trail = st.trail.slice(-12);
     tone([[660, 990, 0, .09, 'square'], [990, 1480, .06, .12, 'sine']]);
-    drawRadial(c, true);
+    if (isGrid()) drawGrid(c);
+    else drawRadial(c, true);
   }
 
   /* ---------- tree drawing ---------- */
@@ -520,16 +596,26 @@ const OffyDigi = (() => {
 
   /* ---------- events ---------- */
   function setBase(g) { const A = (D.amb || {})[g]; if (A && !radOfGlyph.get(g)) g = `${g}@${A[A.length - 1]}`;   // typed 阝 → the left one first; its partner is a tap away
-    if (!D.cc[g] && !D.c[g] && !radOfGlyph.get(g)) return false; st.trail = [g]; st.sel = null; st.open = {}; if (radial()) { tone([[440, 880, 0, .12, 'square']]); drawRadial(g, true); } else paint(); return true; }
+    if (!D.cc[g] && !D.c[g] && !radOfGlyph.get(g)) return false; st.trail = [g]; st.sel = null; st.open = {}; st.stageFilter = null;
+    if (radial()) { tone([[440, 880, 0, .12, 'square']]); drawRadial(g, true); }
+    else if (isGrid()) { tone([[440, 880, 0, .1, 'square']]); drawGrid(g); }
+    else paint();
+    return true; }
   function bind() {
     let drag = null; const pts = new Map(); let pinch = 0;
     host.addEventListener('click', e => {
       const b = e.target.closest('button, [data-view]'); if (!b || (drag && drag.moved)) return;
       const d = b.dataset;
       if (d.close !== undefined) { const fx = host.querySelector('.dg-fx'); fx.hidden = true; fx.innerHTML = ''; return; }
-      if (d.view) { if ((S().digiView || 'radial') !== d.view) { S().digiView = d.view; Store.save(); paint(); } return; }
-      if (d.n) { if (radial()) { ripple(d.n); hover(null); focusOn(d.n); } else { st.sel = d.n; host.querySelectorAll('.dg-n').forEach(x => x.classList.toggle('on', x.dataset.n === d.n)); const n = tree.all.find(m => m.c === d.n); host.querySelector('.dg-side').innerHTML = cardHTML(n.c, n.stage, n.p); tone([[880, 1320, 0, .08, 'square']]); } if (matchMedia('(max-width: 999px)').matches && !radial()) host.querySelector('.dg-side').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); return; }
-      if (d.dgo) { if (radial()) focusOn(d.dgo); else setBase(d.dgo); return; }   // not data-go: the app routes every [data-go] click
+      if (d.view) { if (viewMode() !== d.view) { S().digiView = d.view; Store.save(); paint(); } return; }
+      if (d.n) {
+        if (radial()) { ripple(d.n); hover(null); focusOn(d.n); }
+        else if (isGrid()) { focusOn(d.n); }
+        else { st.sel = d.n; host.querySelectorAll('.dg-n').forEach(x => x.classList.toggle('on', x.dataset.n === d.n)); const n = tree.all.find(m => m.c === d.n); host.querySelector('.dg-side').innerHTML = cardHTML(n.c, n.stage, n.p); tone([[880, 1320, 0, .08, 'square']]); }
+        if (matchMedia('(max-width: 999px)').matches && !radial() && !isGrid()) host.querySelector('.dg-side').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
+      if (d.dgo) { if (radial() || isGrid()) focusOn(d.dgo); else setBase(d.dgo); return; }
       if (d.trail !== undefined) { focusOn(st.trail[+d.trail]); return; }
       if (d.base) { setBase(d.base); return; }
       if (d.more) { st.open[d.more] = true; if (radial()) drawRadial(st.trail[st.trail.length - 1], true); else paint(); return; }
@@ -543,6 +629,7 @@ const OffyDigi = (() => {
           const on = el.dataset.stage === st.stageFilter;
           el.classList.toggle('on', on); el.setAttribute('aria-pressed', on);
         });
+        if (isGrid()) { drawGrid(st.trail[st.trail.length - 1]); return; }
         const world = host.querySelector('.dg-world');
         if (world) {
           world.classList.toggle('sf-on', !!st.stageFilter);

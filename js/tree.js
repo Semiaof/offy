@@ -73,14 +73,14 @@ const OffyTree = (() => {
     if (n.r) {
       const r = radOf(n.r), g = radG(r);
       const langs = [
-        r[5] ? `<span><b>EN</b> ${esc(r[5])}</span>` : '',
+        r[5] ? `<b>EN</b> ${esc(r[5])}` : '',
         r[6] ? `<span lang="vi"><b>VI</b> ${esc(r[6])}</span>` : '',
         r[7] ? `<span lang="ja"><b>JA</b> ${esc(r[7])}</span>` : ''
-      ].filter(Boolean).join('');
+      ].filter(Boolean).join(' · ');
       head = `<div class="tr-node"><div class="tr-glyphs" lang="zh-Hans"><b>${esc(g)}</b>${radForms(r).map(f => `<span>${esc(f)}</span>`).join('')}</div>
         <div class="tr-names"><div class="tr-nh"><b>${esc(LANG === 'en' ? r[5] : r[4])}</b> <span class="pyx">${esc(r[3])}</span><button type="button" class="tr-say" data-say="${esc(g)}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></div>
         <small>#${r[0]} · ${r[2]} ${T('ขีด')}</small>
-        ${langs ? `<div class="tr-langs">${langs}</div>` : ''}
+        ${langs ? `<p class="tr-langs-txt">${langs}</p>` : ''}
         <div class="tr-nacts"><button type="button" class="hz-xbtn sm" data-hzjump="digi" data-hzch="${esc(g)}">${ic('bolt')}<span>${T('สายวิวัฒนาการ')}</span></button><button type="button" class="hz-xbtn sm" data-hzjump="compose" data-hzch="${esc(g)}">${ic('wand')}<span>${T('ผสมอักษร')}</span></button></div></div></div>`;
     } else {
       const x = D.c[n.g], g = base(n.g);
@@ -88,7 +88,7 @@ const OffyTree = (() => {
       head = `<div class="tr-node"><div class="tr-glyphs" lang="zh-Hans"><b>${esc(g)}</b></div><div class="tr-names"><div class="tr-nh"><b>${T('ส่วนประกอบ')}${side(n.g) ? ` · ${esc(side(n.g))}` : ''}</b>${x ? ` <span class="pyx">${esc(x[0])}</span>` : ''}<button type="button" class="tr-say" data-say="${esc(g)}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></div><small>${esc(mo.t || '')}</small></div></div>`;
     }
     const sec = (title, list) => !list.length ? '' : `<section class="tr-sec"><p class="tr-st">${title} <small>${list.length} ${T('ตัว')}</small></p>
-      ${byLevel(list).map(([l, cs]) => `<div class="tr-lv">${lvTag(l)}<div class="tr-cs">${cs.map(c => tile(c, c === st.ch)).join('')}</div></div>`).join('')}</section>`;
+      ${byLevel(list).map(([l, cs]) => `<div class="tr-lv"><div class="tr-lv-h">${lvTag(l)}<small>${cs.length}</small></div><div class="tr-cs">${cs.map(c => tile(c, c === st.ch)).join('')}</div></div>`).join('')}</section>`;
     const body = n.r ? sec(T('อยู่ในหมวดนี้'), own) + sec(T('มีส่วนนี้อยู่ข้างใน แต่จัดหมวดอื่น'), has) : sec(T('อักษรที่มีส่วนนี้'), own);
     return head + (body || `<p class="tr-empty">${T('ยังไม่มีอักษร HSK ในหมวดนี้')}</p>`);
   }
@@ -129,7 +129,6 @@ const OffyTree = (() => {
     const y = keep ? [...host.querySelectorAll('.tr-col')].map(c => c.scrollTop) : null;
     host.innerHTML = `<div class="tr" data-stage="${st.stage}">
       <div class="tr-top"><label class="tr-q">${ic('search')}<input type="search" value="${esc(st.q)}" placeholder="${T('ค้นหาราก / ส่วนประกอบ / อักษร')}" autocomplete="off" spellcheck="false"><button class="q-pen" data-handpad=".tr-q input" aria-label="${T('เขียนค้นหา')}">${ic('pen')}</button></label>
-        <button class="tr-tg" data-trad aria-pressed="${trad()}" aria-label="简 / 繁"><span class="${trad() ? '' : 'on'}" lang="zh-Hans">简</span><span class="${trad() ? 'on' : ''}" lang="zh-Hant">繁</span></button>
         <nav class="tr-crumbs">${crumbs()}</nav></div>
       <div class="tr-cols"><div class="tr-col tr-c1">${colRadicals()}</div><div class="tr-col tr-c2">${colChars()}</div><div class="tr-col tr-c3">${colWords()}</div></div></div>`;
     if (y) host.querySelectorAll('.tr-col').forEach((c, i) => { c.scrollTop = y[i]; });

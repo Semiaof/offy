@@ -2,14 +2,34 @@
    #/hanzi page (full width, full height, full screen) · ผสมอักษร composer · เขียนค้นหา handwriting pad
    ===================================================================== */
 
-/* ---------- the page: whole width, tools grow to the bottom of the screen ---------- */
+/* ---------- the page: whole width, unified calm header & tabs ---------- */
 #v-hanzi.view { max-width: none; padding-bottom: calc(var(--tab) + 18px + env(safe-area-inset-bottom)); }
-#v-hanzi .ph { margin-bottom: 10px; }
-#v-hanzi .hz-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+#v-hanzi .hz-ph { margin-bottom: 8px; align-items: center; gap: 8px; }
+#v-hanzi .hz-head-a { display: flex; align-items: center; gap: 6px; margin-left: auto; flex: none; }
+.hz-lv-btn { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 10px; border-radius: 11px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); font: 600 12.5px var(--ui);
+  white-space: nowrap; transition: border-color .16s, background .16s, color .16s; }
+.hz-lv-btn .ic { width: 14px; height: 14px; color: var(--muted); transition: transform .2s; }
+.hz-lv-btn.open .ic { transform: rotate(180deg); }
+.hz-lv-btn.filtered { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.hz-lvdots { display: inline-flex; gap: 2px; align-items: center; }
+.hz-lvdots i { width: 6px; height: 6px; border-radius: 50%; background: var(--c); display: block; }
+.hz-trad { display: inline-flex; padding: 3px; border-radius: 11px; border: 1px solid var(--line); background: var(--surface-2); height: 36px; align-items: center; }
+.hz-trad span { min-width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; font-family: var(--hz); font-size: 15px; color: var(--muted); transition: background .18s, color .18s; }
+.hz-trad span.on { background: var(--surface); color: var(--ink); box-shadow: var(--sh-1); }
+#v-hanzi .hz-bar { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
 #v-hanzi .hz-tabs { --n: 3; flex: 1; max-width: 640px; }
 #v-hanzi .hz-exit { display: none; }
+.hz-lv-pop { margin: -2px 0 10px; padding: 8px 10px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--sh-1); animation: rise .22s var(--ease) both; }
 #v-hanzi .hz-card { padding: 0; background: none; border: 0; box-shadow: none; border-radius: 0; }
 #v-hanzi .dg-view { height: var(--hz-h, min(68dvh, 640px)); }
+@media (max-width: 600px) {
+  #v-hanzi .hz-ph .eyebrow { display: none; }
+  #v-hanzi .hz-ph h1 { font-size: 22px; }
+  #v-hanzi #hzFull { width: 36px; height: 36px; }
+  .hz-lv-btn { padding: 0 8px; font-size: 12px; gap: 5px; }
+  .hz-lvdots { display: none; }
+}
 @media (min-width: 1000px) {
   #v-hanzi .dg-side { max-height: var(--hz-h, min(68dvh, 640px)); }
   #v-hanzi .tr .tr-col { max-height: var(--hz-h, calc(100dvh - 260px)); }

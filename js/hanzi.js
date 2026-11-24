@@ -233,22 +233,66 @@ const HzKit = (() => {
   return { lang, findWord, wordGloss, charMean, short, charStatus, dotHtml, openWord, strokeSheet, crossBar };
 })();
 
-/* HSK levels shown on every tab of this page */
+/* HSK levels shown on every tab of this page (collapsible via #hzLvBtn chip) */
 const HzLv = (() => {
   const ALL = [1, 2, 3, 4, 5, 6, 7];
   const get = () => { const v = S().hzLv; return Array.isArray(v) && v.length ? v : ALL.slice(); };
   const name = l => l === 7 ? '7–9' : String(l);
+  const label = () => {
+    const on = get(); if (on.length === ALL.length) return 'HSK 1–9';
+    const runs = []; on.forEach(l => { const r = runs[runs.length - 1]; if (r && l === r[1] + 1) r[1] = l; else runs.push([l, l]); });
+    return 'HSK ' + runs.map(([a, b]) => a === b ? name(a) : `${a}–${b === 7 ? 9 : b}`).join(', ');
+  };
   function set(v) {
     try { S().hzLv = [...new Set(v)].sort((a, b) => a - b); Store.save(); } catch (e) { }
     paint(); dispatchEvent(new CustomEvent('hz-lv'));
   }
+  function paintTrad() {
+    const btn = document.getElementById('hzTrad'); if (!btn) return;
+    const tr = !!S().hzTrad;
+    btn.setAttribute('aria-pressed', tr);
+    const sp = btn.querySelectorAll('span');
+    if (sp[0]) sp[0].classList.toggle('on', !tr);
+    if (sp[1]) sp[1].classList.toggle('on', tr);
+  }
   function paint() {
-    const el = document.getElementById('hzLv'); if (!el) return;
     const on = get(), all = on.length === ALL.length;
-    el.innerHTML = `<span class="hz-lv-t">HSK</span>${ALL.map(l => `<button data-l="${l}" class="${on.includes(l) ? 'on' : ''}${l === 7 ? ' w' : ''}" style="--c:var(--hsk${l})" aria-pressed="${on.includes(l)}" aria-label="HSK ${name(l)}">${name(l)}</button>`).join('')}
-      <button class="hz-lv-all${all ? ' on' : ''}" data-l="all">${T('ทั้งหมด')}</button>`;
+    const btn = document.getElementById('hzLvBtn');
+    if (btn) {
+      const dots = on.slice(0, 4).map(l => `<i style="--c:var(--hsk${l})"></i>`).join('');
+      btn.classList.toggle('filtered', !all);
+      btn.innerHTML = `<span class="hz-lvdots">${dots}</span><span>${esc(label())}</span>${ic('chev-d')}`;
+    }
+    const el = document.getElementById('hzLv');
+    if (el) {
+      el.innerHTML = `<span class="hz-lv-t">HSK</span>${ALL.map(l => `<button data-l="${l}" class="${on.includes(l) ? 'on' : ''}${l === 7 ? ' w' : ''}" style="--c:var(--hsk${l})" aria-pressed="${on.includes(l)}" aria-label="HSK ${name(l)}">${name(l)}</button>`).join('')}
+        <button class="hz-lv-all${all ? ' on' : ''}" data-l="all">${T('ทั้งหมด')}</button>`;
+    }
+    paintTrad();
   }
   document.addEventListener('click', e => {
+    const toggleBtn = e.target.closest('#hzLvBtn');
+    if (toggleBtn) {
+      try { sfx('tap'); } catch (err) {}
+      const pop = document.getElementById('hzLvPop');
+      if (pop) {
+        const open = pop.hidden;
+        pop.hidden = !open;
+        toggleBtn.setAttribute('aria-expanded', open);
+        toggleBtn.classList.toggle('open', open);
+        if (typeof HanziView !== 'undefined' && HanziView.fit) setTimeout(HanziView.fit, 40);
+      }
+      return;
+    }
+    const tradBtn = e.target.closest('#hzTrad');
+    if (tradBtn) {
+      try { sfx('tap'); } catch (err) {}
+      S().hzTrad = !S().hzTrad;
+      try { Store.save(); } catch (err) {}
+      paintTrad();
+      dispatchEvent(new CustomEvent('hz-lv'));
+      return;
+    }
     const b = e.target.closest('#hzLv [data-l]'); if (!b) return;
     try { sfx('tap'); } catch (err) { }
     const on = get(), l = b.dataset.l;
@@ -257,12 +301,7 @@ const HzLv = (() => {
     if (on.includes(n)) { if (on.length === 1) { b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); return; } set(on.filter(x => x !== n)); }
     else set(on.concat(n));
   });
-  const label = () => {
-    const on = get(); if (on.length === ALL.length) return 'HSK 1–9';
-    const runs = []; on.forEach(l => { const r = runs[runs.length - 1]; if (r && l === r[1] + 1) r[1] = l; else runs.push([l, l]); });
-    return 'HSK ' + runs.map(([a, b]) => a === b ? name(a) : `${a}–${b === 7 ? 9 : b}`).join(', ');
-  };
-  return { get, has: l => get().includes(l > 7 ? 7 : l), set, paint, label };
+  return { get, has: l => get().includes(l > 7 ? 7 : l), set, paint, paintTrad, label };
 })();
 
 const HanziView = (() => {
