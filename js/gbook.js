@@ -843,6 +843,216 @@
     </div>`;
   }
 
+  /* ---------- textbook upgrades: 2-column compare boxes, 把 roadmap, local Course Book cross-links ---------- */
+  const isLocalHost = location.protocol === 'file:' || /^(localhost|127\.0\.0\.1|::1|192\.168\.|10\.|100\.)/.test(location.hostname);
+
+  const COURSE_LINKS = {
+    'g3-3-040': { route: '/book/course/3/1', th: 'ฟังใช้จริงใน 新HSK教程 3 บทที่ 1 (课文 1)', en: 'Hear in 新HSK教程 3 Lesson 1 (Text 1)' },
+    'g3-3-041': { route: '/book/course/3/1', th: 'ฟังใช้จริงใน 新HSK教程 3 บทที่ 1 (课文 1)', en: 'Hear in 新HSK教程 3 Lesson 1 (Text 1)' },
+    'g3-3-009': { route: '/book/course/3/1', th: 'ฟังใช้จริงใน 新HSK教程 3 บทที่ 1 (课文 2)', en: 'Hear in 新HSK教程 3 Lesson 1 (Text 2)' },
+    'g3-3-056': { route: '/book/course/3/1', th: 'ฟังใช้จริงใน 新HSK教程 3 บทที่ 1 (课文 3)', en: 'Hear in 新HSK教程 3 Lesson 1 (Text 3)' }
+  };
+
+  const BA_STEPS = [
+    ['g3-3-067', '1', 'วาง/ย้าย', '在 / 到'],
+    ['g3-3-068', '2', 'มอบให้', '给'],
+    ['g3-3-069', '3', 'บทเสริม', 'V + 补语'],
+    ['g3-4-055', '4', 'ซ้ำกริยา', 'V(一)V'],
+    ['g3-4-056', '5', 'เสร็จสิ้น', 'V + 了'],
+    ['g3-4-057', '6', 'ครั้ง/เวลา', 'V + 数量'],
+    ['g3-4-058', '7', 'บทขยาย', '状语 + V']
+  ];
+
+  const GRAM_COMPARE = [
+    {
+      ids: ['g3-2-019', 'g3-2-020', 'g3-3-017', 'g3-3-018', 'g3-3-022', 'g3-4-013'],
+      title: ['เทียบชัด 2 ฝั่ง: 就 vs 才', 'Side-by-Side: 就 vs 才'],
+      sub: ['เร็ว/ง่าย/ทันที vs ช้า/ยาก/เพิ่งจะ (ออกสอบ HSK 3–4 บ่อยมาก!)', 'Early/easy/soon vs late/hard/only just'],
+      cols: [
+        {
+          hd: '就 (jiù)',
+          tag: ['เร็ว · ง่าย · น้อย · ทันที', 'Early · Easy · Small · Right away'],
+          pts: [
+            ['เกิด <b>เร็วกว่าที่คิด</b> หรือใช้เวลาน้อย', 'Happens <b>earlier / faster</b> than expected'],
+            ['เชื่อม 2 เหตุการณ์ที่เกิด <b>ต่อกันทันที</b>', 'Action 2 follows <b>immediately</b> after Action 1'],
+            ['ใส่ <b>了</b> ท้ายประโยคได้', 'Can take sentence-final <b>了</b>']
+          ],
+          ex: ['他七点半<b>就</b>到了。', 'Tā qī diǎn bàn jiù dào le.', 'เขามาถึงตั้งแต่เจ็ดโมงครึ่งแล้ว (เร็ว!)', 'He arrived as early as 7:30.']
+        },
+        {
+          hd: '才 (cái)',
+          tag: ['ช้า · ยาก · กว่าจะ · เพิ่งจะ', 'Late · Hard · Only then · Just'],
+          pts: [
+            ['เกิด <b>ช้ากว่าที่คิด</b> หรือใช้เวลานานกว่าจะได้', 'Happens <b>later / slower</b> than expected'],
+            ['บอกเงื่อนไขว่า <b>ต้องผ่านเหตุ 1 ก่อนจึงจะ…</b>', 'Only <b>after</b> a strict condition is met'],
+            ['<b>ห้ามใส่ 了</b> ท้ายประโยค! (✗ 九点才到了)', '<b>Never</b> takes final <b>了</b>! (✗ 九点才到了)']
+          ],
+          ex: ['他九点<b>才</b>到。', 'Tā jiǔ diǎn cái dào.', 'ตั้งเก้าโมงกว่าเขาจะมาถึง (ช้า!)', 'He did not arrive until 9:00.']
+        }
+      ],
+      links: [['g3-2-019', '就1'], ['g3-2-020', '就2'], ['g3-3-017', '就3'], ['g3-3-018', '才1'], ['g3-3-022', '才/就 น้ำเสียง']]
+    },
+    {
+      ids: ['g3-2-029', 'g3-2-056', 'g3-2-068', 'g3-3-029', 'g3-3-083'],
+      title: ['เทียบชัด 2 ฝั่ง: 还是 vs 或者', 'Side-by-Side: 还是 vs 或者'],
+      sub: ['แปลว่า “หรือ” ทั้งคู่ แต่ใช้คนละชนิดประโยค!', 'Both mean “or”, but in different sentence types!'],
+      cols: [
+        {
+          hd: '还是 (háishi)',
+          tag: ['ประโยคคำถามให้เลือก (?)', 'Choice Questions (?)'],
+          pts: [
+            ['ใช้ใน <b>คำถามให้เลือก</b> A หรือ B?', 'Used in <b>direct choice questions</b>'],
+            ['ใช้ในประโยคที่มี <b>ความไม่แน่ใจ</b> (不知道…还是…)', 'Used in <b>uncertain clauses</b> (不知道…还是…)'],
+            ['ใช้บอก <b>“เอาอันนี้ดีกว่า”</b> (还是去吧)', 'Also means <b>“had better”</b> (还是去吧)']
+          ],
+          ex: ['你喝茶<b>还是</b>喝咖啡？', 'Nǐ hē chá háishi hē kāfēi?', 'คุณจะดื่มชาหรือกาแฟ?', 'Would you like tea or coffee?']
+        },
+        {
+          hd: '或者 (huòzhě)',
+          tag: ['ประโยคบอกเล่า (。)', 'Statements (。)'],
+          pts: [
+            ['ใช้ใน <b>ประโยคบอกเล่า / เสนอทางเลือก</b> เท่านั้น', 'Used strictly in <b>statements / suggestions</b>'],
+            ['ห้ามใช้ถามตรง ๆ (✗ 你喝茶或者咖啡？)', '<b>Never</b> in direct questions (✗ 你喝茶或者咖啡？)'],
+            ['ใช้คู่ <b>或者……，或者……</b> = ไม่…ก็…', 'Pairs as <b>或者…或者…</b> = either…or…']
+          ],
+          ex: ['喝茶<b>或者</b>喝咖啡都可以。', 'Hē chá huòzhě hē kāfēi dōu kěyǐ.', 'ดื่มชาหรือกาแฟก็ได้ทั้งนั้น', 'Either tea or coffee is fine.']
+        }
+      ],
+      links: [['g3-2-056', '选择问句 还是'], ['g3-2-068', '（是）…还是…'], ['g3-3-029', '或 / 或者'], ['g3-3-083', '或者…或者…']]
+    },
+    {
+      ids: ['g3-3-018'],
+      title: ['เทียบชัด 2 ฝั่ง: 刚才 vs 刚刚 / 刚', 'Side-by-Side: 刚才 vs 刚刚 / 刚'],
+      sub: ['แปลว่า “เมื่อกี้ / เพิ่งจะ” แต่ชนิดคำและตำแหน่งต่างกันเด็ดขาด!', 'Time noun vs adverb — totally different positions!'],
+      cols: [
+        {
+          hd: '刚才 (gāngcái)',
+          tag: ['คำนามบอกเวลา · ไม่กี่นาทีก่อน', 'Time Noun · Minutes ago'],
+          pts: [
+            ['วาง <b>หน้าหรือหลังประธาน</b> ก็ได้ (刚才他来了 / 他刚才来了)', 'Goes <b>before OR after subject</b>'],
+            ['ขยายคำนามได้: <b>刚才的事</b> (เรื่องเมื่อกี้)', 'Can modify a noun: <b>刚才的事</b>'],
+            ['ปฏิเสธด้วย <b>刚才没…</b> ได้ตรง ๆ', 'Directly takes negation: <b>刚才没看见</b>']
+          ],
+          ex: ['<b>刚才</b>他给你打电话了。', 'Gāngcái tā gěi nǐ dǎ diànhuà le.', 'เมื่อกี้เขาโทรหาเธอ', 'He called you just a moment ago.']
+        },
+        {
+          hd: '刚刚 / 刚 (gānggāng)',
+          tag: ['คำวิเศษณ์ · เพิ่งจะ (ตามความรู้สึก)', 'Adverb · Just (subjective)'],
+          pts: [
+            ['วาง <b>หลังประธาน หน้ากริยา</b> เท่านั้น (✗ 刚刚他来)', '<b>Strictly after subject</b>, before verb'],
+            ['ช่วงเวลาขึ้นกับใจผู้พูด (เพิ่งมาถึงจีน 2 เดือนก่อนก็ใช้ 刚 ได้)', 'Subjective recency (minutes, days, or months)'],
+            ['ต่อระยะเวลาหลังกริยาได้: <b>刚到十分钟</b>', 'Can follow with duration: <b>刚到十分钟</b>']
+          ],
+          ex: ['他<b>刚刚</b>下飞机。', 'Tā gānggāng xià fēijī.', 'เขาเพิ่งลงจากเครื่องบิน', 'He just got off the plane.']
+        }
+      ],
+      links: [['g3-3-018', '时间副词 刚/刚刚']]
+    },
+    {
+      ids: ['g3-1-018', 'g3-2-019', 'g3-3-019'],
+      title: ['เทียบชัด 2 ฝั่ง: 又 vs 再', 'Side-by-Side: 又 vs 再'],
+      sub: ['แปลว่า “อีกแล้ว / อีกครั้ง” — แยกด้วย “เกิดไปแล้ว” vs “ยังไม่เกิด”', 'Both mean “again” — already happened vs future!'],
+      cols: [
+        {
+          hd: '又 (yòu)',
+          tag: ['เกิดซ้ำไปแล้ว · รอบปฏิทินแน่นอน', 'Already happened · Calendar cycle'],
+          pts: [
+            ['เหตุการณ์ซ้ำ <b>เกิดขึ้นจริงแล้ว</b> ในอดีต/ปัจจุบัน', 'Repeated action <b>already occurred</b>'],
+            ['ใช้กับ <b>รอบปฏิทินธรรมชาติ</b> แม้เป็นอนาคต (明天又是星期天)', 'Natural <b>calendar cycles</b> even in the future'],
+            ['มักใช้คู่ <b>又……了</b> (อีกแล้ว!)', 'Often pairs with <b>了</b>']
+          ],
+          ex: ['昨天迟到了，今天<b>又</b>迟到了。', 'Zuótiān chídào le, jīntiān yòu chídào le.', 'เมื่อวานมาสาย วันนี้ก็มาสายอีกแล้ว', 'Late yesterday, and late again today.']
+        },
+        {
+          hd: '再 (zài)',
+          tag: ['จะทำซ้ำในอนาคต · ขอร้อง/วางแผน', 'Future repetition · Requests'],
+          pts: [
+            ['เหตุการณ์ซ้ำ <b>ยังไม่เกิด</b> (ตั้งใจ/วางแผน/ขอให้ทำอีก)', 'Repetition <b>has not happened yet</b>'],
+            ['ใช้ในคำขอร้องสุภาพ: <b>请再说一遍</b>', 'Polite requests: <b>请再说一遍</b>'],
+            ['บอกลำดับ <b>ทำ 1 ให้เสร็จก่อนค่อยทำ 2</b> (吃完再走)', 'Sequence: <b>do A first, then B</b>']
+          ],
+          ex: ['这个菜很好吃，明天<b>再</b>来吃吧！', 'Zhège cài hěn hǎochī, míngtiān zài lái chī ba!', 'จานนี้อร่อยมาก พรุ่งนี้มากินอีกนะ!', 'This dish is delicious — let’s come again tomorrow!']
+        }
+      ],
+      links: [['g3-1-018', '再1 (อนาคต)'], ['g3-2-019', '再2 (ค่อย…)'], ['g3-3-019', '又 (ความถี่)']],
+      syn: ['g16', 'เทียบเต็ม 4 คำ (也/还/再/又) ใน VOL. 12']
+    },
+    {
+      ids: ['g3-3-040', 'g3-3-041', 'g3-3-037', 'g3-3-038'],
+      title: ['เทียบชัด 3 ตัว: 看起来 vs 看上去 vs 看来', '3-Way Compare: 看起来 vs 看上去 vs 看来'],
+      sub: ['แปลว่า “ดูเหมือน / ดูท่าแล้ว” ต่างกันที่ “ตาเห็น” vs “วิเคราะห์สรุป”', 'Visual impression vs logical conclusion'],
+      cols: [
+        {
+          hd: '看起来',
+          tag: ['ดูท่าทาง · ใช้ได้กว้างที่สุด', 'Looks / Seems · Broadest'],
+          pts: [
+            ['วาง <b>หลังประธาน</b> (他看起来很累)', 'Follows subject: <b>S + 看起来 + Adj/VP</b>'],
+            ['ใช้ได้ทั้งรูปลักษณ์ อารมณ์ และเรื่องนามธรรม (问题看起来不难)', 'Works for appearance, mood & abstract issues']
+          ],
+          ex: ['你<b>看起来</b>有点儿累。', 'Nǐ kàn qǐlái yǒudiǎnr lèi.', 'คุณดูท่าทางเหนื่อย ๆ นะ', 'You look a bit tired.']
+        },
+        {
+          hd: '看上去',
+          tag: ['มองภายนอกด้วยตา · ผิวเผิน', 'From the outside · Visual'],
+          pts: [
+            ['วาง <b>หลังประธาน</b> เช่นกัน แต่มักเน้น <b>สิ่งที่ตาเห็นภายนอก</b>', 'Focuses on <b>surface / visual appearance</b>'],
+            ['มักเทียบกับความจริงข้างใน (看上去不大，其实很宽敞)', 'Often contrasts appearance vs reality']
+          ],
+          ex: ['这件衣服<b>看上去</b>很贵。', 'Zhè jiàn yīfu kàn shàngqù hěn guì.', 'เสื้อตัวนี้ดูภายนอกแพงมาก', 'This garment looks very expensive.']
+        },
+        {
+          hd: '看来',
+          tag: ['ดูท่าแล้ว · สรุปจากสถานการณ์', 'It seems · Conclusion'],
+          pts: [
+            ['วาง <b>ต้นประโยค</b> (看来 + ประโยค) หรือ <b>在…看来</b>', 'Starts a clause (<b>看来，…</b>) or <b>在…看来</b>'],
+            ['ห้ามวางหลังประธานตรง ๆ (✗ 他看来很年轻)', 'Cannot replace 看起来 after subject']
+          ],
+          ex: ['天阴了，<b>看来</b>要下雨了。', 'Tiān yīn le, kànlái yào xiàyǔ le.', 'ฟ้าครึ้มแล้ว ดูท่าฝนจะตกแน่', 'The sky is overcast — looks like rain.']
+        }
+      ],
+      links: [['g3-3-040', '看起来'], ['g3-3-041', '看上去'], ['g3-3-037', '看来'], ['g3-3-038', '在……看来']]
+    }
+  ];
+
+  function renderCompareBoxes(gid, el) {
+    const en = el !== 'th';
+    const matches = GRAM_COMPARE.filter(c => c.ids.includes(gid));
+    if (!matches.length) return '';
+    return matches.map(c => `<section class="gb-cmp">
+      <div class="gb-cmp-h">
+        <div><h3 class="gb-k">${icn('bolt')}${esc(en ? c.title[1] : c.title[0])}</h3><p class="gb-cmp-sub">${esc(en ? c.sub[1] : c.sub[0])}</p></div>
+      </div>
+      <div class="gb-cmp-grid cols-${c.cols.length}">
+        ${c.cols.map(col => `<div class="gb-cmp-col">
+          <div class="gb-cmp-ch"><b lang="zh-Hans">${esc(col.hd)}</b><span>${esc(en ? col.tag[1] : col.tag[0])}</span></div>
+          <ul class="gb-cmp-pts">${col.pts.map(p => `<li>${en ? p[1] : p[0]}</li>`).join('')}</ul>
+          <div class="gb-cmp-ex">
+            <div class="gb-cmp-ez"><span lang="zh-Hans">${col.ex[0]}</span><button type="button" class="gx-say sm" data-say="${esc(col.ex[0].replace(/<[^>]+>/g, ''))}" aria-label="${esc(T('ฟังเสียง'))}">${icn('vol')}</button></div>
+            <div class="pyx">${esc(col.ex[1])}</div>
+            <div class="gb-cmp-etr">${esc(en ? col.ex[3] : col.ex[2])}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+      <div class="gb-cmp-foot">
+        ${(c.links || []).map(([id, lbl]) => `<button type="button" class="gb-cmp-pill${id === gid ? ' cur' : ''}" data-gopen="${id}">${esc(lbl)}${id === gid ? '' : ' →'}</button>`).join('')}
+        ${c.syn ? `<button type="button" class="gb-cmp-pill is-syn" data-gsyn="${c.syn[0]}">${esc(c.syn[1])} →</button>` : ''}
+      </div>
+    </section>`).join('');
+  }
+
+  function renderBaSteps(gid, el) {
+    if (!BA_STEPS.some(s => s[0] === gid)) return '';
+    const en = el !== 'th';
+    return `<section class="gb-bastep">
+      <h3 class="gb-k">${en ? '把-Sentence Progression (HSK 3 → HSK 4)' : 'ลำดับขั้นประโยค 把 (HSK 3 → HSK 4 ครบ 7 ขั้น)'}</h3>
+      <div class="gb-ba-row">${BA_STEPS.map(([id, num, thLbl, fm]) =>
+        `<button type="button" class="gb-ba-pill${id === gid ? ' cur' : ''}" data-gopen="${id}">
+          <i>${num}</i><span><b>${esc(thLbl)}</b><small lang="zh-Hans">${esc(fm)}</small></span>
+        </button>`).join('')}
+      </div>
+    </section>`;
+  }
+
   /* ---------- one lesson ---------- */
   function lesson(gid) {
     syncPacks();
@@ -921,6 +1131,9 @@
 
     const nextIt = next ? item(next) : null;
     const nextCrossLv = nextIt && nextIt[1] !== i ? ` · HSK ${lvOf(nextIt[1])}` : '';
+    const cLink = isLocalHost ? COURSE_LINKS[gid] : null;
+    const cmpHtml = renderCompareBoxes(gid, el);
+    const baHtml = renderBaSteps(gid, el);
 
     return `<div class="gb gb-read" style="--c:var(--hsk${i})">
       <div class="gb-crumb">
@@ -938,10 +1151,13 @@
         <div class="gb-meta">
           <span class="gb-stat-pill${s && s.s ? ' on' : ''}">${esc(statTxt(gid))}</span>
           <button type="button" class="gb-read-btn${read ? ' on' : ''}" data-gread="${gid}" aria-pressed="${read}">${icn('check')}<span>${read ? T('อ่านแล้ว') : T('ทำเครื่องหมายว่าอ่านแล้ว')}</span></button>
+          ${cLink ? `<button type="button" class="gb-course-pill" data-gcourse="${esc(cLink.route)}">${icn('ear')}<span>${esc(el === 'th' ? cLink.th : cLink.en)} →</span></button>` : ''}
         </div>
       </header>
+      ${baHtml}
       ${L.f.length ? `<div class="gb-f">${L.f.map(f => { const gl = formulaGloss(f, el); return `<div class="gb-f-item"><code lang="zh-Hans">${esc(f)}</code>${gl}</div>`; }).join('')}</div>` : ''}
       <div class="gb-why" lang="${HL[el]}">${formatWhy(pick(L.why, el), el)}</div>
+      ${cmpHtml}
       <section>
         <div class="gb-sh"><h3 class="gb-k">${T('ตัวอย่าง')} <small>${L.ex.length}</small></h3><label class="gb-tog"><input type="checkbox" data-ghide ${hideTr() ? 'checked' : ''}><span>${T('ซ่อนคำแปล')}</span></label></div>
         <p class="gb-hid-tip" ${hideTr() ? '' : 'hidden'}>${T('แตะเพื่อดูคำแปล')}</p>
@@ -1188,9 +1404,11 @@
 
   $('#bkBody').addEventListener('click', e => {
     if (Book.id !== ID || !D() || !D().items) return;
-    const t = e.target.closest('[data-glv],[data-gopen],[data-gfind],[data-gjump],[data-gspot],[data-gtogall],[data-gback],[data-gstep],[data-gpractice],[data-gmix],[data-ghide],[data-glang],[data-gpy],[data-gread],[data-guf],[data-glf]');
+    const t = e.target.closest('[data-glv],[data-gopen],[data-gfind],[data-gjump],[data-gspot],[data-gtogall],[data-gback],[data-gstep],[data-gpractice],[data-gmix],[data-ghide],[data-glang],[data-gpy],[data-gread],[data-guf],[data-glf],[data-gcourse],[data-gsyn]');
     if (!t) return;
     const ds = t.dataset;
+    if (ds.gcourse) { sfx('tap'); Router.go(ds.gcourse); return; }
+    if (ds.gsyn) { sfx('tap'); Router.go('/book/synonym/' + ds.gsyn); return; }
     if (ds.gspot) {
       sfx('tap');
       ovSpotLv = +ds.gspot;

@@ -410,3 +410,55 @@
   .gb-dock .btn .ic { width: 15px; height: 15px; }
   .gb-next { padding: 12px 14px; }
 }
+
+/* ---------- VOL 06 textbook upgrades: Course cross-link, 把 roadmap, 2-col compare boxes ---------- */
+.gb-course-pill { display: inline-flex; align-items: center; gap: 6px; font: 700 12px var(--ui) !important; color: #c74a1c !important;
+  background: color-mix(in srgb, #e6511e 11%, var(--surface)); border: 1px solid color-mix(in srgb, #e6511e 35%, transparent);
+  border-radius: 99px; padding: 4px 12px; transition: background .18s, transform .14s; }
+:root[data-theme="dark"] .gb-course-pill { color: #ff9c75 !important; background: color-mix(in srgb, #e6511e 18%, var(--surface)); }
+.gb-course-pill .ic { width: 14px; height: 14px; flex: none; }
+.gb-course-pill:active { transform: scale(.97); }
+@media (hover: hover) { .gb-course-pill:hover { background: color-mix(in srgb, #e6511e 18%, var(--surface)); } }
+
+.gb-bastep { margin-top: 14px !important; padding: 12px 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface-2); }
+.gb-ba-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.gb-ba-row::-webkit-scrollbar { display: none; }
+.gb-ba-pill { flex: none; display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; border-radius: 11px;
+  border: 1px solid var(--line); background: var(--surface); transition: border-color .16s, background .16s; }
+.gb-ba-pill i { font: 800 11px var(--ui); width: 20px; height: 20px; border-radius: 7px; display: grid; place-items: center; background: var(--surface-3); color: var(--muted); flex: none; }
+.gb-ba-pill span { display: grid; line-height: 1.25; }
+.gb-ba-pill b { font-size: 12.5px; color: var(--ink); }
+.gb-ba-pill small { font-size: 11.5px; color: var(--muted); }
+.gb-ba-pill.cur { border-color: var(--c); background: color-mix(in srgb, var(--c) 11%, var(--surface)); }
+.gb-ba-pill.cur i { background: var(--c); color: #fff; }
+@media (hover: hover) { .gb-ba-pill:not(.cur):hover { border-color: var(--c); } }
+
+.gb-cmp { margin-top: 18px !important; padding: 14px 16px; border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, var(--line));
+  background: color-mix(in srgb, var(--accent) 4.5%, var(--surface)); display: grid; gap: 12px; }
+.gb-cmp-h .gb-k { margin-bottom: 2px !important; color: var(--accent-ink); }
+.gb-cmp-h .gb-k .ic { width: 15px; height: 15px; }
+.prose .gb-cmp-sub { margin: 0 !important; font-size: 13px !important; color: var(--muted); }
+.gb-cmp-grid { display: grid; gap: 10px; grid-template-columns: 1fr; }
+@media (min-width: 720px) {
+  .gb-cmp-grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gb-cmp-grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.gb-cmp-col { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 14px;
+  border: 1px solid var(--line); background: var(--surface); box-shadow: var(--sh-1); }
+.gb-cmp-ch { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; border-bottom: 1px dashed var(--line); padding-bottom: 6px; }
+.gb-cmp-ch b { font-size: 20px; font-weight: 600; color: var(--accent-ink); }
+.gb-cmp-ch span { font: 700 11px var(--ui); color: var(--muted); background: var(--surface-2); border-radius: 99px; padding: 2px 8px; }
+.gb-cmp-pts { margin: 0 !important; padding-left: 18px !important; display: grid; gap: 4px; font-size: 13.5px; line-height: 1.55; color: var(--ink-2); flex: 1; }
+.gb-cmp-pts b { color: var(--ink); }
+.gb-cmp-ex { padding: 8px 10px; border-radius: 11px; background: var(--surface-2); border: 1px solid var(--line); display: grid; gap: 2px; }
+.gb-cmp-ez { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 16.5px; line-height: 1.4; color: var(--ink); }
+.gb-cmp-ez b { color: var(--accent-ink); }
+.gb-cmp-ex .pyx { font-size: 12px; }
+.gb-cmp-etr { font-size: 12.5px; color: var(--muted); line-height: 1.45; }
+.gb-cmp-foot { display: flex; flex-wrap: wrap; gap: 6px; }
+.gb-cmp-pill { font: 600 12px var(--ui) !important; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-2) !important; transition: border-color .16s, background .16s; }
+.gb-cmp-pill.cur { border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, var(--surface)); color: var(--c) !important; font-weight: 700 !important; }
+.gb-cmp-pill.is-syn { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); color: var(--accent-ink) !important; background: var(--accent-soft); }
+@media (hover: hover) { .gb-cmp-pill:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink) !important; } }

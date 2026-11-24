@@ -277,7 +277,7 @@ function f5groups(f) {
   const byZh = new Map();
   FIVE.D.words.forEach(w => { if (w && w.zh && w.app && !byZh.has(w.zh)) byZh.set(w.zh, w.app); });
   return `<section class="f-sec"><h4 class="f-sec-h"><span>${T('คำใกล้เคียง / ระวังสับสน')}</span><small>${items.length}</small></h4>
-    <div class="f-grps">${items.map(([, g]) => {
+    <div class="f-grps">${items.map(([gid, g]) => {
       const [title, ws, rTh, rEn] = g;
       const rule = LANG === 'en' ? (rEn || rTh) : (rTh || rEn);
       return `<div class="f-grp">
@@ -288,7 +288,7 @@ function f5groups(f) {
             const aid = byZh.get(wzh);
             return aid ? `<button type="button" class="${wzh === f.zh ? 'cur' : ''}" data-open5="${esc(aid)}" lang="zh-Hans">${esc(wzh)}</button>` : `<span class="f-tag" lang="zh-Hans">${esc(wzh)}</span>`;
           }).join('')}</div>
-          <button type="button" class="f-grp-book" data-openg="synonym">${T('เปิดเทียบเต็มใน VOL. 12')} →</button>
+          <button type="button" class="f-grp-book" data-openg="synonym/${esc(gid)}">${T('เปิดเทียบเต็มใน VOL. 12')} →</button>
         </div>
       </div>`;
     }).join('')}</div></section>`;
