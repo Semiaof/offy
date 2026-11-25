@@ -1,29 +1,37 @@
-/* Library of Limu · new offy v6 — 汉字进化图鉴 · Hanzi Digivolution (js/digi.js), a chapter of VOL 04 部首.
-   Theme "สะอาดตา" (chosen by the user): the app's own surfaces and type, thin grey lines, rounded-square nodes,
-   the stage shown by a small coloured dot. Follows the app's light / dark theme. */
+/* Library of Limu · new offy v6 — 汉字进化图鉴 · Hanzi Evolution Star Map (js/digi.js)
+   2-Level Star Map (Radical Sky + True Etymological Constellation) · follows light / dark theme cleanly. */
 .dg {
-  --ROOKIE: var(--ink); --ARMOR: #c08a1e; --CHAMPION: #2d7a5c; --ULTIMATE: #c0517a; --VARIANT: #6e5bbd; --PART: #8a8f86;
+  --ROOKIE: var(--ink); --STACK: #b87e14; --ARMOR: #c08a1e; --CHAMPION: #2d7a5c;
+  --ULTIMATE: #c0517a; --VARIANT: #6e5bbd; --PART: #8a8f86;
   position: relative; color: var(--ink); display: grid; gap: 10px;
 }
-:root[data-theme="dark"] .dg { --ARMOR: #e0b44f; --CHAMPION: #5cc095; --ULTIMATE: #ec8bb0; --VARIANT: #a99af0; --PART: #8b9288; }
-.dg .s-ROOKIE { --sc: var(--ROOKIE); } .dg .s-ARMOR { --sc: var(--ARMOR); } .dg .s-CHAMPION { --sc: var(--CHAMPION); }
-.dg .s-ULTIMATE { --sc: var(--ULTIMATE); } .dg .s-VARIANT { --sc: var(--VARIANT); } .dg .s-PART { --sc: var(--PART); }
+:root[data-theme="dark"] .dg {
+  --STACK: #f2c45a; --ARMOR: #e0b44f; --CHAMPION: #5cc095;
+  --ULTIMATE: #ec8bb0; --VARIANT: #a99af0; --PART: #8b9288;
+}
+.dg .s-ROOKIE { --sc: var(--ROOKIE); } .dg .s-STACK { --sc: var(--STACK); }
+.dg .s-ARMOR { --sc: var(--ARMOR); } .dg .s-CHAMPION { --sc: var(--CHAMPION); }
+.dg .s-ULTIMATE { --sc: var(--ULTIMATE); } .dg .s-VARIANT { --sc: var(--VARIANT); }
+.dg .s-PART { --sc: var(--PART); }
 .dg .pyx { font-family: var(--pinyin); color: var(--accent-ink); }
 .dg [lang="zh-Hans"], .dg [lang="zh-Hant"] { font-family: var(--hz); }
 
-/* unified top toolbar matching tree & compose */
+/* top search bar */
 .dg-top { display: flex; align-items: center; gap: 8px; }
 .dg-q { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); }
 .dg-q:focus-within { border-color: var(--accent); }
 .dg-q input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--ink); font: 15px var(--ui); }
 
-.dg-clans { display: flex; align-items: center; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 1px 0; -webkit-overflow-scrolling: touch; }
-.dg-clans::-webkit-scrollbar { display: none; }
-.dg-clans button { flex: none; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-size: 21px; color: var(--ink); transition: border-color .18s, background .18s, transform .14s; }
-.dg-clans button:hover { border-color: var(--line-2); }
-.dg-clans button:active { transform: scale(.94); }
-.dg-clans button.on { border-color: var(--ink); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--ink); }
+/* Level 1 Sky Map zone filter pills */
+.dg-zones { display: flex; align-items: center; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 1px 0; -webkit-overflow-scrolling: touch; }
+.dg-zones::-webkit-scrollbar { display: none; }
+.dg-zones button { flex: none; display: inline-flex; align-items: center; gap: 5px; height: 34px; padding: 0 12px; border-radius: 99px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); font: 600 12.5px var(--ui); white-space: nowrap;
+  transition: border-color .16s, background .16s, color .16s, transform .14s; }
+.dg-zones button:active { transform: scale(.96); }
+.dg-zones button.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
 
+/* Level 2 view switcher + legend */
 .dg-subbar { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; min-width: 0; }
 .dg-tg { flex: none; display: inline-flex; padding: 3px; border-radius: 11px; background: var(--surface-3); }
 .dg-tg span { min-width: 34px; height: 28px; padding: 0 9px; display: grid; place-items: center; border-radius: 8px; font-size: 12.5px; font-weight: 600; color: var(--muted); cursor: pointer; transition: background .2s, color .2s; white-space: nowrap; }
@@ -35,20 +43,26 @@
 .dg-legend button.on { border-color: var(--sc); background: color-mix(in srgb, var(--sc) 14%, var(--surface)); color: var(--ink); }
 .dg-legend i { width: 7px; height: 7px; border-radius: 50%; background: var(--sc); flex: none; }
 .dg-legend b { font-weight: 400; color: var(--sc); }
-.dg-world.sf-on .dg-n:not(.sf-hi) { opacity: .18 !important; }
-.dg-world.sf-on .dg-l:not(.sf-hi) { opacity: .08 !important; }
+.dg-legend .dg-cnt { font-style: normal; font-weight: 700; color: var(--ink-2); min-width: 1ch; }
+.dg-legend .dg-cnt:not(:empty)::before { content: "· "; color: var(--muted); font-weight: 400; }
+.dg-legend button.none { opacity: .4; cursor: default; }
+.dg-world.sf-on .dg-n:not(.sf-hi) { opacity: .16 !important; }
+.dg-world.sf-on .dg-l:not(.sf-hi) { opacity: .06 !important; }
 
-.dg-trail { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-.dg-trail button { min-width: 34px; height: 32px; padding: 0 8px; border-radius: 10px; border: 1px solid var(--line); font-family: var(--hz); font-size: 18px; color: var(--muted); background: var(--surface); }
+/* trail + back-to-sky button */
+.dg-trail { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.dg-trail button { min-width: 34px; height: 32px; padding: 0 9px; border-radius: 10px; border: 1px solid var(--line); font-family: var(--hz); font-size: 18px; color: var(--muted); background: var(--surface); transition: border-color .16s, background .16s, color .16s; }
 .dg-trail button.on { color: var(--ink); border-color: var(--ink); }
+.dg-trail .dg-sky-back { font: 700 12.5px var(--ui); color: var(--accent-ink); border-color: color-mix(in srgb, var(--accent) 42%, var(--line)); background: var(--accent-soft); padding: 0 11px; }
+.dg-trail .dg-sky-back:hover { border-color: var(--accent); }
 .dg-trail i { font-style: normal; color: var(--faint); }
 
 /* graph & grid container */
 .dg-body { display: grid; gap: 12px; }
 @media (min-width: 1000px) { .dg-body { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; } }
 .dg-view { position: relative; height: min(64dvh, 620px); overflow: hidden; touch-action: none; cursor: grab; outline: none; border-radius: 18px; border: 1px solid var(--line);
-  background: radial-gradient(circle at 20% 25%, color-mix(in srgb, var(--accent) 5%, transparent), transparent 45%),
-              radial-gradient(circle at 82% 72%, color-mix(in srgb, var(--accent) 4%, transparent), transparent 42%),
+  background: radial-gradient(circle at 20% 24%, color-mix(in srgb, var(--accent) 5%, transparent), transparent 45%),
+              radial-gradient(circle at 82% 72%, color-mix(in srgb, var(--STACK) 5%, transparent), transparent 44%),
               radial-gradient(1px 1px at 14% 18%, color-mix(in srgb, var(--ink) 22%, transparent) 50%, transparent 100%),
               radial-gradient(1px 1px at 78% 22%, color-mix(in srgb, var(--ink) 18%, transparent) 50%, transparent 100%),
               radial-gradient(1px 1px at 32% 82%, color-mix(in srgb, var(--ink) 18%, transparent) 50%, transparent 100%),
@@ -56,14 +70,94 @@
               radial-gradient(1px 1px at 62% 14%, color-mix(in srgb, var(--ink) 16%, transparent) 50%, transparent 100%),
               radial-gradient(1px 1px at 22% 54%, color-mix(in srgb, var(--ink) 16%, transparent) 50%, transparent 100%),
               var(--surface); }
-.dg-more-bar { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 5; max-width: calc(100% - 24px); }
+.dg-view:active { cursor: grabbing; }
+.dg-more-bar { position: absolute; left: 50%; bottom: 10px; transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: 6px; max-width: calc(100% - 24px); }
 .dg-more-bar:empty { display: none; }
 .dg-more-pill { display: inline-flex; align-items: center; gap: 5px; height: 34px; padding: 0 14px; border-radius: 99px;
   border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)); background: color-mix(in srgb, var(--surface) 94%, transparent);
   backdrop-filter: blur(10px); color: var(--accent-ink); font: 700 12.5px var(--ui); white-space: nowrap; box-shadow: var(--sh-2); }
+.dg-more-pill.alt { border-color: var(--line-2); color: var(--ink-2); }
 .dg-more-pill:active { transform: scale(.97); }
 
-/* Grid view for big clans (e.g. 人 / 木 / 口) */
+/* world & svg */
+.dg-world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+.dg.is-radial .dg-world { width: 0; height: 0; }
+.dg-svg { position: absolute; left: 0; top: 0; overflow: visible; }
+
+/* Level 1 Sky Map elements */
+.dg-sky-l { stroke: var(--line-2); stroke-width: 1; stroke-dasharray: 2 5; opacity: .45; transition: opacity .25s; }
+.dg-sky-lbl { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 15px; border-radius: 99px;
+  border: 1px solid var(--line-2); background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(8px);
+  color: var(--ink); font: 700 15.5px var(--ui); white-space: nowrap; box-shadow: var(--sh-1); transition: opacity .25s, border-color .18s; }
+.dg-sky-lbl:hover { border-color: var(--accent); color: var(--accent-ink); }
+.dg-sky-lbl em { font-style: normal; font-size: 13px; color: var(--muted); }
+.dg-sky-n { --hy: -48px; transition: opacity .25s; }
+.dg-sky-n.t0 { --hy: -53px; }
+.dg-sky-n.t0 .dg-hex { width: 66px; height: 66px; font-size: 36px; border-radius: 18px; box-shadow: var(--sh-2); }
+.dg-sky-n.t1 .dg-hex { width: 56px; height: 56px; font-size: 30px; border-radius: 16px; }
+.dg-sky-n.t2 { --hy: -44px; }
+.dg-sky-n.t2 .dg-hex { width: 48px; height: 48px; font-size: 25px; border-radius: 14px; }
+.dg-sky-n .dg-hex::after { display: none; }
+.dg-sky-n.has-st .dg-hex { box-shadow: 0 0 0 2px color-mix(in srgb, var(--STACK) 24%, transparent), var(--sh-1); }
+.dg-sky-ch { font-style: normal; font-family: var(--hz); font-weight: 600; color: var(--STACK); letter-spacing: .01em; }
+.dg-world.z-dim .dg-sky-n:not(.z-hi),
+.dg-world.z-dim .dg-sky-lbl:not(.z-hi) { opacity: .16; }
+.dg-world.z-dim .dg-sky-l:not(.z-hi) { opacity: .06; }
+
+/* Level 2 True Genealogy links */
+.dg-l { fill: none; stroke: var(--line-2); stroke-width: 1.25; opacity: .75; transition: opacity .25s, stroke .25s, stroke-width .25s; }
+.dg-l.lk-stack { stroke: var(--STACK); stroke-width: 2.35; opacity: .96; }
+.dg-l.lk-branch { stroke: color-mix(in srgb, var(--ink) 40%, transparent); stroke-width: 1.5; opacity: .88; }
+.dg-l.lk-leaf { stroke: var(--line-2); stroke-width: 1; opacity: .45; }
+.dg-l.lk-leaf-far { stroke: var(--line-2); stroke-width: .9; opacity: .20; }
+.dg-l.part { stroke-dasharray: 4 5; stroke: var(--PART); opacity: .78; }
+
+/* Nodes */
+.dg-n { position: absolute; display: grid; justify-items: center; gap: 3px; padding: 0; color: var(--ink); --hy: -49px; animation: dgIn .38s cubic-bezier(.2, .9, .3, 1.15) both; }
+.dg.is-radial .dg-n, .dg.is-radial .dg-more, .dg-sec, .dg-none.r { left: 0; top: 0; }
+.dg-n.t { width: 92px; }
+.dg-hex { position: relative; font-style: normal; width: 58px; height: 58px; display: grid; place-items: center; font-size: 31px; line-height: 1; border-radius: 16px;
+  background: var(--surface); border: 1.5px solid var(--line-2); box-shadow: var(--sh-1); transition: border-color .2s, transform .2s, box-shadow .2s; }
+.dg-hex::after { content: ""; position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--sc); }
+.dg-n .pyx { font-size: 13px; font-weight: 600; min-height: 17px; line-height: 17px; white-space: nowrap; }
+.dg-n small { font-size: 11.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+.dg-n:hover .dg-hex { border-color: var(--sc); transform: translateY(-2px); }
+
+/* Center focus node */
+.dg-n.r0 { --hy: -58px; z-index: 3; }
+.dg-n.r0 .dg-hex { width: 76px; height: 76px; font-size: 44px; border-radius: 20px; border: 2px solid var(--ink); box-shadow: var(--sh-2); }
+.dg-n.r0 .dg-hex::after { top: 8px; right: 8px; width: 9px; height: 9px; }
+
+/* 2nd-generation grandchild nodes: keep readable Pinyin + Meaning! */
+.dg-n.r2 { --hy: -47px; }
+.dg-n.r2 .dg-hex { width: 54px; height: 54px; font-size: 28px; border-radius: 15px; }
+.dg-n.r2 .dg-hex::after { top: 5px; right: 5px; width: 6px; height: 6px; }
+/* Hero STACK spine nodes stay full 58px with warm starlight aura */
+.dg-n.k-stack { --hy: -49px; z-index: 2; }
+.dg-n.k-stack .dg-hex { width: 58px; height: 58px; font-size: 31px; border-radius: 16px; box-shadow: 0 0 0 2.5px color-mix(in srgb, var(--STACK) 26%, transparent), var(--sh-1); }
+
+/* Subtle ×2 / ×3 / ×4 repeat badge */
+.dg-rep { position: absolute; right: 4px; bottom: 3px; font: 800 9.5px/1 var(--ui); font-style: normal; color: var(--STACK); pointer-events: none; letter-spacing: -.02em; }
+
+/* Non-HSK Bonus stacked characters: dashed muted border */
+.dg-n.is-bonus .dg-hex,
+.dg-gtile.is-bonus,
+.dg-big.is-bonus { border: 2px dashed color-mix(in srgb, var(--muted) 72%, transparent) !important; background: color-mix(in srgb, var(--surface-2) 86%, var(--surface)) !important; }
+.dg-bonus-tag { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 99px; font: 700 11px var(--ui);
+  border: 1px dashed color-mix(in srgb, var(--muted) 75%, transparent); color: var(--muted); background: var(--surface-2); }
+
+.dg-n.s-PART .dg-hex { border-style: dashed; box-shadow: none; background: var(--surface-2); }
+.dg-n.t.on .dg-hex { border: 1.5px solid var(--ink); }
+.dg-n.out { opacity: 0; transition: opacity .28s; pointer-events: none; }
+.dg-more { position: absolute; height: 30px; padding: 0 12px; border-radius: 10px; border: 1px dashed var(--line-2); color: var(--accent-ink); font-size: 12px; font-weight: 600; background: var(--surface); white-space: nowrap; }
+.dg-zoom { position: absolute; right: 10px; top: 10px; z-index: 4; display: grid; gap: 6px; }
+.dg-zoom button { width: 36px; height: 36px; border-radius: 11px; border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(8px); color: var(--ink-2); font-size: 18px; display: grid; place-items: center; box-shadow: var(--sh-1); }
+.dg-zoom .ic { width: 17px; height: 17px; }
+.dg-hint { position: absolute; left: 12px; bottom: 8px; margin: 0 !important; font-size: 11.5px !important; color: var(--faint); pointer-events: none; }
+.dg-none { position: absolute; left: 50%; top: 60%; transform: translateX(-50%); color: var(--muted); font-size: 13px !important; }
+.dg-none.r { white-space: nowrap; font-size: 12px !important; }
+
+/* Grid view */
 .dg-grid-wrap { display: grid; gap: 14px; min-width: 0; }
 .dg-gsec { display: grid; gap: 8px; }
 .dg-gsh { display: flex; align-items: center; gap: 6px; margin: 0; font: 700 13px var(--ui); color: var(--ink-2); }
@@ -79,47 +173,25 @@
 .dg-gtile .pyx { font-size: 10.5px; }
 .dg-gtile small { font-size: 10px; color: var(--ink-2); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dg-gtile small.fb { color: var(--muted); font-style: italic; }
-.dg-view:active { cursor: grabbing; }
-.dg-world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
-.dg.is-radial .dg-world { width: 0; height: 0; }
-.dg-svg { position: absolute; left: 0; top: 0; overflow: visible; }
-.dg-l { fill: none; stroke: var(--line-2); stroke-width: 1.15; opacity: .72; }
-.dg-l.outer { opacity: .45; stroke-width: 1; }
-.dg-l.part { stroke-dasharray: 3 5; }
-.dg-ring1, .dg-ring2 { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 6; }
-.dg-n { position: absolute; display: grid; justify-items: center; gap: 3px; padding: 0; color: var(--ink); --hy: -49px; animation: dgIn .4s cubic-bezier(.2, .9, .3, 1.15) both; }
-.dg.is-radial .dg-n, .dg.is-radial .dg-more, .dg-sec, .dg-none.r { left: 0; top: 0; }
-.dg-n.t { width: 92px; }
-.dg-hex { position: relative; font-style: normal; width: 58px; height: 58px; display: grid; place-items: center; font-size: 31px; line-height: 1; border-radius: 16px;
-  background: var(--surface); border: 1px solid var(--line-2); box-shadow: var(--sh-1); transition: border-color .2s, transform .2s, box-shadow .2s; }
-.dg-hex::after { content: ""; position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--sc); }
-.dg-n .pyx { font-size: 13px; font-weight: 600; min-height: 17px; line-height: 17px; white-space: nowrap; }
-.dg-n small { font-size: 11.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
-.dg-n:hover .dg-hex { border-color: var(--sc); transform: translateY(-2px); }
-.dg-n.r0 { --hy: -58px; z-index: 2; }
-.dg-n.r0 .dg-hex { width: 76px; height: 76px; font-size: 44px; border-radius: 20px; border: 1.5px solid var(--ink); box-shadow: var(--sh-2); }
-.dg-n.r0 .dg-hex::after { top: 8px; right: 8px; width: 9px; height: 9px; }
-.dg-n.r2 { --hy: -41px; }
-.dg-n.r2 .dg-hex { width: 44px; height: 44px; font-size: 24px; border-radius: 12px; box-shadow: none; }
-.dg-n.r2 .dg-hex::after { top: 4px; right: 4px; width: 6px; height: 6px; }
-.dg-n.r2 small { display: none; }
-.dg-n.s-PART .dg-hex { border-style: dashed; box-shadow: none; background: var(--surface-2); }
-.dg-n.t.on .dg-hex { border: 1.5px solid var(--ink); }
-.dg-n.out { opacity: 0; transition: opacity .3s; pointer-events: none; }
-.dg-sec { position: absolute; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-size: 12px; font-weight: 600; color: var(--muted); pointer-events: none; }
-.dg-sec::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--sc); }
-.dg-more { position: absolute; height: 30px; padding: 0 12px; border-radius: 10px; border: 1px dashed var(--line-2); color: var(--accent-ink); font-size: 12px; font-weight: 600; background: var(--surface); white-space: nowrap; }
-.dg-zoom { position: absolute; right: 10px; top: 10px; z-index: 4; display: grid; gap: 6px; }
-.dg-zoom button { width: 36px; height: 36px; border-radius: 11px; border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(8px); color: var(--ink-2); font-size: 18px; display: grid; place-items: center; box-shadow: var(--sh-1); }
-.dg-zoom .ic { width: 17px; height: 17px; }
-.dg-hint { position: absolute; left: 12px; bottom: 8px; margin: 0 !important; font-size: 11.5px !important; color: var(--faint); pointer-events: none; }
-.dg-none { position: absolute; left: 50%; top: 60%; transform: translateX(-50%); color: var(--muted); font-size: 13px !important; }
-.dg-none.r { white-space: nowrap; font-size: 12px !important; }
 
-/* card */
+/* Side card & Sky Map guide */
 .dg-side { padding: 0; background: transparent; }
 @media (min-width: 1000px) { .dg-side { max-height: min(64dvh, 620px); overflow: auto; } }
 .dg-card { border: 1px solid var(--line); border-radius: 16px; padding: 14px; background: var(--surface); box-shadow: var(--sh-1); animation: dgIn .3s ease both; }
+.dg-sky-lead { margin: 10px 0 !important; font-size: 13px !important; line-height: 1.55; color: var(--ink-2); }
+.dg-sky-key { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 7px; font-size: 12.5px; color: var(--ink-2); }
+.dg-sky-key li { display: flex; align-items: center; gap: 9px; line-height: 1.4; }
+.dg-sky-key i { flex: none; width: 20px; height: 3px; border-radius: 99px; display: block; }
+.dg-sky-key .k-stack { background: var(--STACK); height: 3.5px; }
+.dg-sky-key .k-branch { background: color-mix(in srgb, var(--ink) 45%, transparent); }
+.dg-sky-key .k-leaf { background: var(--line-2); height: 2px; }
+.dg-sky-key .k-bonus { width: 18px; height: 14px; border-radius: 4px; border: 1.5px dashed var(--muted); background: var(--surface-2); }
+.dg-qchains { display: flex; flex-wrap: wrap; gap: 6px; }
+.dg-qchain { height: 32px; padding: 0 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink);
+  font-size: 13.5px; transition: border-color .16s, background .16s, transform .14s; }
+.dg-qchain:hover { border-color: var(--STACK); background: color-mix(in srgb, var(--STACK) 12%, var(--surface)); }
+.dg-qchain:active { transform: scale(.96); }
+
 .dg-ch { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; }
 .dg-stage { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); }
 .dg-stage::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--sc); }
@@ -136,7 +208,7 @@
 .dg-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0 0 8px; }
 .dg-stats div { border-radius: 10px; padding: 6px; text-align: center; background: var(--surface-2); }
 .dg-stats dt { font-size: 11px; color: var(--muted); }
-.dg-stats dd { margin: 0; font-size: 15px; font-weight: 600; }
+.dg-stats dd { margin: 0; font-size: 14px; font-weight: 600; }
 .dg-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0 !important; font-size: 13px !important; }
 .dg-row > span { color: var(--muted); font-size: 12.5px; min-width: 76px; }
 .dg-row > i { font-style: normal; color: var(--faint); }
@@ -159,73 +231,50 @@
   color: var(--on-accent); background: var(--accent); transition: transform .15s; }
 .dg-go:active { transform: scale(.97); }
 
-/* the evolution moment: a quiet card, the new character grows in */
+/* overlay modal */
 .dg-fx { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; background: color-mix(in srgb, var(--ink) 30%, transparent); backdrop-filter: blur(3px); }
 .dg-fx[hidden] { display: none; }
-.dg-seq { position: relative; width: min(380px, 90%); text-align: center; padding: 26px 18px 22px; border-radius: 22px; background: var(--surface); box-shadow: var(--sh-2); }
-.dg-seq-t { margin: 0 0 16px !important; font-size: 12px !important; font-weight: 700; letter-spacing: .08em; color: var(--muted); }
-.dg-seq-t span { color: var(--sc); }
-.dg-seq-a { display: flex; justify-content: center; align-items: center; gap: 12px; font-size: 48px; animation: dgMerge 1.2s cubic-bezier(.6, 0, .4, 1) forwards; }
-.dg-seq-a b { font-weight: 400; }
-.dg-seq-c { color: var(--sc) !important; }
-.dg-plus { font-size: 24px; color: var(--faint); }
-.dg-ring { width: 130px; height: 130px; margin: -96px auto 0; border-radius: 34px; border: 2px solid var(--sc); opacity: 0; animation: dgRing 1.3s ease-out .85s both; }
-.dg-seq-r { width: 112px; height: 112px; display: grid; place-items: center; margin: -122px auto 0; font-size: 72px; line-height: 1; border-radius: 28px; border: 1.5px solid var(--ink); background: var(--surface);
-  opacity: 0; animation: dgReveal .7s cubic-bezier(.2, 1.3, .4, 1) 1.15s both; }
-.dg-seq-n { margin: 14px 0 0 !important; font-size: 14px !important; opacity: 0; animation: dgFade .5s ease 1.6s both; }
-.dg-seq-n .pyx { font-size: 18px; font-weight: 600; margin-right: 6px; }
 .dg-x { position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: var(--muted); background: var(--surface-2); }
-.dg-seq.rm * { animation-duration: .01s !important; animation-delay: 0s !important; }
 
 @keyframes dgIn { from { opacity: 0; transform: scale(.92); } }
-@keyframes dgMerge { 0% { transform: none; opacity: 1; } 70% { transform: scale(.6); opacity: 1; letter-spacing: -26px; } 100% { transform: scale(.25); opacity: 0; } }
-@keyframes dgRing { 0% { opacity: 0; transform: scale(.4); } 40% { opacity: .9; } 100% { opacity: 0; transform: scale(1.5) rotate(45deg); } }
-@keyframes dgReveal { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: none; } }
-@keyframes dgFade { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .dg-n, .dg-card { animation: none !important; } }
-@media (max-width: 760px) {
-  .dg-clans { gap: 5px; }
-  .dg-clans button { width: 38px; height: 38px; font-size: 20px; border-radius: 10px; }
-}
 @media (max-width: 520px) {
-  .dg-view { height: 52dvh; min-height: 360px; }
+  .dg-view { height: 54dvh; min-height: 360px; }
   .dg-stats { grid-template-columns: repeat(2, 1fr); }
   .dg-hint { display: none; }
   .dg-n { --hy: -44px; }
   .dg-hex { width: 50px; height: 50px; font-size: 26px; border-radius: 14px; }
   .dg-n.r0 { --hy: -53px; }
   .dg-n.r0 .dg-hex { width: 68px; height: 68px; font-size: 38px; border-radius: 18px; }
-  .dg-n .dg-m { max-width: 76px; font-size: 10px; }
+  .dg-n.r2 { --hy: -43px; }
+  .dg-n.r2 .dg-hex { width: 46px; height: 46px; font-size: 24px; border-radius: 13px; }
+  .dg-n.k-stack { --hy: -45px; }
+  .dg-n.k-stack .dg-hex { width: 50px; height: 50px; font-size: 26px; border-radius: 14px; }
+  .dg-n .dg-m { max-width: 78px; font-size: 10px; }
   .dg-wbtn { grid-template-columns: auto auto 1fr; }
   .dg-wgl { grid-column: 1 / -1; }
   .dg-tg span { padding: 0 7px; font-size: 12px; }
 }
-/* look-alike forms told apart: 阝 left (阜) / right (邑), ⺼ flesh vs 月 moon */
+
+/* look-alike forms & meaning labels */
 .dg-side-tag { font-size: 10px; font-weight: 700; color: var(--accent-ink, var(--ink)); background: var(--accent-soft, var(--surface)); border-radius: 6px; padding: 1px 6px; max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dg-part small { display: block; font: 600 10px var(--ui); color: var(--muted); text-align: center; }
-
-/* ---------- meaning under each character (flashcard language; English in grey when that language has none) ---------- */
-.dg-n .dg-m { max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10.5px; font-weight: 500; color: var(--ink-2); }
+.dg-n .dg-m { max-width: 92px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10.5px; font-weight: 500; color: var(--ink-2); }
 .dg-n .dg-m.fb { color: var(--muted); font-style: italic; }
 
-/* ---------- motion ---------- */
+/* motion & hover highlight */
 .dg.is-radial .dg-n { animation: none; transition: opacity .22s; }
-.dg-l { transition: opacity .25s, stroke .25s, stroke-width .25s; }
-/* pointing at a character: its links and neighbours stay, the rest steps back */
-.dg-world.hov .dg-l { opacity: .14; }
-.dg-world.hov .dg-l.hl { opacity: 1; stroke: var(--hlc, var(--ink)); stroke-width: 2.2; }
-.dg-world.hov .dg-n:not(.hl):not(.r0) { opacity: .28; }
-.dg-world.hov .dg-sec { opacity: .35; transition: opacity .25s; }
+.dg-world.hov .dg-l { opacity: .12; }
+.dg-world.hov .dg-l.hl { opacity: 1; stroke: var(--hlc, var(--ink)); stroke-width: 2.3; }
+.dg-world.hov .dg-n:not(.hl):not(.r0) { opacity: .26; }
 .dg-world .dg-n.hl .dg-hex { transform: translateY(-2px); }
-/* a tap ripples out from the square in its level colour */
+
 .dg-ripple { position: absolute; left: 0; top: 0; width: 58px; height: 58px; margin-top: -2px; border-radius: 16px; border: 2px solid var(--lc, var(--ink)); pointer-events: none; animation: dgRip .7s cubic-bezier(.2, .8, .3, 1) forwards; }
 @keyframes dgRip { from { opacity: .9; scale: 1; } to { opacity: 0; scale: 2.3; } }
-/* arriving in the middle: a small bounce and one ring in the level colour */
 .dg-n.r0.arrive .dg-hex { animation: dgArrive .62s cubic-bezier(.3, 1.6, .5, 1); }
 .dg-n.r0.arrive .dg-hex::before { content: ""; position: absolute; inset: -4px; border-radius: 24px; border: 2px solid var(--lc, var(--ink)); pointer-events: none; animation: dgHalo .95s ease-out forwards; }
 @keyframes dgArrive { 0% { scale: .84; } 60% { scale: 1.07; } 100% { scale: 1; } }
 @keyframes dgHalo { from { opacity: .85; scale: 1; } to { opacity: 0; scale: 1.55; } }
-/* the card: its parts rise in one after another; the big character writes itself */
 .dg-card > * { animation: dgRise .45s cubic-bezier(.2, .8, .3, 1) both; }
 .dg-card > *:nth-child(2) { animation-delay: .04s; } .dg-card > *:nth-child(3) { animation-delay: .08s; } .dg-card > *:nth-child(4) { animation-delay: .12s; }
 .dg-card > *:nth-child(5) { animation-delay: .16s; } .dg-card > *:nth-child(n+6) { animation-delay: .2s; }
@@ -235,7 +284,7 @@
 .dg-big:has(.dg-hw) { color: transparent; }
 @media (prefers-reduced-motion: reduce) { .dg-card > *, .dg-ripple, .dg-n.r0.arrive .dg-hex, .dg-n.r0.arrive .dg-hex::before { animation: none !important; } }
 
-/* ---------- ฉากประกอบอักษร (assembly scene) ---------- */
+/* ฉากประกอบอักษร (assembly scene) */
 .dg-asm { position: relative; width: min(460px, 94vw); text-align: center; padding: 22px 16px 18px; border-radius: 24px; background: var(--surface); box-shadow: var(--sh-2); animation: dgIn .3s ease both; }
 .dg-asm-t { margin: 0 0 6px !important; font-size: 12.5px !important; font-weight: 700; color: var(--muted); letter-spacing: .02em; }
 .dg-asm-stage { position: relative; height: calc(var(--S) + 150px); overflow: hidden; }
@@ -260,7 +309,3 @@
 .dg-asm-again { height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); background: var(--surface); }
 .dg-asm-again .ic { width: 16px; height: 16px; }
 .dg-asm.rm * { transition-duration: .01s !important; }
-/* counts per kind live in the key at the top (the ring no longer needs room for labels around it) */
-.dg-legend .dg-cnt { font-style: normal; font-weight: 700; color: var(--ink-2); min-width: 1ch; }
-.dg-legend .dg-cnt:not(:empty)::before { content: "· "; color: var(--muted); font-weight: 400; }
-.dg-legend button.none { opacity: .4; cursor: default; }
