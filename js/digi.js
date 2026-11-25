@@ -1,24 +1,18 @@
 'use strict';
 /* =====================================================================
-   Library of Limu · new offy v6 — 汉字进化图鉴 · Hanzi Evolution Star Map
-   2-Level Star Map & True Etymological Genealogy Engine:
-     Level 1 · Sky Map (ท้องฟ้ากลุ่มดาวรากศัพท์):
-       All active Kangxi radicals clustered into 5 semantic nebulae
-       (Nature · People & Body · Home & Life · Animals · Motion & Forms).
-       Tap any star or search any character to enter its real genealogy.
-     Level 2 · Constellation Focus (สายเลือดวิวัฒนาการจริง):
-       ZERO fake sibling lines. Every link A → B is a real structural/etymological
-       parent → child relationship with transitive reduction (e.g. 木 → 林 → 森,
-       木 → 相 → 想/箱, 又 → 双 → 叒 → 叕, 土 → 圭 → 垚/街/鞋):
-         STACK     Reduplication / stacked evolution spine (木→林→森, 又→双→叒→叕)
-         BRANCH    Multi-generation parent → child → grandchild chains (木→相→想/箱)
-         ARMOR     Sound component (声旁)
-         CHAMPION  Meaning component (形旁)
-         ULTIMATE  Ideogrammatic compound (会意)
-         VARIANT   Other structural link (指事 / radical)
-         PART      Parent components of the focused character
-       Includes curated BONUS_STACK non-HSK stacked characters (dashed grey border)
-       so famous reduplication chains are complete.
+   Library of Limu · new offy v6 — 汉字进化图鉴 · Hanzi & Word Evolution Star Map
+   Dual-Realm 2-Level Star Map Engine:
+     Realm 1 · 字 อักษร (Character Evolution):
+       - Level 1 Sky Map: 5 semantic radical nebulae (214 Kangxi radicals)
+       - Level 2 Focus: 100% real etymological genealogy with transitive reduction
+         (STACK reduplication spine 木→林→森, 又→双→叒→叕 + multi-gen BRANCHES
+         木→相→想/箱 + single-step LEAVES + 24 curated non-HSK BONUS stacked chars)
+     Realm 2 · 词 คำศัพท์ (Shared-Character Word Constellation · 11,000 HSK words):
+       - Level 1 Word Sky: 5 semantic nebulae of iconic Chinese morpheme hubs
+       - Level 2 Word Focus: Left wing (□字 suffix) · Right wing (字□ prefix) ·
+         Top wing (□字□ idioms) · Real 2→3+ syllable sub-chains (大学→大学生,
+         电影→电影院) · Learned-status dots · Tap to speak + open 5-lang card +
+         1-tap partner-character hopping (学 → 学生 → 生 → 生活 → 活!)
    ===================================================================== */
 const OffyDigi = (() => {
   const SRC = 'data/tree.js?v=6';
@@ -51,14 +45,12 @@ const OffyDigi = (() => {
     '毳': { py: 'cuì',  th: 'ขนสัตว์อ่อนนุ่ม',   en: 'fine down; soft fur',     vi: 'lông tơ mịn',      ja: '柔らかなうぶ毛', parent: '毛', parts: ['毛', '毛', '毛'], strokes: 12, rep: 3 }
   };
 
-  /* Stack multiplicity hints (×2 / ×3 / ×4) for HSK stacked characters */
   const HSK_REP = {
     '林': 2, '森': 3, '从': 2, '众': 3, '双': 2, '炎': 2, '昌': 2, '晶': 3,
     '品': 3, '磊': 3, '多': 2, '朋': 2, '哥': 2, '羽': 2, '二': 2, '竹': 2,
     '赫': 2, '矗': 3, '棘': 2, '辨': 2, '兢': 2, '轰': 3
   };
 
-  /* Featured reduplication chains for Sky Map previews & quick shortcuts */
   const STACK_PREVIEWS = {
     '木': '林→森', '人': '从→众', '又': '双→叒→叕', '水': '沝→淼', '火': '炎→焱',
     '土': '圭→垚', '口': '吅→品→㗊', '日': '昍→晶', '石': '砳→磊', '金': '鑫',
@@ -66,16 +58,9 @@ const OffyDigi = (() => {
     '车': '轰', '白': '皛', '心': '惢', '手': '掱', '田': '畾', '毛': '毳', '月@74': '朋', '夕': '多'
   };
   const QUICK_CHAINS = [
-    ['木', '木 → 林 → 森'],
-    ['人', '人 → 从 → 众'],
-    ['又', '又 → 双 → 叒 → 叕'],
-    ['水', '水 → 沝 → 淼'],
-    ['火', '火 → 炎 → 焱'],
-    ['土', '土 → 圭 → 垚'],
-    ['口', '口 → 吅 → 品 → 㗊'],
-    ['日', '日 → 昍 → 晶'],
-    ['石', '石 → 砳 → 磊'],
-    ['金', '金 → 鑫']
+    ['木', '木 → 林 → 森'], ['人', '人 → 从 → 众'], ['又', '又 → 双 → 叒 → 叕'],
+    ['水', '水 → 沝 → 淼'], ['火', '火 → 炎 → 焱'], ['土', '土 → 圭 → 垚'],
+    ['口', '口 → 吅 → 品 → 㗊'], ['日', '日 → 昍 → 晶'], ['石', '石 → 砳 → 磊'], ['金', '金 → 鑫']
   ];
 
   /* Preferred simplified radical display glyphs (when !trad()) */
@@ -85,7 +70,7 @@ const OffyDigi = (() => {
     '見': '见', '戶': '户', '靑': '青'
   };
 
-  /* 5 Semantic Sky Nebulae (grouped by Kangxi radical number) */
+  /* 5 Semantic Sky Nebulae for Realm 1 (Char Radicals) */
   const ZONES = [
     { id: 'nature', icon: '🌿', th: 'ธรรมชาติ',        en: 'Nature',
       rads: [75, 85, 86, 32, 72, 74, 46, 112, 167, 96, 140, 115, 118, 119, 102, 173, 15, 36, 116, 27, 174, 84, 182, 150, 97, 151, 199, 200, 161, 170, 163, 47, 99, 100, 139, 180, 186, 201, 203, 155] },
@@ -102,6 +87,21 @@ const OffyDigi = (() => {
   ZONES.forEach(z => z.rads.forEach(no => ZONE_OF_NO.set(no, z.id)));
   const zoneOfNo = no => ZONE_OF_NO.get(no) || 'form';
 
+  /* 5 Semantic Sky Nebulae for Realm 2 (Word Morpheme Hubs) */
+  const WORD_ZONES = [
+    { id: 'study',  icon: '🎓', th: 'การเรียน & จิตใจ',   en: 'Study & Mind',
+      chars: ['学', '心', '意', '思', '感', '情', '书', '话', '语', '文', '教', '理'] },
+    { id: 'daily',  icon: '⚡', th: 'เทคโนโลยี & ชีวิต',  en: 'Tech & Life',
+      chars: ['电', '机', '车', '家', '房', '衣', '饭', '菜', '钱', '店', '工', '场'] },
+    { id: 'nature', icon: '🌿', th: 'ธรรมชาติ & เวลา',    en: 'Nature & Time',
+      chars: ['水', '火', '天', '气', '风', '日', '年', '月', '时', '山', '花', '光'] },
+    { id: 'people', icon: '🧍', th: 'คน & ร่างกาย',       en: 'People & Body',
+      chars: ['人', '手', '口', '头', '面', '身', '生', '老', '友', '女', '子', '民'] },
+    { id: 'core',   icon: '🚀', th: 'กิริยา & คำหลักฮิต', en: 'Core Verbs & Hubs',
+      chars: ['大', '小', '高', '好', '新', '动', '发', '出', '行', '力', '用', '成', '公', '自', '无'] }
+  ];
+  const QUICK_WORD_HUBS = ['学', '电', '心', '水', '生', '手', '大', '高', '气', '机'];
+
   const STAGES = {
     ROOKIE:   { th: 'อักษรตั้งต้น',          sh: 'ตั้งต้น',   zh: '基', d: 'จุดเริ่มต้นของตระกูลอักษรนี้' },
     STACK:    { th: 'ซ้ำร่างวิวัฒนาการ',     sh: 'ซ้ำร่าง',   zh: '叠', d: 'ซ้อนอักษรตัวเดิม 2–4 ตัวเพื่อขยายความหมาย (เช่น 木→林→森 · 又→双→叒→叕)' },
@@ -112,20 +112,32 @@ const OffyDigi = (() => {
     PART:     { th: 'ส่วนประกอบ',            sh: 'ประกอบ',   zh: '件', d: 'ส่วนที่ประกอบขึ้นเป็นตัวนี้' }
   };
   const ORDER = ['STACK', 'ARMOR', 'CHAMPION', 'ULTIMATE', 'VARIANT', 'PART'];
+  const W_WINGS = {
+    PRE: { th: 'ขึ้นต้นด้วยตัวนี้', sh: 'ขึ้นต้น', zh: '首' },
+    SUF: { th: 'ลงท้ายด้วยตัวนี้',  sh: 'ลงท้าย',  zh: '尾' },
+    SUB: { th: 'ต่อยอด 3–4 พยางค์', sh: 'ต่อยอด',  zh: '延' },
+    MID: { th: 'กลางคำ / สำนวน',    sh: 'กลางคำ',  zh: '中' }
+  };
+  const W_ORDER = ['SUF', 'PRE', 'SUB', 'MID'];
   const COLW = 210, ROWH = 114, NODE = 92, PAD = 40;
 
   const st = {
-    mode: 'sky',        // 'sky' = Level 1 Radical Star Map | 'focus' = Level 2 True Evolution Constellation
-    skyZone: 'all',     // 'all' or zone id
-    skyAll: false,      // false = major ~82 stars | true = all active ~193 stars
+    mode: 'sky',        // 'sky' = Level 1 Sky Map | 'focus' = Level 2 Constellation
+    skyZone: 'all',
+    skyAll: false,
+    wSkyZone: 'all',
     trail: ['木'],
+    wTrail: ['学'],
+    wSel: null,         // currently selected word in Word Constellation
     sel: null,
-    open: {},           // per-focus expansion of single-step satellites
+    open: {},           // char focus expanded satellites
+    wOpen: {},          // word focus expanded words
     stageFilter: null,
+    wFilter: null,
     tx: 0, ty: 0, k: 1, fitted: false
   };
   let D = null, host = null, rad = null, formsOf = null, radOfGlyph = null, tree = null;
-  let cur = new Map(), anim = 0, lay = null, skyLay = null;
+  let cur = new Map(), anim = 0, lay = null, skyLay = null, wLay = null, wSkyLay = null;
 
   Object.assign(window.OFFY_EN || {}, {
     'สายวิวัฒนาการ': 'Character families', 'สายวิวัฒนาการอักษร': 'Character families',
@@ -136,23 +148,39 @@ const OffyDigi = (() => {
     'การประกอบอักษร': 'How it is built', 'ดูการประกอบอักษร': 'See how it is built',
     'รูปเขียนตามภูมิภาค': 'Regional forms',
     'ยังไม่มีอักษร HSK ที่ต่อยอดจากตัวนี้': 'No HSK character builds on this one',
+    'ยังไม่มีคำศัพท์ HSK ที่ใช้ตัวอักษรนี้': 'No HSK compound words with this character',
     'บอกความหมาย': 'meaning', 'บอกเสียง': 'sound', 'เล่นอีกครั้ง': 'Play again',
     'ทั้งหมด': 'All', 'กลุ่มดาว': 'Star map', 'รอบตัว': 'Constellation', 'กริด': 'Grid', 'ขวา': 'Tree',
-    'ท้องฟ้าทั้งหมด': 'All constellations', 'ดูทั้งหมดในโหมดกริด': 'See all in Grid',
-    'ส่วนที่เพิ่ม': 'Added part', 'โครงสร้าง': 'Structure', 'คำที่ใช้ตัวนี้': 'Words with it',
+    'ท้องฟ้าทั้งหมด': 'All constellations', 'ท้องฟ้าคำศัพท์': 'Word hubs sky',
+    'ดูทั้งหมดในโหมดกริด': 'See all in Grid', 'ส่วนที่เพิ่ม': 'Added part', 'โครงสร้าง': 'Structure',
+    'คำที่ใช้ตัวนี้': 'Words with it', 'อักษร': 'Chars', 'คำศัพท์': 'Words',
     'แตะตัวไหนก็ได้เพื่อย้ายมาไว้ตรงกลาง': 'Tap any star to explore its real lineage',
+    'แตะคำเพื่อฟังเสียงและดูรายละเอียด · แตะตัวกลางดูสรุป': 'Tap any word to hear & inspect · hop via partner chars',
     'แตะรากศัพท์เพื่อเจาะเข้ากลุ่มดาว · ลากหรือซูมได้': 'Tap any radical star to explore · drag or pinch to zoom',
+    'แตะอักษรแม่คำเพื่อดูกลุ่มดาวคำศัพท์ · ลากหรือซูมได้': 'Tap any morpheme hub to explore its word cluster',
     'ลากเพื่อเลื่อน · หมุนล้อหรือบีบเพื่อซูม': 'Drag to pan · wheel or pinch to zoom',
     'ไต้หวัน': 'Taiwan', 'ญี่ปุ่น': 'Japanese', 'เพิ่มอีก': 'more', 'หมวดนำ': 'Radical',
     'นอก HSK': 'Outside HSK', 'ดาวบริวารอีก': 'more satellites',
     'ซ่อนดาวบริวาร (เหลือเฉพาะสายหลัก)': 'Show main chains only',
     'แสดงรากทั้งหมด': 'Show all radicals', 'แสดงเฉพาะรากหลัก': 'Major radicals only',
     'ค้นหาอักษรหรือราก เช่น 木, 森, 想, 叒…': 'Search char or radical e.g. 木, 森, 想, 叒…',
+    'ค้นหาแม่คำ หรือคำศัพท์ เช่น 学, 电, 心, 电影…': 'Search hub char or word e.g. 学, 电, 心, 电影…',
     'ท้องฟ้ากลุ่มดาวรากศัพท์': 'Radical Constellation Sky',
-    'สายซ้ำร่างเด่น': 'Iconic Reduplication Chains'
+    'ท้องฟ้ากลุ่มดาวคำศัพท์': 'Shared-Char Word Galaxy',
+    'สายซ้ำร่างเด่น': 'Iconic Reduplication Chains',
+    'แม่คำยอดฮิต': 'Popular Word Hubs',
+    'ขึ้นต้นด้วยตัวนี้': 'Starts with char', 'ลงท้ายด้วยตัวนี้': 'Ends with char',
+    'ต่อยอด 3–4 พยางค์': '3–4 char extensions', 'กลางคำ / สำนวน': 'Middle / idioms',
+    'ขึ้นต้น': 'Prefix', 'ลงท้าย': 'Suffix', 'ต่อยอด': 'Extended', 'กลางคำ': 'Middle',
+    'ดูเพิ่มอีก': 'more words', 'ย่อเหลือคำหลัก': 'Show core words',
+    'เปิดการ์ด 5 ภาษา': 'Open 5-lang card', 'กระโดดไปกลุ่มดาวคำของ…': 'Hop to partner char…',
+    'ดูสายวิวัฒนาการอักษร': 'View char evolution', 'ดูกลุ่มดาวคำของตัวนี้': 'View word constellation',
+    'คำ': 'words', 'ยังไม่เรียน': 'New'
   });
 
-  /* ---------- simplified / traditional / helpers ---------- */
+  /* ---------- realm, simplified/traditional & common helpers ---------- */
+  const realm = () => (S().digiRealm === 'word' ? 'word' : 'char');
+  const isWord = () => realm() === 'word';
   const trad = () => !!S().hzTrad;
   const base = c => String(c || '').split('@')[0];
   const radG = r => {
@@ -176,6 +204,17 @@ const OffyDigi = (() => {
     const r = radOfGlyph.get(c);
     return r && base(c) === r[1] ? radG(r) : base(c);
   };
+  const showWord = zh => {
+    if (!trad()) return zh;
+    return [...String(zh || '')].map(ch => (D.c[ch] && D.c[ch][8]) ? D.c[ch][8] : ch).join('');
+  };
+  const markWord = (zh, focusChar) => {
+    const f = base(focusChar);
+    return [...String(zh || '')].map(ch => {
+      const disp = (trad() && D.c[ch] && D.c[ch][8]) ? D.c[ch][8] : ch;
+      return ch === f ? `<mark>${esc2(disp)}</mark>` : esc2(disp);
+    }).join('');
+  };
   const viewMode = () => S().digiView || 'radial';
   const radial = () => viewMode() === 'radial';
   const isGrid = () => viewMode() === 'grid';
@@ -190,6 +229,7 @@ const OffyDigi = (() => {
     const x = D.c[c] || (c === '月@74' ? D.c['月'] : null);
     return ` style="--lc:var(--hsk${x ? x[1] : 'C'})"`;
   };
+  const lvWordC = lv => ` style="--lc:var(--hsk${lv || 'C'})"`;
   const lvQ = l => `<i class="lvq" style="--c:var(--hsk${l})">${l === 7 ? '7–9' : l}</i>`;
   const meanOf = c => {
     if (BONUS[c]) {
@@ -209,17 +249,14 @@ const OffyDigi = (() => {
     return (D.c[c] && D.c[c][4]) || [];
   };
 
-  /* ---------- True Etymological Relations (HSK + BONUS_STACK + Transitive Reduction) ---------- */
+  /* ---------- True Etymological Relations (Char Realm) ---------- */
   function isStackedChild(c, p) {
     const fs = formsOf(p);
     if (c === '轰') return fs.has('车') || fs.has('車');
     if (BONUS[c]) return BONUS[c].parent === p || fs.has(BONUS[c].parent);
     const ps = partsRaw(c);
     if (ps.length >= 2 && ps.every(q => fs.has(q))) return true;
-    // e.g. 森 = ['木', '林'] when p === '林', 众 = ['人', '从'] when p === '从',
-    // 品 = ['口', '吅'] when p === '吅', 晶 = ['日', '昍'] when p === '昍', 磊 = ['石', '砳'] when p === '砳'
     if (HSK_REP[c] && HSK_REP[c] >= 3 && ps.some(q => fs.has(q))) {
-      // Ensure p is itself a 2x stacked form of the same base (林, 从, 吅, 昍, 砳)
       if (BONUS[p] || (HSK_REP[p] && HSK_REP[p] === 2)) return true;
     }
     return false;
@@ -236,11 +273,9 @@ const OffyDigi = (() => {
     const r = x[3] && rad.get(x[3]), isRad = !!r && (fb.has(r[1]) || r[8].some(f => fb.has(f[0])));
     if (six === '形声') return isRad ? 'CHAMPION' : null;
     if (six === '指事' || isRad) return 'VARIANT';
-    // Allow bonus component parents (like 圭 → 佳/挂/街/鞋, 吅 → 哭/骂/器, 叒 → 桑/叠, 叕 → 缀, 㗊 → 噩)
-    if (BONUS[p] && parts.some(q => fsHas(forms, q))) return 'ULTIMATE';
+    if (BONUS[p] && parts.some(q => forms.has(q) || forms.has(base(q)))) return 'ULTIMATE';
     return null;
   }
-  const fsHas = (fs, q) => fs.has(q) || fs.has(base(q));
 
   const catalyst = (c, p) => {
     const forms = formsOf(p), parts = partsRaw(c);
@@ -248,7 +283,6 @@ const OffyDigi = (() => {
     return rest.length ? rest : parts.slice(1);
   };
 
-  /* All real structural children of p (HSK matching lvOk + BONUS_STACK) */
   function rawKidsOf(p, except) {
     const fs = formsOf(p), out = [];
     for (const c of Object.keys(D.c)) {
@@ -263,19 +297,13 @@ const OffyDigi = (() => {
     return out;
   }
 
-  /* Transitive Reduction: if child C contains ANOTHER child B of p in its parts (or BONUS parent is B),
-     attach C under B (p → B → C) instead of shortcutting directly from p → C!
-     Automatically turns 木→森 into 木→林→森, 木→棵 into 木→果→棵, 人→众 into 人→从→众,
-     口→品 into 口→吅→品→㗊, 日→晶 into 日→昍→晶, 石→磊 into 石→砳→磊! */
   function directKidsOf(p, except) {
     const raw = rawKidsOf(p, except);
     const rawSet = new Set(raw);
     const direct = raw.filter(c => {
       if (BONUS[c] && rawSet.has(BONUS[c].parent)) return false;
       const ps = partsRaw(c);
-      for (const q of ps) {
-        if (q !== c && rawSet.has(q)) return false;
-      }
+      for (const q of ps) if (q !== c && rawSet.has(q)) return false;
       return true;
     });
     return direct.sort((a, b) => {
@@ -299,7 +327,7 @@ const OffyDigi = (() => {
     return prev && stageOf(f, prev) ? stageOf(f, prev) : 'ROOKIE';
   }
 
-  /* ---------- Fast deterministic hash & AABB zero-overlap solver ---------- */
+  /* ---------- Fast deterministic hash & AABB zero-overlap solvers ---------- */
   const viewAspect = () => { const v = host && host.querySelector('.dg-view'); return v && v.clientWidth && v.clientHeight ? v.clientWidth / v.clientHeight : 1; };
   const hash01 = s => { let h = 2166136261; for (const ch of String(s)) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return ((h >>> 0) % 1000) / 1000; };
 
@@ -333,14 +361,44 @@ const OffyDigi = (() => {
     }
   }
 
+  /* Variable-width AABB solver for Word Constellation capsules (2-char vs 3-char vs 4-char idioms) */
+  function relaxBoxes(nodes, pinFirst, padX = 16, padY = 12, passes = 30) {
+    for (let pass = 0; pass < passes; pass++) {
+      let moved = false;
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j];
+          const isPin = pinFirst && i === 0;
+          const rw = (a.bw + b.bw) / 2 + padX, rh = (a.bh + b.bh) / 2 + padY;
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const ox = rw - Math.abs(dx), oy = rh - Math.abs(dy);
+          if (ox > 0 && oy > 0) {
+            moved = true;
+            const sgnX = dx >= 0 ? 1 : -1, sgnY = dy >= 0 ? 1 : -1;
+            if (ox < oy) {
+              const push = ox * 0.52 + 0.6;
+              if (isPin) b.x += sgnX * push * 2;
+              else { a.x -= sgnX * push; b.x += sgnX * push; }
+            } else {
+              const push = oy * 0.52 + 0.6;
+              if (isPin) b.y += sgnY * push * 2;
+              else { a.y -= sgnY * push; b.y += sgnY * push; }
+            }
+          }
+        }
+      }
+      if (!moved) break;
+    }
+  }
+
   /* =====================================================================
-     LEVEL 1 · SKY MAP LAYOUT (5 Semantic Radical Constellations)
+     REALM 1 · LEVEL 1 — RADICAL SKY MAP LAYOUT
      ===================================================================== */
   let skyCache = null;
   function buildSkyCatalog() {
     if (skyCache) return skyCache;
-    const AMB = D.amb || {};
-    const items = [];
+    const AMB = D.amb || {}, items = [];
     for (const r of D.r) {
       const no = r[0], orig = r[1];
       const key = AMB[orig] ? `${orig}@${no}` : (D.c[orig] ? orig : (RAD_SIMP[orig] && D.c[RAD_SIMP[orig]] ? RAD_SIMP[orig] : orig));
@@ -352,40 +410,27 @@ const OffyDigi = (() => {
       }
       const hasBonus = !!STACK_PREVIEWS[key] || !!STACK_PREVIEWS[orig];
       if (cnt === 0 && !hasBonus) continue;
-      // Curated ~52 iconic core radicals on default Sky Map for large, readable stars (+ button reveals all 197)
       const major = cnt >= 27 || hasBonus || [74, 93, 195, 196, 174, 82, 173, 212, 169, 145, 184, 15, 36, 142, 159].includes(no);
-      items.push({
-        no, key, r, cnt, major,
-        zone: zoneOfNo(no),
-        preview: STACK_PREVIEWS[key] || STACK_PREVIEWS[orig] || ''
-      });
+      items.push({ no, key, r, cnt, major, zone: zoneOfNo(no), preview: STACK_PREVIEWS[key] || STACK_PREVIEWS[orig] || '' });
     }
     items.sort((a, b) => b.cnt - a.cnt || a.no - b.no);
     skyCache = items;
     return items;
   }
 
-  function layoutSky() {
-    const allItems = buildSkyCatalog();
-    const list = st.skyAll ? allItems : allItems.filter(it => it.major);
-    const byZone = new Map(ZONES.map(z => [z.id, []]));
-    list.forEach(it => { (byZone.get(it.zone) || byZone.get('form')).push(it); });
-
+  function layoutNebulae(zoneList, byZoneMap, gap = 64) {
     const asp = Math.max(.68, Math.min(1.8, viewAspect()));
     const portrait = asp < 0.92;
     const GOLDEN = 2.39996323;
-
-    // Place each zone's stars in an organic golden-angle star cluster
     const zoneClusters = new Map();
-    for (const z of ZONES) {
-      const arr = byZone.get(z.id) || [];
-      arr.sort((a, b) => (b.preview ? 1 : 0) - (a.preview ? 1 : 0) || b.cnt - a.cnt);
+
+    for (const z of zoneList) {
+      const arr = byZoneMap.get(z.id) || [];
       const local = arr.map((it, i) => {
         const ang = i * GOLDEN + hash01(it.key) * 0.4;
         const radDist = i === 0 ? 0 : 90 * Math.sqrt(i) + (hash01(it.key + 'r') - 0.5) * 14;
-        const tier = it.cnt >= 70 ? 0 : it.cnt >= 25 ? 1 : 2;
         return {
-          key: it.key, r: it.r, no: it.no, cnt: it.cnt, zone: z.id, tier, preview: it.preview,
+          ...it, zone: z.id,
           x: Math.cos(ang) * radDist * (portrait ? 0.94 : 1.12),
           y: Math.sin(ang) * radDist * (portrait ? 1.06 : 0.92)
         };
@@ -399,41 +444,31 @@ const OffyDigi = (() => {
       zoneClusters.set(z.id, { z, nodes: local, w, h });
     }
 
-    // Arrange the 5 semantic nebulae cleanly with generous breathing space
-    const cN = zoneClusters.get('nature'), cH = zoneClusters.get('human'),
-          cL = zoneClusters.get('life'), cA = zoneClusters.get('animal'), cF = zoneClusters.get('form');
-    const gap = 64;
-    let offsets;
+    const ids = zoneList.map(z => z.id);
+    const [z0, z1, z2, z3, z4] = ids.map(id => zoneClusters.get(id));
+    const offsets = {};
     if (portrait) {
-      // 3-row constellation chart for portrait iPad / iPhone (exact non-overlapping row spacing)
-      const r1H = Math.max(cN.h, cH.h), r2H = Math.max(cL.h, cA.h);
-      const y1 = 0, y2 = r1H / 2 + r2H / 2 + gap, y3 = y2 + r2H / 2 + cF.h / 2 + gap;
-      offsets = {
-        nature: [-(cN.w / 2 + gap * .45), y1],
-        human:  [+(cH.w / 2 + gap * .45), y1],
-        life:   [-(cL.w / 2 + gap * .45), y2],
-        animal: [+(cA.w / 2 + gap * .45), y2],
-        form:   [0, y3]
-      };
+      const r1H = Math.max(z0.h, z1.h), r2H = Math.max(z2.h, z3.h);
+      const y1 = 0, y2 = r1H / 2 + r2H / 2 + gap, y3 = y2 + r2H / 2 + z4.h / 2 + gap;
+      offsets[ids[0]] = [-(z0.w / 2 + gap * .45), y1];
+      offsets[ids[1]] = [+(z1.w / 2 + gap * .45), y1];
+      offsets[ids[2]] = [-(z2.w / 2 + gap * .45), y2];
+      offsets[ids[3]] = [+(z3.w / 2 + gap * .45), y2];
+      offsets[ids[4]] = [0, y3];
     } else {
-      // Wide 2-row astronomical sky chart for landscape iPad / desktop
-      const topH = Math.max(cN.h, cH.h);
-      const botH = Math.max(cA.h, cF.h, cL.h);
-      const yTop = -(topH / 2 + gap * .45);
-      const yBot = +(botH / 2 + gap * .45);
-      offsets = {
-        nature: [-(cN.w / 2 + gap * .55), yTop],
-        human:  [+(cH.w / 2 + gap * .55), yTop],
-        animal: [-(cF.w / 2 + cA.w / 2 + gap * .9), yBot],
-        form:   [0, yBot + 20],
-        life:   [+(cF.w / 2 + cL.w / 2 + gap * .9), yBot]
-      };
+      const topH = Math.max(z0.h, z1.h), botH = Math.max(z3.h, z4.h, z2.h);
+      const yTop = -(topH / 2 + gap * .45), yBot = +(botH / 2 + gap * .45);
+      offsets[ids[0]] = [-(z0.w / 2 + gap * .55), yTop];
+      offsets[ids[1]] = [+(z1.w / 2 + gap * .55), yTop];
+      offsets[ids[3]] = [-(z4.w / 2 + z3.w / 2 + gap * .9), yBot];
+      offsets[ids[4]] = [0, yBot + 16];
+      offsets[ids[2]] = [+(z4.w / 2 + z2.w / 2 + gap * .9), yBot];
     }
 
     const nodes = [], links = [], labels = [], zoneBoxes = {};
-    for (const z of ZONES) {
+    for (const z of zoneList) {
       const cl = zoneClusters.get(z.id);
-      if (!cl.nodes.length) continue;
+      if (!cl || !cl.nodes.length) continue;
       const [ox, oy] = offsets[z.id];
       let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
       cl.nodes.forEach(n => {
@@ -442,7 +477,7 @@ const OffyDigi = (() => {
         minX = Math.min(minX, n.x - 58); maxX = Math.max(maxX, n.x + 58);
         minY = Math.min(minY, n.y - 68); maxY = Math.max(maxY, n.y + 62);
       });
-      // Prim's Minimum Spanning Tree inside each semantic nebula (delicate constellation chart lines)
+      // Prim's MST inside each semantic nebula (delicate constellation chart strokes)
       const conn = [0], rem = new Set(cl.nodes.map((_, i) => i).slice(1));
       while (rem.size) {
         let bestU = 0, bestV = 0, bestD = Infinity;
@@ -455,65 +490,63 @@ const OffyDigi = (() => {
         links.push({ from: cl.nodes[bestU], to: cl.nodes[bestV], zone: z.id });
         conn.push(bestV); rem.delete(bestV);
       }
-      labels.push({ id: z.id, icon: z.icon, title: LANG === 'en' ? z.en : z.th, count: cl.nodes.length, x: (minX + maxX) / 2, y: minY - 26 });
-      zoneBoxes[z.id] = { minX: minX - 24, maxX: maxX + 24, minY: minY - 62, maxY: maxY + 24 };
+      labels.push({ id: z.id, icon: z.icon, title: LANG === 'en' ? z.en : z.th, count: cl.nodes.length, x: (minX + maxX) / 2, y: minY - 30 });
+      zoneBoxes[z.id] = { minX: minX - 24, maxX: maxX + 24, minY: minY - 68, maxY: maxY + 24 };
     }
 
-    // Center whole sky at (0, 0)
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     nodes.forEach(n => { minX = Math.min(minX, n.x - 62); maxX = Math.max(maxX, n.x + 62); minY = Math.min(minY, n.y - 74); maxY = Math.max(maxY, n.y + 64); });
-    labels.forEach(l => { minY = Math.min(minY, l.y - 26); });
+    labels.forEach(l => { minY = Math.min(minY, l.y - 28); });
     const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
     nodes.forEach(n => { n.x -= cx; n.y -= cy; });
     labels.forEach(l => { l.x -= cx; l.y -= cy; });
     Object.values(zoneBoxes).forEach(b => { b.minX -= cx; b.maxX -= cx; b.minY -= cy; b.maxY -= cy; });
+    return { nodes, links, labels, zoneBoxes, box: { minX: minX - cx - 28, maxX: maxX - cx + 28, minY: minY - cy - 28, maxY: maxY - cy + 48 }, asp };
+  }
 
-    return {
-      nodes, links, labels, zoneBoxes,
-      totalActive: allItems.length, shown: nodes.length,
-      box: { minX: minX - cx - 28, maxX: maxX - cx + 28, minY: minY - cy - 28, maxY: maxY - cy + 48 },
-      asp
-    };
+  function layoutSky() {
+    const allItems = buildSkyCatalog();
+    const list = st.skyAll ? allItems : allItems.filter(it => it.major);
+    const byZone = new Map(ZONES.map(z => [z.id, []]));
+    list.forEach(it => {
+      const tier = it.cnt >= 70 ? 0 : it.cnt >= 25 ? 1 : 2;
+      (byZone.get(it.zone) || byZone.get('form')).push({ ...it, tier });
+    });
+    byZone.forEach(arr => arr.sort((a, b) => (b.preview ? 1 : 0) - (a.preview ? 1 : 0) || b.cnt - a.cnt));
+    const res = layoutNebulae(ZONES, byZone, 64);
+    return { ...res, totalActive: allItems.length, shown: res.nodes.length };
   }
 
   /* =====================================================================
-     LEVEL 2 · TRUE GENEALOGY CONSTELLATION LAYOUT (ZERO FAKE LINES!)
+     REALM 1 · LEVEL 2 — TRUE GENEALOGY CONSTELLATION LAYOUT
      ===================================================================== */
   function layoutConstellation(f) {
     const nodes = [{ key: f, c: f, x: 0, y: 0, ring: 0, kind: 'root', stage: stageForFocus(f) }];
     const links = [];
     const used = new Set([f]);
 
-    // 1. Parent parts of f (for compound chars like 相 → 木+目, 想 → 相+心)
     const parts = partsOf(f).map(q => ({ c: q, stage: 'PART' }));
     parts.forEach(p => used.add(p.c));
-
-    // 2. Direct children via Transitive Reduction (true parent→child only!)
     const direct = directKidsOf(f, used);
 
-    // 3. Classify direct children into STACK (reduplication), BRANCH (has real kids), LEAF (single-step)
     const stackRoots = [], branchItems = [], leafItems = [];
     for (const c of direct) {
       const stg = stageOf(c, f);
-      if (stg === 'STACK') {
-        stackRoots.push({ c, stage: 'STACK' });
-      } else {
+      if (stg === 'STACK') stackRoots.push({ c, stage: 'STACK' });
+      else {
         const gTest = directKidsOf(c, new Set([f, c]));
         if (gTest.length > 0) branchItems.push({ c, stage: stg, gCount: gTest.length });
         else leafItems.push({ c, stage: stg });
       }
     }
 
-    // Sort branches: richest multi-gen chains first (果, 相, 采, 某...), then lower HSK level
     branchItems.sort((a, b) => b.gCount - a.gCount || ((D.c[a.c] || [])[1] || 9) - ((D.c[b.c] || [])[1] || 9));
-    // Sort leaves: HSK 1–2 brightest stars first
     leafItems.sort((a, b) => ((D.c[a.c] || [])[1] || 9) - ((D.c[b.c] || [])[1] || 9) || ORDER.indexOf(a.stage) - ORDER.indexOf(b.stage));
 
     const mobile = innerWidth < 700, tablet = innerWidth >= 700 && innerWidth < 1100;
     const isExpanded = !!st.open[f];
     const hasHeroChains = stackRoots.length > 0 || branchItems.length > 0;
 
-    // Caps keep focus razor-sharp on STACK + multi-gen BRANCHES, while showing top HSK satellites
     const maxBranches = isExpanded ? branchItems.length : (mobile ? 4 : tablet ? 7 : 9);
     const maxGPerBranch = isExpanded ? 6 : (mobile ? 4 : 5);
     const maxLeaves = isExpanded
@@ -524,21 +557,16 @@ const OffyDigi = (() => {
     const pickedLeaves = leafItems.slice(0, maxLeaves);
     const more = (branchItems.length - pickedBranches.length) + (leafItems.length - pickedLeaves.length);
 
-    // Pre-reserve picked top-level nodes so grandchildren never steal a primary node
     stackRoots.forEach(s => used.add(s.c));
     pickedBranches.forEach(b => used.add(b.c));
     pickedLeaves.forEach(l => used.add(l.c));
 
-    // Trace each STACK spine deeply (e.g. 木 → 林 → 森, 又 → 双 → 叒 → 叕, 口 → 吅 → 品 → 㗊)
-    // Plus real side-children off each spine step (e.g. 林 → 梦, 禁, 麻, 楚, 焚; 圭 → 街, 鞋, 挂, 佳)
     const stackChains = stackRoots.map(sr => {
       const spine = [];
       let curC = sr.c, depth = 1;
       while (curC && depth <= 4) {
         const kids = directKidsOf(curC, used);
-        // Find next pure stacked continuation on this spine
         let nextSpine = kids.find(k => stageOf(k, curC) === 'STACK');
-        // Non-stack real children off this spine node (e.g. 林 → 梦/禁/麻/楚/焚, 炎 → 谈/淡/毯)
         const sideKids = kids.filter(k => k !== nextSpine).slice(0, isExpanded ? 6 : (mobile ? 3 : 5));
         if (nextSpine) used.add(nextSpine);
         sideKids.forEach(k => used.add(k));
@@ -549,15 +577,12 @@ const OffyDigi = (() => {
       return spine;
     });
 
-    // Gather grandchildren for each picked BRANCH (e.g. 相 → 想, 箱, 厢, 霜; 果 → 课, 棵, 颗, 裹, 裸)
     const branchTrees = pickedBranches.map(b => {
       const gk = directKidsOf(b.c, used).slice(0, maxGPerBranch);
       gk.forEach(k => used.add(k));
       return { ...b, kids: gk.map(k => ({ c: k, stage: stageOf(k, b.c) || 'CHAMPION' })) };
     });
 
-    /* ---------- Spatial Placement: Hero Spine UP, Parts UPPER-LEFT, Branches & Leaves Around ---------- */
-    // A. Place STACK spine straight UP at 12 o'clock (-π/2)
     const nSpines = stackChains.length;
     stackChains.forEach((spine, si) => {
       const xBase = nSpines > 1 ? (si - (nSpines - 1) / 2) * 168 : 0;
@@ -565,16 +590,12 @@ const OffyDigi = (() => {
       spine.forEach((step, idx) => {
         const x = xBase + (idx > 0 ? (si === 0 && nSpines > 1 ? -16 : si > 0 ? 16 : 0) : 0);
         const y = -(158 + idx * 146);
-        const nd = { key: step.c, c: step.c, x, y, ring: idx === 0 ? 1 : 2, kind: 'stack', stage: 'STACK' };
-        nodes.push(nd);
+        nodes.push({ key: step.c, c: step.c, x, y, ring: idx === 0 ? 1 : 2, kind: 'stack', stage: 'STACK' });
         links.push({ from: prevKey, to: step.c, stage: 'STACK', kind: 'stack' });
 
-        // Fan real side-children cleanly to left & right of this spine node (e.g. 林 → 梦, 禁, 麻, 楚)
-        const sk = step.sideKids;
-        sk.forEach((child, ci) => {
-          const onRight = ci % 2 === 0;
+        step.sideKids.forEach((child, ci) => {
+          const dir = ci % 2 === 0 ? 1 : -1;
           const rank = Math.floor(ci / 2);
-          const dir = onRight ? 1 : -1;
           const sx = x + dir * (138 + rank * 78);
           const sy = y - 24 + (rank % 2 === 0 ? -36 : 44) - idx * 8;
           nodes.push({ key: child.c, c: child.c, x: sx, y: sy, ring: 2, kind: 'branch-leaf', stage: child.stage });
@@ -584,64 +605,47 @@ const OffyDigi = (() => {
       });
     });
 
-    // B. Place PART components (parents of f) on upper-left arc if present
     if (parts.length) {
       const startA = -Math.PI * 0.88, spanA = Math.min(0.85, parts.length * 0.34);
       parts.forEach((p, i) => {
         const a = startA + (parts.length > 1 ? (i / (parts.length - 1)) * spanA : spanA / 2);
-        const r = 164;
-        nodes.push({ key: p.c, c: p.c, x: Math.cos(a) * r, y: Math.sin(a) * r, ring: 1, kind: 'part', stage: 'PART' });
+        nodes.push({ key: p.c, c: p.c, x: Math.cos(a) * 164, y: Math.sin(a) * 164, ring: 1, kind: 'part', stage: 'PART' });
         links.push({ from: p.c, to: f, stage: 'PART', kind: 'part' });
       });
     }
 
-    // C. Allocate remaining angular arc cleanly to BRANCHES (multi-gen) + LEAVES (satellites)
-    // Reserve top wedge around -π/2 if STACK exists, and upper-left wedge if PART exists
     const topReserve = nSpines ? (stackChains.some(sp => sp.some(s => s.sideKids.length > 0)) ? 1.15 : 0.62) : 0;
     const partReserve = parts.length ? 0.85 : 0;
-
-    // Available sweep starts just clockwise of top reserve (-π/2 + topReserve/2) and wraps around to (-π/2 - topReserve/2 - partReserve)
     const aStart = -Math.PI / 2 + topReserve / 2 + 0.14;
     const aEnd = Math.PI * 1.5 - topReserve / 2 - partReserve - 0.14;
     const totalArc = Math.max(1.2, aEnd - aStart);
 
-    // Split arc between BRANCH arms (higher weight so grandchildren fan cleanly) and LEAF satellites
     const hasExpandedLeaves = isExpanded && pickedLeaves.length > 16;
     const branchWeight = branchTrees.reduce((sum, b) => sum + 1.15 + Math.min(4, b.kids.length) * 0.42, 0);
-    const leafArcCount = hasExpandedLeaves ? Math.min(18, pickedLeaves.length) : pickedLeaves.length;
-    const leafWeight = leafArcCount * 0.56;
+    const leafWeight = (hasExpandedLeaves ? Math.min(18, pickedLeaves.length) : pickedLeaves.length) * 0.56;
     const totalWeight = Math.max(1, branchWeight + leafWeight);
 
-    // Place BRANCHES first (flanking right/bottom/left symmetrically around the star)
     let cursor = aStart;
     const branchArcTotal = totalArc * (branchWeight / totalWeight);
     const leafArcTotal = totalArc - branchArcTotal;
-
-    // Interleave branches on right & left sides if leaves are in the middle bottom, or sweep cleanly clockwise
-    const bCount = branchTrees.length;
-    const rightHalf = Math.ceil(bCount / 2);
-    const leftBranches = branchTrees.slice(rightHalf);
-    const rightBranches = branchTrees.slice(0, rightHalf);
+    const bCount = branchTrees.length, rightHalf = Math.ceil(bCount / 2);
+    const rightBranches = branchTrees.slice(0, rightHalf), leftBranches = branchTrees.slice(rightHalf);
 
     const placeBranch = (b, ang, slotArc) => {
       const r1 = bCount > 6 ? 196 : 174;
       const bx = Math.cos(ang) * r1, by = Math.sin(ang) * r1;
       nodes.push({ key: b.c, c: b.c, x: bx, y: by, ring: 1, kind: 'branch', stage: b.stage });
       links.push({ from: f, to: b.c, stage: b.stage, kind: 'branch' });
-
       const gk = b.kids;
       const fanSpread = Math.min(Math.max(slotArc * 1.15, 0.42), gk.length > 3 ? 1.38 : 0.95);
       gk.forEach((g, gi) => {
         const off = gk.length > 1 ? ((gi / (gk.length - 1)) - 0.5) * fanSpread : 0;
-        const ga = ang + off;
-        const r2 = 142 + (gk.length > 4 && gi % 2 === 1 ? 36 : 0);
-        const gx = bx + Math.cos(ga) * r2, gy = by + Math.sin(ga) * r2;
-        nodes.push({ key: g.c, c: g.c, x: gx, y: gy, ring: 2, kind: 'branch-leaf', stage: g.stage });
+        const ga = ang + off, r2 = 142 + (gk.length > 4 && gi % 2 === 1 ? 36 : 0);
+        nodes.push({ key: g.c, c: g.c, x: bx + Math.cos(ga) * r2, y: by + Math.sin(ga) * r2, ring: 2, kind: 'branch-leaf', stage: g.stage });
         links.push({ from: b.c, to: g.c, stage: g.stage, kind: 'branch' });
       });
     };
 
-    // Right-side branches
     rightBranches.forEach(b => {
       const w = 1.15 + Math.min(4, b.kids.length) * 0.42;
       const slot = branchWeight ? branchArcTotal * (w / branchWeight) : 0;
@@ -649,12 +653,9 @@ const OffyDigi = (() => {
       cursor += slot;
     });
 
-    // Leaves sit cleanly in the dedicated quiet bottom sky arc (between right & left branches)
-    // EVERY SINGLE LEAF connects strictly to center f — ZERO fake sibling lines!
     if (pickedLeaves.length) {
       const leafStart = cursor, leafSpan = Math.max(0.55, leafArcTotal);
       if (!hasExpandedLeaves) {
-        // Neat organic single/double arc of brightest HSK satellites
         const perArc = Math.max(4, Math.floor((leafSpan * 185) / 118));
         let idx = 0, layer = 0;
         while (idx < pickedLeaves.length) {
@@ -663,8 +664,7 @@ const OffyDigi = (() => {
           const take = Math.min(pickedLeaves.length - idx, cap);
           for (let j = 0; j < take; j++) {
             const lf = pickedLeaves[idx + j];
-            const t = take > 1 ? (j + 0.5) / take : 0.5;
-            const ang = leafStart + t * leafSpan;
+            const ang = leafStart + (take > 1 ? (j + 0.5) / take : 0.5) * leafSpan;
             const jit = (hash01(lf.c) - 0.5) * 18;
             nodes.push({ key: lf.c, c: lf.c, x: Math.cos(ang) * (r + jit), y: Math.sin(ang) * (r + jit), ring: 1, kind: 'leaf', stage: lf.stage });
             links.push({ from: f, to: lf.c, stage: lf.stage, kind: 'leaf' });
@@ -672,12 +672,9 @@ const OffyDigi = (() => {
           idx += take; layer++;
         }
       } else {
-        // Expanded satellite halo: clean outer arcs wrapping around the whole constellation,
-        // every satellite linked with a soft direct ray to f (never fake sibling-to-sibling!)
         let idx = 0, ringR = 395;
         while (idx < pickedLeaves.length) {
-          const circ = 2 * Math.PI * ringR;
-          const cap = Math.max(12, Math.floor(circ / 122));
+          const cap = Math.max(12, Math.floor((2 * Math.PI * ringR) / 122));
           const take = Math.min(pickedLeaves.length - idx, cap);
           for (let j = 0; j < take; j++) {
             const lf = pickedLeaves[idx + j];
@@ -692,7 +689,6 @@ const OffyDigi = (() => {
       cursor += leafArcTotal;
     }
 
-    // Left-side branches
     leftBranches.forEach(b => {
       const w = 1.15 + Math.min(4, b.kids.length) * 0.42;
       const slot = branchWeight ? branchArcTotal * (w / branchWeight) : 0;
@@ -700,17 +696,13 @@ const OffyDigi = (() => {
       cursor += slot;
     });
 
-    // D. Guaranteed Zero-Overlap AABB Relaxation (center f stays pinned at (0,0))
     relaxOverlap(nodes, true, 104, 114, 128, 134, 28);
 
-    // Exact bounding box for framing cleanly above the +more pill
     let minX = -150, maxX = 150, minY = -150, maxY = 150;
     nodes.forEach(n => {
       minX = Math.min(minX, n.x - 64); maxX = Math.max(maxX, n.x + 64);
       minY = Math.min(minY, n.y - 72); maxY = Math.max(maxY, n.y + 66);
     });
-
-    // Stage counts across visible nodes (excluding center root)
     const sectors = ORDER.map(s2 => {
       const n = nodes.filter(nd => nd.ring > 0 && nd.stage === s2).length;
       return n ? { s: s2, n } : null;
@@ -724,7 +716,189 @@ const OffyDigi = (() => {
     };
   }
 
-  /* ---------- tree layout (left → right, 3 generations, with transitive reduction + BONUS) ---------- */
+  /* =====================================================================
+     REALM 2 · LEVEL 1 — WORD HUB SKY MAP (5 Semantic Morpheme Nebulae)
+     ===================================================================== */
+  function wordsForChar(ch) {
+    const f = base(ch), seen = new Set(), out = [];
+    for (const idx of (D.cw[f] || [])) {
+      const w = D.w[idx];
+      if (!w || !lvOk(w[2]) || [...w[0]].length < 2 || seen.has(w[0])) continue;
+      seen.add(w[0]);
+      out.push(w);
+    }
+    return out;
+  }
+
+  function layoutWordSky() {
+    const byZone = new Map(WORD_ZONES.map(z => [z.id, []]));
+    for (const z of WORD_ZONES) {
+      const arr = byZone.get(z.id);
+      for (const ch of z.chars) {
+        const ws = wordsForChar(ch);
+        if (!ws.length) continue;
+        const top2 = ws.slice().sort((a, b) => a[2] - b[2] || a[0].length - b[0].length).slice(0, 2).map(w => showWord(w[0]));
+        const tier = ws.length >= 55 ? 0 : ws.length >= 28 ? 1 : 2;
+        arr.push({ key: ch, cnt: ws.length, tier, preview: top2.join('·') });
+      }
+      arr.sort((a, b) => b.cnt - a.cnt);
+    }
+    return layoutNebulae(WORD_ZONES, byZone, 62);
+  }
+
+  /* =====================================================================
+     REALM 2 · LEVEL 2 — SHARED-CHAR WORD CONSTELLATION LAYOUT
+     Left Wing (□字 suffix) · Right Wing (字□ prefix) · Top Wing (□字□ idioms)
+     Real 2-char → 3–4 char Sub-Chains (大学→大学生, 电影→电影院) + Variable AABB!
+     ===================================================================== */
+  function layoutWordConstellation(rawFocus) {
+    const f = base(rawFocus);
+    const allWords = wordsForChar(f);
+    const byZh = new Map(allWords.map(w => [w[0], w]));
+
+    // Separate 2-char base words vs 3+ char words and attach real 2→3+ sub-chains!
+    const twoWords = allWords.filter(w => [...w[0]].length === 2);
+    const subMap = new Map();
+    const attached = new Set();
+    for (const w of allWords) {
+      if ([...w[0]].length < 3) continue;
+      // Prefer exact prefix match (大学→大学生, 留学→留学生, 电影→电影院) before suffix/substring (电话→打电话)
+      let bestP = null, bestScore = -1;
+      for (const w2 of twoWords) {
+        if (!w[0].includes(w2[0])) continue;
+        const score = (w[0].startsWith(w2[0]) ? 100 : 0) + (10 - (w2[2] || 9));
+        if (score > bestScore) { bestScore = score; bestP = w2; }
+      }
+      if (bestP) {
+        if (!subMap.has(bestP[0])) subMap.set(bestP[0], []);
+        subMap.get(bestP[0]).push(w);
+        attached.add(w[0]);
+      }
+    }
+    subMap.forEach(arr => arr.sort((a, b) => a[2] - b[2] || a[0].length - b[0].length));
+
+    // Classify root words (not attached as sub-children) into SUF (left □f), PRE (right f□), MID (top □f□)
+    const sufAll = [], preAll = [], midAll = [];
+    for (const w of allWords) {
+      if (attached.has(w[0])) continue;
+      const chars = [...w[0]];
+      if (chars[0] === f) preAll.push(w);
+      else if (chars[chars.length - 1] === f) sufAll.push(w);
+      else midAll.push(w);
+    }
+    const sortW = (a, b) => ((subMap.get(b[0]) || []).length > 0 ? 1 : 0) - ((subMap.get(a[0]) || []).length > 0 ? 1 : 0)
+      || a[2] - b[2] || a[0].length - b[0].length;
+    sufAll.sort(sortW); preAll.sort(sortW); midAll.sort(sortW);
+
+    const mobile = innerWidth < 700, tablet = innerWidth >= 700 && innerWidth < 1100;
+    const isExpanded = !!st.wOpen[f];
+    const baseSide = isExpanded ? 30 : (mobile ? 5 : tablet ? 8 : 10);
+    const baseMid = isExpanded ? 10 : (mobile ? 2 : tablet ? 3 : 4);
+    const maxSubPerWord = isExpanded ? 4 : (mobile ? 2 : 3);
+
+    // Rebalance surplus slots when one wing is smaller (e.g. 电: 6 SUF vs 23 PRE)
+    const sufCap = baseSide + Math.max(0, baseSide - preAll.length);
+    const preCap = baseSide + Math.max(0, baseSide - sufAll.length);
+    const pickedSuf = sufAll.slice(0, sufCap);
+    const pickedPre = preAll.slice(0, preCap);
+    const pickedMid = midAll.slice(0, baseMid);
+
+    const shownCount = pickedSuf.length + pickedPre.length + pickedMid.length;
+    const totalRootCount = sufAll.length + preAll.length + midAll.length;
+    const more = Math.max(0, totalRootCount - shownCount);
+
+    const calcBW = zh => Math.max(92, [...zh].length * 25 + 36);
+    const bh = 98;
+
+    const nodes = [{ key: '__root__', c: f, zh: f, x: 0, y: 0, bw: 86, bh: 120, ring: 0, wing: 'ROOT', kind: 'root' }];
+    const links = [];
+
+    const addWing = (list, sideDir, wingCode) => {
+      if (!list.length) return;
+      const perArc = isExpanded ? 10 : (mobile ? 5 : 7);
+      let idx = 0, layer = 0;
+      while (idx < list.length) {
+        const take = Math.min(list.length - idx, perArc + layer * 4);
+        const rx = 215 + layer * 165, ry = 185 + layer * 125;
+        const maxSpan = Math.min(1.12, 0.35 + take * 0.14);
+        for (let j = 0; j < take; j++) {
+          const w = list[idx + j];
+          const t = take > 1 ? (j / (take - 1) - 0.5) * 2 : 0; // -1..+1
+          const ang = (sideDir < 0 ? Math.PI : 0) + t * maxSpan * (sideDir < 0 ? -1 : 1);
+          const x = Math.cos(ang) * rx, y = Math.sin(ang) * ry;
+          nodes.push({ key: w[0], zh: w[0], w, x, y, bw: calcBW(w[0]), bh, ring: 1, wing: wingCode, side: sideDir, kind: 'word' });
+          links.push({ from: '__root__', to: w[0], wing: wingCode, kind: wingCode === 'PRE' ? 'wpre' : 'wsuf' });
+
+          // Real 2→3+ syllable sub-chains extend cleanly outward from their 2-char parent!
+          const subs = (subMap.get(w[0]) || []).slice(0, maxSubPerWord);
+          subs.forEach((sw, si) => {
+            const sOff = subs.length > 1 ? (si - (subs.length - 1) / 2) * 96 : 0;
+            const sx = x + sideDir * (calcBW(w[0]) / 2 + calcBW(sw[0]) / 2 + 54);
+            const sy = y + sOff + (t * 28);
+            nodes.push({ key: sw[0], zh: sw[0], w: sw, x: sx, y: sy, bw: calcBW(sw[0]), bh, ring: 2, wing: 'SUB', side: sideDir, kind: 'wsub' });
+            links.push({ from: w[0], to: sw[0], wing: 'SUB', kind: 'wsub' });
+          });
+        }
+        idx += take; layer++;
+      }
+    };
+
+    // Left wing = □f (suffix), Right wing = f□ (prefix), Top wing = □f□ (middle/idiom)
+    addWing(pickedSuf, -1, 'SUF');
+    addWing(pickedPre, +1, 'PRE');
+
+    if (pickedMid.length) {
+      pickedMid.forEach((w, i) => {
+        const row = Math.floor(i / 3), col = i % 3, inRow = Math.min(3, pickedMid.length - row * 3);
+        const mx = (col - (inRow - 1) / 2) * 162;
+        const my = -(176 + row * 116);
+        nodes.push({ key: w[0], zh: w[0], w, x: mx, y: my, bw: calcBW(w[0]), bh, ring: 1, wing: 'MID', side: 0, kind: 'word' });
+        links.push({ from: '__root__', to: w[0], wing: 'MID', kind: 'wmid' });
+      });
+    }
+
+    // Variable-width AABB relaxation — guarantees 0 overlaps across 2-, 3-, and 4-char word capsules!
+    relaxBoxes(nodes, true, 18, 12, 32);
+
+    // Floating wing labels positioned cleanly above ALL nodes (including 3-char sub-chains) on each side
+    const wingLabels = [];
+    const makeWingLabel = (wingCode, sideVal, text) => {
+      const grp = nodes.filter(n => n.ring > 0 && n.side === sideVal);
+      if (!grp.length) return;
+      let minX = Infinity, maxX = -Infinity, minY = Infinity;
+      grp.forEach(n => { minX = Math.min(minX, n.x - n.bw / 2); maxX = Math.max(maxX, n.x + n.bw / 2); minY = Math.min(minY, n.y - n.bh / 2); });
+      wingLabels.push({ wing: wingCode, text, x: (minX + maxX) / 2, y: minY - 38 });
+    };
+    const dispF = show(f);
+    makeWingLabel('SUF', -1, `□${dispF} · ${T('ลงท้าย')} (${sufAll.length})`);
+    makeWingLabel('PRE', +1, `${dispF}□ · ${T('ขึ้นต้น')} (${preAll.length})`);
+    makeWingLabel('MID',  0, `□${dispF}□ · ${T('กลางคำ')} (${midAll.length})`);
+
+    let minX = -170, maxX = 170, minY = -150, maxY = 150;
+    nodes.forEach(n => {
+      minX = Math.min(minX, n.x - n.bw / 2 - 14); maxX = Math.max(maxX, n.x + n.bw / 2 + 14);
+      minY = Math.min(minY, n.y - n.bh / 2 - 14); maxY = Math.max(maxY, n.y + n.bh / 2 + 14);
+    });
+    wingLabels.forEach(lb => { minY = Math.min(minY, lb.y - 24); });
+
+    const counts = {
+      SUF: nodes.filter(n => n.wing === 'SUF').length,
+      PRE: nodes.filter(n => n.wing === 'PRE').length,
+      SUB: nodes.filter(n => n.wing === 'SUB').length,
+      MID: nodes.filter(n => n.wing === 'MID').length
+    };
+
+    return {
+      f, nodes, links, wingLabels, counts, more, isExpanded,
+      totalWords: allWords.length, sufTotal: sufAll.length, preTotal: preAll.length, midTotal: midAll.length,
+      hasMoreToggle: more > 0 || (isExpanded && totalRootCount > 14),
+      byZh,
+      box: { minX: minX - 24, maxX: maxX + 24, minY: minY - 24, maxY: maxY + 24 },
+      asp: viewAspect()
+    };
+  }
+
+  /* ---------- tree layout (left → right, Char Realm) ---------- */
   function build(baseChar) {
     const seen = new Set([baseChar]);
     const node = (c, p, depth) => {
@@ -756,7 +930,6 @@ const OffyDigi = (() => {
     return rep ? `<em class="dg-rep">×${rep}</em>` : '';
   };
 
-  /* Pinyin ABOVE box · character square MIDDLE · meaning BELOW */
   const nodeInner = (c, stage) => {
     const dot = !BONUS[c] && typeof HzKit !== 'undefined' ? HzKit.dotHtml(c) : '';
     const sd = side(c);
@@ -769,11 +942,24 @@ const OffyDigi = (() => {
     return `${topLbl}<i class="dg-hex"${lvC(c)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(c))}${dot}${rep}</i>${m.t ? `<small class="dg-m${m.fb ? ' fb' : ''}" lang="${m.fb ? 'en' : mLang()}">${esc2(shortM(m.t))}</small>` : ''}`;
   };
 
+  function wordNodeInner(n, focusChar) {
+    if (n.ring === 0) return nodeInner(n.c, 'ROOKIE');
+    const w = n.w;
+    const dot = typeof HzKit !== 'undefined' && HzKit.wordDotHtml ? HzKit.wordDotHtml(w[0]) : '';
+    const gl = typeof HzKit !== 'undefined' ? HzKit.wordGloss(w[0], w[3], !!w[4]) : { t: w[3], fb: !w[4] };
+    return `<span class="pyx">${esc2(w[1])}</span><i class="dg-wpill"${lvWordC(w[2])} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${dot}${markWord(w[0], focusChar)}</i>${gl.t ? `<small class="dg-m${gl.fb ? ' fb' : ''}" lang="${gl.fb ? 'en' : mLang()}">${esc2(shortM(gl.t))}</small>` : ''}`;
+  }
+
   function skyNodeInner(n) {
-    const r = n.r, py = pyOf(n.key) || r[3] || '';
+    const r = n.r, py = pyOf(n.key) || (r && r[3]) || '';
     const m = meanOf(n.key);
     const sub = n.preview ? `<em class="dg-sky-ch" lang="zh-Hans">${esc2(n.preview)}</em>` : `${esc2(shortM(m.t))} · ${n.cnt}`;
     return `<span class="pyx">${esc2(py)}</span><i class="dg-hex"${lvC(n.key)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(n.key))}</i><small class="dg-m">${sub}</small>`;
+  }
+
+  function wordSkyNodeInner(n) {
+    const py = pyOf(n.key), m = meanOf(n.key);
+    return `<span class="pyx">${esc2(py)}</span><i class="dg-hex"${lvC(n.key)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(n.key))}</i><small class="dg-m">${esc2(shortM(m.t))} · <b>${n.cnt}</b></small>`;
   }
 
   function skyGuideHTML() {
@@ -795,13 +981,95 @@ const OffyDigi = (() => {
     </div>`;
   }
 
+  function wordSkyGuideHTML() {
+    const items = QUICK_WORD_HUBS.map(ch => {
+      const cnt = wordsForChar(ch).length;
+      return `<button type="button" class="dg-qchain" data-whub="${esc2(ch)}"><span lang="zh-Hans">${esc2(show(ch))}</span><small>${cnt} ${T('คำ')}</small></button>`;
+    }).join('');
+    return `<div class="dg-card dg-sky-card">
+      <div class="dg-ch"><span class="dg-stage s-CHAMPION">${T('ท้องฟ้ากลุ่มดาวคำศัพท์')}</span><span class="dg-id">11,000 词</span></div>
+      <p class="dg-sky-lead">${LANG === 'en'
+        ? 'Tap any morpheme hub star or search a char/word above to see all HSK compound words sharing that character.'
+        : 'แตะอักษรแม่คำบนท้องฟ้า หรือพิมพ์ค้นหาอักษร/คำศัพท์ด้านบน เพื่อดูพวงคำศัพท์ที่ใช้ตัวเดียวกันทั้ง HSK 1–9'}</p>
+      <ul class="dg-sky-key">
+        <li><i class="k-wsuf"></i><span><b>${T('ลงท้ายด้วยตัวนี้')} (□字)</b> · ${LANG === 'en' ? 'Left wing (e.g. 大学, 小学, 开心, 担心)' : 'ฝั่งซ้าย เช่น 大学 · 小学 · 开心 · 担心'}</span></li>
+        <li><i class="k-wpre"></i><span><b>${T('ขึ้นต้นด้วยตัวนี้')} (字□)</b> · ${LANG === 'en' ? 'Right wing (e.g. 学生, 学习, 电话, 电脑)' : 'ฝั่งขวา เช่น 学生 · 学习 · 电话 · 电脑'}</span></li>
+        <li><i class="k-stack"></i><span><b>${T('ต่อยอด 3–4 พยางค์')}</b> · ${LANG === 'en' ? 'Real sub-chains (大学→大学生, 电影→电影院)' : 'ต่อสายจริงจากคำ 2 พยางค์ เช่น 大学→大学生 · 电影→电影院'}</span></li>
+        <li><i class="k-dot"></i><span><b>${T('จำได้แล้ว')} / ${T('กำลังเรียน')}</b> · ${LANG === 'en' ? 'Green/gold status dot on words you studied' : 'จุดเขียว/เหลืองมุมบนซ้ายบอกคำที่คุณเคยฝึกแล้ว'}</span></li>
+      </ul>
+      <p class="dg-wt">${T('แม่คำยอดฮิต')}</p>
+      <div class="dg-qchains">${items}</div>
+    </div>`;
+  }
+
+  function wordCardHTML(focusChar, selZh) {
+    const f = base(focusChar);
+    const w = selZh ? (D.cw[f] || []).map(i => D.w[i]).find(x => x && x[0] === selZh) : null;
+    if (w) {
+      const gl = typeof HzKit !== 'undefined' ? HzKit.wordGloss(w[0], w[3], !!w[4]) : { t: w[3], fb: !w[4] };
+      const stCode = typeof HzKit !== 'undefined' && HzKit.wordStatus ? HzKit.wordStatus(w[0]) : '';
+      const stPill = stCode === 'mastered'
+        ? `<span class="dg-st-pill m">${T('จำได้แล้ว')}</span>`
+        : stCode === 'learning'
+        ? `<span class="dg-st-pill l">${T('กำลังเรียน')}</span>`
+        : `<span class="dg-st-pill">${T('ยังไม่เรียน')}</span>`;
+      // Distinct partner characters inside this word so user can hop directly to their word constellation!
+      const partners = [...new Set([...w[0]])].filter(ch => ch !== f && (D.cw[ch] || []).length > 0);
+      const hopBtns = partners.map(ch => {
+        const cnt = wordsForChar(ch).length, m = meanOf(ch);
+        return `<button type="button" class="dg-hop" data-whub="${esc2(ch)}"${lvC(ch)}>
+          <b lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(ch))}</b>
+          <span><em>${esc2(pyOf(ch))}</em>${esc2(shortM(m.t))}</span>
+          <small>${cnt} ${T('คำ')} →</small>
+        </button>`;
+      }).join('');
+
+      return `<div class="dg-card dg-wcard">
+        <div class="dg-ch"><span class="dg-wbadge">${lvQ(w[2])}<span>HSK ${w[2] === 7 ? '7–9' : w[2]}</span></span>${stPill}</div>
+        <div class="dg-whero">
+          <div class="dg-wbig"${lvWordC(w[2])} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${markWord(w[0], f)}</div>
+          <div class="dg-wmeta">
+            <p class="dg-py"><span class="pyx">${esc2(w[1])}</span><button class="dg-say" data-say="${esc2(w[0])}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></p>
+            <p class="dg-mean">${gl.fb ? '<em>EN</em> ' : ''}${esc2(gl.t)}</p>
+          </div>
+        </div>
+        <button type="button" class="dg-go" data-dgword="${esc2(w[0])}">${ic('vocab')}${T('เปิดการ์ด 5 ภาษา')}</button>
+        ${hopBtns ? `<p class="dg-wt">${T('กระโดดไปกลุ่มดาวคำของ…')}</p><div class="dg-hops">${hopBtns}</div>` : ''}
+        <div class="dg-wfoot">
+          <button type="button" class="hz-xbtn" data-tochar="${esc2(f)}">${ic('bolt')}<span>${T('ดูสายวิวัฒนาการอักษร')} ${esc2(show(f))}</span></button>
+        </div>
+      </div>`;
+    }
+
+    // Default Focus Character Summary in Word Mode
+    const all = wordsForChar(f);
+    const mo = meanOf(f);
+    const preCnt = all.filter(x => [...x[0]][0] === f).length;
+    const sufCnt = all.filter(x => { const cs = [...x[0]]; return cs[cs.length - 1] === f && cs[0] !== f; }).length;
+    const midCnt = all.length - preCnt - sufCnt;
+    const topWords = all.slice().sort((a, b) => a[2] - b[2] || a[0].length - b[0].length).slice(0, 8).map(x => {
+      const gl = typeof HzKit !== 'undefined' ? HzKit.wordGloss(x[0], x[3], !!x[4]) : { t: x[3], fb: !x[4] };
+      return `<li><button type="button" class="dg-wbtn" data-wn="${esc2(x[0])}">${lvQ(x[2])}<b lang="zh-Hans">${esc2(showWord(x[0]))}</b><span class="pyx">${esc2(x[1])}</span><span class="dg-wgl">${gl.fb ? '<em>EN</em>' : ''}${esc2(gl.t)}</span></button><button type="button" class="tr-say" data-say="${esc2(x[0])}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></li>`;
+    }).join('');
+    return `<div class="dg-card dg-wcard">
+      <div class="dg-ch"><span class="dg-stage s-CHAMPION">${T('กลุ่มดาว')} · ${T('คำศัพท์')}</span><span class="dg-id">${all.length} ${T('คำ')}</span></div>
+      <div class="dg-hero"><div class="dg-big"${lvC(f)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(f))}</div>
+        <div><p class="dg-py"><span class="pyx">${esc2(pyOf(f))}</span><button class="dg-say" data-say="${esc2(f)}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></p>
+          ${mo.t ? `<p class="dg-mean">${esc2(mo.t)}</p>` : ''}<p class="dg-sd">${LANG === 'en' ? 'Tap any word star on the map to inspect or hop to partner chars.' : 'แตะคำบนกลุ่มดาวเพื่อฟังเสียง ดูความหมาย หรือกระโดดไปตัวอักษรคู่หู'}</p></div></div>
+      <dl class="dg-stats dg-wstats"><div><dt>□${esc2(show(f))}</dt><dd>${sufCnt}</dd></div><div><dt>${esc2(show(f))}□</dt><dd>${preCnt}</dd></div><div><dt>□${esc2(show(f))}□</dt><dd>${midCnt}</dd></div><div><dt>${T('ทั้งหมด')}</dt><dd>${all.length}</dd></div></dl>
+      <div class="hz-xbar"><button type="button" class="hz-xbtn" data-tochar="${esc2(f)}">${ic('bolt')}<span>${T('ดูสายวิวัฒนาการอักษร')} ${esc2(show(f))}</span></button></div>
+      ${topWords ? `<p class="dg-wt">${T('คำที่ใช้ตัวนี้')} <small>${T('แตะเพื่อเลือก')}</small></p><ul class="dg-ws">${topWords}</ul>` : ''}
+    </div>`;
+  }
+
   function cardHTML(c, stage, parent) {
     const b = BONUS[c], x = D.c[c], stg = STAGES[stage] || STAGES.ROOKIE, g = show(c);
     const rr = x ? x[3] && rad.get(x[3]) : radOfGlyph.get(c);
+    const wCnt = wordsForChar(c).length;
     const words = x ? (D.cw[c] || []).slice(0, 8).map(i => {
       const w = D.w[i];
       const gl = typeof HzKit !== 'undefined' ? HzKit.wordGloss(w[0], w[3], !!w[4]) : { t: w[3], fb: !w[4] };
-      return `<li><button type="button" class="dg-wbtn" data-dgword="${esc2(w[0])}">${lvQ(w[2])}<b lang="zh-Hans">${esc2(w[0])}</b><span class="pyx">${esc2(w[1])}</span><span class="dg-wgl">${gl.fb ? '<em>EN</em>' : ''}${esc2(gl.t)}</span></button><button type="button" class="tr-say" data-say="${esc2(w[0])}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></li>`;
+      return `<li><button type="button" class="dg-wbtn" data-dgword="${esc2(w[0])}">${lvQ(w[2])}<b lang="zh-Hans">${esc2(showWord(w[0]))}</b><span class="pyx">${esc2(w[1])}</span><span class="dg-wgl">${gl.fb ? '<em>EN</em>' : ''}${esc2(gl.t)}</span></button><button type="button" class="tr-say" data-say="${esc2(w[0])}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></li>`;
     }).join('') : '';
     const cat = parent && (x || b) && stageOf(c, parent) ? catalyst(c, parent) : [];
     const parts = partsRaw(c).map(q => `<button class="dg-part${parent && formsOf(parent).has(q) ? ' base' : ''}" data-dgo="${esc2(q)}" lang="zh-Hans">${esc2(show(q))}${side(q) ? `<small>${esc2(side(q))}</small>` : ''}</button>`).join('<i>+</i>');
@@ -809,13 +1077,14 @@ const OffyDigi = (() => {
     const reg = x ? [[T('ไต้หวัน'), x[8], 'zh-Hant'], [T('ญี่ปุ่น'), x[13], 'ja']].filter(f => f[1]) : (b && b.trad ? [[T('ตัวเต็ม'), b.trad, 'zh-Hant']] : []);
     const twins = side(c) ? ((D.amb || {})[base(c)] || []).filter(no => `${base(c)}@${no}` !== c).map(no => `${base(c)}@${no}`) : [];
     const xbar = !b && typeof HzKit !== 'undefined' ? HzKit.crossBar(c, 'digi') : '';
+    const toWordBtn = !b && wCnt > 0 ? `<button type="button" class="dg-toword" data-toword="${esc2(base(c))}">${ic('star')}<span>${T('ดูกลุ่มดาวคำของตัวนี้')} (${wCnt} ${T('คำ')}) →</span></button>` : '';
     const bonusBadge = b ? `<span class="dg-bonus-tag">${T('นอก HSK')} · ×${b.rep}</span>` : '';
     return `<div class="dg-card s-${stage}${b ? ' is-bonus' : ''}">
       <div class="dg-ch"><span class="dg-stage">${esc2(T(stg.th))} <b>${stg.zh}</b></span>${bonusBadge || `<span class="dg-id">#${esc2((c.codePointAt(0) || 0).toString(16).toUpperCase())}</span>`}</div>
       <div class="dg-hero"><div class="dg-big${b ? ' is-bonus' : ''}"${lvC(c)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(g)}</div>
         <div><p class="dg-py"><span class="pyx">${esc2(pyOf(c))}</span><button class="dg-say" data-say="${esc2(base(c))}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></p>
           ${meaning ? `<p class="dg-mean">${esc2(meaning)}</p>` : ''}<p class="dg-sd">${esc2(stg.d)}</p></div></div>
-      ${xbar}
+      ${xbar}${toWordBtn}
       ${x ? `<dl class="dg-stats"><div><dt>HSK</dt><dd>${x[1] === 7 ? '7-9' : x[1]}</dd></div><div><dt>${T('ขีด')}</dt><dd>${esc2(x[2])}</dd></div>${rr ? `<div><dt>部首</dt><dd lang="zh-Hans">${esc2(radG(rr))}</dd></div>` : ''}${x[6] ? `<div><dt>六书</dt><dd lang="zh-Hans">${esc2(x[6])}</dd></div>` : ''}</dl>`
         : b ? `<dl class="dg-stats"><div><dt>HSK</dt><dd>${T('นอก HSK')}</dd></div><div><dt>${T('ขีด')}</dt><dd>${b.strokes}</dd></div><div><dt>六书</dt><dd lang="zh-Hans">会意</dd></div><div><dt>${T('ซ้ำร่าง')}</dt><dd>×${b.rep}</dd></div></dl>` : ''}
       ${parts ? `<p class="dg-row"><span>${T('โครงสร้าง')}</span>${parts}</p>` : ''}
@@ -827,36 +1096,68 @@ const OffyDigi = (() => {
     </div>`;
   }
 
-  const trailHTML = () => `<button type="button" class="dg-sky-back" data-skyback>✦ ${T('ท้องฟ้าทั้งหมด')}</button>`
-    + st.trail.map((c, i) => `<i>›</i><button class="${i === st.trail.length - 1 ? 'on' : ''}" data-trail="${i}" lang="zh-Hans">${esc2(show(c))}</button>`).join('');
+  const trailHTML = () => {
+    if (isWord()) {
+      return `<button type="button" class="dg-sky-back" data-skyback>✦ ${T('ท้องฟ้าคำศัพท์')}</button>`
+        + st.wTrail.map((c, i) => `<i>›</i><button class="${i === st.wTrail.length - 1 ? 'on' : ''}" data-wtrail="${i}" lang="zh-Hans">${esc2(show(c))}</button>`).join('');
+    }
+    return `<button type="button" class="dg-sky-back" data-skyback>✦ ${T('ท้องฟ้าทั้งหมด')}</button>`
+      + st.trail.map((c, i) => `<i>›</i><button class="${i === st.trail.length - 1 ? 'on' : ''}" data-trail="${i}" lang="zh-Hans">${esc2(show(c))}</button>`).join('');
+  };
 
-  /* ---------- paint (frame) ---------- */
+  /* ---------- paint (unified dual-realm frame) ---------- */
   function paint() {
     if (!host) return;
     cancelAnimationFrame(anim); cur = new Map();
-    st.stageFilter = null;
-    const focus = st.trail[st.trail.length - 1], vm = viewMode(), sky = isSky();
+    st.stageFilter = null; st.wFilter = null;
+    const wordMode = isWord(), sky = isSky();
+    const vm = wordMode && viewMode() === 'tree' ? 'radial' : viewMode();
+    const focus = wordMode ? st.wTrail[st.wTrail.length - 1] : st.trail[st.trail.length - 1];
 
-    const zoneBar = sky
-      ? `<div class="dg-zones">
-          <button type="button" class="${st.skyZone === 'all' ? 'on' : ''}" data-zone="all">✦ ${T('ทั้งหมด')}</button>
-          ${ZONES.map(z => `<button type="button" class="${st.skyZone === z.id ? 'on' : ''}" data-zone="${z.id}">${z.icon} ${LANG === 'en' ? z.en : z.th}</button>`).join('')}
-        </div>`
-      : `<div class="dg-subbar">
-          <div class="dg-tg dg-vw" role="tablist">
-            <span class="${vm === 'radial' ? 'on' : ''}" data-view="radial">${T('กลุ่มดาว')}</span>
-            <span class="${vm === 'grid' ? 'on' : ''}" data-view="grid">${T('กริด')}</span>
-            <span class="${vm === 'tree' ? 'on' : ''}" data-view="tree">${T('ขวา')}</span>
-          </div>
-          <div class="dg-legend">${ORDER.map(k => `<button type="button" class="s-${k}" data-stage="${k}" aria-pressed="false"><i></i><b lang="zh-Hans">${STAGES[k].zh}</b><span>${LANG === 'en' ? T(STAGES[k].th) : STAGES[k].sh}</span><em class="dg-cnt"></em></button>`).join('')}</div>
+    let subArea = '';
+    if (sky) {
+      const zList = wordMode ? WORD_ZONES : ZONES;
+      const curZ = wordMode ? st.wSkyZone : st.skyZone;
+      subArea = `<div class="dg-zones">
+        <button type="button" class="${curZ === 'all' ? 'on' : ''}" data-zone="all">✦ ${T('ทั้งหมด')}</button>
+        ${zList.map(z => `<button type="button" class="${curZ === z.id ? 'on' : ''}" data-zone="${z.id}">${z.icon} ${LANG === 'en' ? z.en : z.th}</button>`).join('')}
+      </div>`;
+    } else if (wordMode) {
+      subArea = `<div class="dg-subbar">
+        <div class="dg-tg dg-vw" role="tablist">
+          <span class="${vm === 'radial' ? 'on' : ''}" data-view="radial">${T('กลุ่มดาว')}</span>
+          <span class="${vm === 'grid' ? 'on' : ''}" data-view="grid">${T('กริด')}</span>
         </div>
-        <nav class="dg-trail" aria-label="trail">${trailHTML()}</nav>`;
-
-    host.innerHTML = `<div class="dg${sky ? ' is-sky is-radial' : (vm === 'radial' ? ' is-radial' : '')}${!sky && vm === 'grid' ? ' is-grid' : ''}">
-      <div class="dg-top">
-        <label class="dg-q">${ic('search')}<input maxlength="4" placeholder="${T('ค้นหาอักษรหรือราก เช่น 木, 森, 想, 叒…')}" value=""><button class="q-pen" data-handpad=".dg-q input" aria-label="${T('เขียนค้นหา')}">${ic('pen')}</button></label>
+        <div class="dg-legend">${W_ORDER.map(k => `<button type="button" class="w-${k}" data-wing="${k}" aria-pressed="false"><i></i><b lang="zh-Hans">${W_WINGS[k].zh}</b><span>${LANG === 'en' ? T(W_WINGS[k].sh) : W_WINGS[k].sh}</span><em class="dg-cnt"></em></button>`).join('')}</div>
       </div>
-      ${zoneBar}
+      <nav class="dg-trail" aria-label="trail">${trailHTML()}</nav>`;
+    } else {
+      subArea = `<div class="dg-subbar">
+        <div class="dg-tg dg-vw" role="tablist">
+          <span class="${vm === 'radial' ? 'on' : ''}" data-view="radial">${T('กลุ่มดาว')}</span>
+          <span class="${vm === 'grid' ? 'on' : ''}" data-view="grid">${T('กริด')}</span>
+          <span class="${vm === 'tree' ? 'on' : ''}" data-view="tree">${T('ขวา')}</span>
+        </div>
+        <div class="dg-legend">${ORDER.map(k => `<button type="button" class="s-${k}" data-stage="${k}" aria-pressed="false"><i></i><b lang="zh-Hans">${STAGES[k].zh}</b><span>${LANG === 'en' ? T(STAGES[k].th) : STAGES[k].sh}</span><em class="dg-cnt"></em></button>`).join('')}</div>
+      </div>
+      <nav class="dg-trail" aria-label="trail">${trailHTML()}</nav>`;
+    }
+
+    const hintTxt = sky
+      ? (wordMode ? T('แตะอักษรแม่คำเพื่อดูกลุ่มดาวคำศัพท์ · ลากหรือซูมได้') : T('แตะรากศัพท์เพื่อเจาะเข้ากลุ่มดาว · ลากหรือซูมได้'))
+      : wordMode ? T('แตะคำเพื่อฟังเสียงและดูรายละเอียด · แตะตัวกลางดูสรุป')
+      : vm === 'radial' ? T('แตะตัวไหนก็ได้เพื่อย้ายมาไว้ตรงกลาง')
+      : T('ลากเพื่อเลื่อน · หมุนล้อหรือบีบเพื่อซูม');
+
+    host.innerHTML = `<div class="dg${wordMode ? ' is-word' : ''}${sky ? ' is-sky is-radial' : (vm === 'radial' ? ' is-radial' : '')}${!sky && vm === 'grid' ? ' is-grid' : ''}">
+      <div class="dg-top">
+        <div class="dg-tg dg-realm" role="tablist" aria-label="mode">
+          <span class="${wordMode ? '' : 'on'}" data-realm="char"><b lang="zh-Hans">字</b>${T('อักษร')}</span>
+          <span class="${wordMode ? 'on' : ''}" data-realm="word"><b lang="zh-Hans">词</b>${T('คำศัพท์')}</span>
+        </div>
+        <label class="dg-q">${ic('search')}<input maxlength="6" placeholder="${wordMode ? T('ค้นหาแม่คำ หรือคำศัพท์ เช่น 学, 电, 心, 电影…') : T('ค้นหาอักษรหรือราก เช่น 木, 森, 想, 叒…')}" value=""><button class="q-pen" data-handpad=".dg-q input" aria-label="${T('เขียนค้นหา')}">${ic('pen')}</button></label>
+      </div>
+      ${subArea}
       <div class="dg-body">
         ${!sky && vm === 'grid'
           ? `<div class="dg-grid-wrap"></div>`
@@ -864,24 +1165,28 @@ const OffyDigi = (() => {
               <div class="dg-world"></div>
               <div class="dg-zoom"><button data-zoom="1" aria-label="zoom in">+</button><button data-zoom="-1" aria-label="zoom out">−</button><button data-zoom="0" aria-label="fit">${ic('repeat')}</button></div>
               <div class="dg-more-bar"></div>
-              <p class="dg-hint">${sky ? T('แตะรากศัพท์เพื่อเจาะเข้ากลุ่มดาว · ลากหรือซูมได้') : radial() ? T('แตะตัวไหนก็ได้เพื่อย้ายมาไว้ตรงกลาง') : T('ลากเพื่อเลื่อน · หมุนล้อหรือบีบเพื่อซูม')}</p>
+              <p class="dg-hint">${hintTxt}</p>
             </div>`}
         <aside class="dg-side"></aside>
       </div>
       <div class="dg-fx" hidden></div></div>`;
 
-    if (sky) { drawSky(); watchShape(); }
-    else if (vm === 'radial') { st.fitted = false; drawRadial(focus, false); watchShape(); }
-    else if (vm === 'grid') drawGrid(focus);
-    else { drawTree(); watchShape(); }
+    if (sky) { wordMode ? drawWordSky() : drawSky(); watchShape(); }
+    else if (wordMode) {
+      if (vm === 'grid') drawWordGrid(focus);
+      else { st.fitted = false; drawWordConstellation(focus, false); watchShape(); }
+    } else {
+      if (vm === 'radial') { st.fitted = false; drawRadial(focus, false); watchShape(); }
+      else if (vm === 'grid') drawGrid(focus);
+      else { drawTree(); watchShape(); }
+    }
     if (typeof HanziView !== 'undefined' && HanziView.fit) setTimeout(HanziView.fit, 35);
   }
 
-  /* ---------- Level 1 Sky Map drawing ---------- */
+  /* ---------- Sky Map Drawing (Char & Word) ---------- */
   function drawSky() {
     const world = host.querySelector('.dg-world'); if (!world) return;
-    skyLay = layoutSky();
-    lay = null;
+    skyLay = layoutSky(); lay = null; wLay = null; wSkyLay = null;
     const svg = `<svg class="dg-svg sky" width="1" height="1" aria-hidden="true">${skyLay.links.map(l =>
       `<line class="dg-sky-l" data-zone="${l.zone}" x1="${l.from.x.toFixed(1)}" y1="${l.from.y.toFixed(1)}" x2="${l.to.x.toFixed(1)}" y2="${l.to.y.toFixed(1)}"/>`
     ).join('')}</svg>`;
@@ -892,37 +1197,147 @@ const OffyDigi = (() => {
       `<button type="button" class="dg-n dg-sky-n t${n.tier}${n.preview ? ' has-st' : ''}" data-sky="${esc2(n.key)}" data-zone="${n.zone}" style="transform:translate(${n.x.toFixed(1)}px,${n.y.toFixed(1)}px) translate(-50%,var(--hy))" aria-label="${esc2(show(n.key))}">${skyNodeInner(n)}</button>`
     ).join('');
     world.innerHTML = svg + labels + stars;
-
     const moreBar = host.querySelector('.dg-more-bar');
     if (moreBar) {
       moreBar.innerHTML = st.skyAll
         ? `<button type="button" class="dg-more-pill" data-skyall>${T('แสดงเฉพาะรากหลัก')}</button>`
         : `<button type="button" class="dg-more-pill" data-skyall>+ ${T('แสดงรากทั้งหมด')} (${skyLay.totalActive})</button>`;
     }
-    const card = host.querySelector('.dg-side');
-    if (card) card.innerHTML = skyGuideHTML();
+    host.querySelector('.dg-side').innerHTML = skyGuideHTML();
+    applySkyZone(false);
+  }
+
+  function drawWordSky() {
+    const world = host.querySelector('.dg-world'); if (!world) return;
+    wSkyLay = layoutWordSky(); lay = null; wLay = null; skyLay = null;
+    const svg = `<svg class="dg-svg sky" width="1" height="1" aria-hidden="true">${wSkyLay.links.map(l =>
+      `<line class="dg-sky-l" data-zone="${l.zone}" x1="${l.from.x.toFixed(1)}" y1="${l.from.y.toFixed(1)}" x2="${l.to.x.toFixed(1)}" y2="${l.to.y.toFixed(1)}"/>`
+    ).join('')}</svg>`;
+    const labels = wSkyLay.labels.map(lb =>
+      `<button type="button" class="dg-sky-lbl" data-zone="${lb.id}" style="transform:translate(${lb.x.toFixed(1)}px,${lb.y.toFixed(1)}px) translate(-50%,-50%)">${lb.icon} <span>${esc2(lb.title)}</span><em>${lb.count}</em></button>`
+    ).join('');
+    const stars = wSkyLay.nodes.map(n =>
+      `<button type="button" class="dg-n dg-sky-n t${n.tier} is-whub" data-whub="${esc2(n.key)}" data-zone="${n.zone}" style="transform:translate(${n.x.toFixed(1)}px,${n.y.toFixed(1)}px) translate(-50%,var(--hy))" aria-label="${esc2(show(n.key))}">${wordSkyNodeInner(n)}</button>`
+    ).join('');
+    world.innerHTML = svg + labels + stars;
+    const moreBar = host.querySelector('.dg-more-bar');
+    if (moreBar) moreBar.innerHTML = '';
+    host.querySelector('.dg-side').innerHTML = wordSkyGuideHTML();
     applySkyZone(false);
   }
 
   function applySkyZone(animate) {
     const world = host && host.querySelector('.dg-world');
-    if (!world || !skyLay) return;
-    const z = st.skyZone;
+    const curSky = isWord() ? wSkyLay : skyLay;
+    if (!world || !curSky) return;
+    const z = isWord() ? st.wSkyZone : st.skyZone;
     world.classList.toggle('z-dim', z !== 'all');
     world.querySelectorAll('[data-zone]').forEach(el => el.classList.toggle('z-hi', z === 'all' || el.dataset.zone === z));
     host.querySelectorAll('.dg-zones [data-zone]').forEach(b => b.classList.toggle('on', b.dataset.zone === z));
-    const box = (z !== 'all' && skyLay.zoneBoxes[z]) || skyLay.box;
-    fitBox(box, animate, true);
+    const box = (z !== 'all' && curSky.zoneBoxes[z]) || curSky.box;
+    fitBox(box, animate, !isWord());
   }
 
-  /* ---------- Grid view (with STACK + BONUS + grouped HSK tiles) ---------- */
+  /* ---------- Word Constellation Drawing (Level 2 · Realm 2) ---------- */
+  function drawWordConstellation(f, animate) {
+    const world = host.querySelector('.dg-world'); if (!world) return;
+    st.wFilter = null;
+    world.classList.remove('sf-on', 'z-dim', 'hov');
+    host.querySelectorAll('.dg-legend [data-wing].on').forEach(el => { el.classList.remove('on'); el.setAttribute('aria-pressed', 'false'); });
+    wLay = layoutWordConstellation(f);
+    lay = null; skyLay = null; wSkyLay = null;
+
+    const posMap = new Map(wLay.nodes.map(n => [n.key, n]));
+    const svg = `<svg class="dg-svg" width="1" height="1" aria-hidden="true">${wLay.links.map(l => {
+      const a = posMap.get(l.from), b = posMap.get(l.to); if (!a || !b) return '';
+      return `<line class="dg-l lk-${l.kind} w-${l.wing}" data-a="${esc2(l.from)}" data-b="${esc2(l.to)}" x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}"/>`;
+    }).join('')}</svg>`;
+
+    const wingLabels = wLay.wingLabels.map(lb =>
+      `<span class="dg-wing-lbl w-${lb.wing}" style="transform:translate(${lb.x.toFixed(1)}px,${lb.y.toFixed(1)}px) translate(-50%,-50%)">${esc2(lb.text)}</span>`
+    ).join('');
+
+    const nodesHtml = wLay.nodes.map(n => {
+      const isR = n.ring === 0, on = !isR && st.wSel === n.zh;
+      const cls = isR ? 'dg-n r0 dg-wroot on' : `dg-n dg-wn r${n.ring} w-${n.wing} k-${n.kind}${on ? ' on' : ''}`;
+      const attr = isR ? `data-wroot="${esc2(n.c)}"` : `data-wn="${esc2(n.zh)}"`;
+      return `<button type="button" class="${cls}" ${attr} style="transform:translate(${n.x.toFixed(1)}px,${n.y.toFixed(1)}px) translate(-50%,var(--hy))" aria-label="${esc2(isR ? show(n.c) : showWord(n.zh))}">${wordNodeInner(n, wLay.f)}</button>`;
+    }).join('');
+
+    const emptyMsg = wLay.nodes.length <= 1
+      ? `<p class="dg-none r" style="transform:translate(-50%,0) translate(0px,106px)">${T('ยังไม่มีคำศัพท์ HSK ที่ใช้ตัวอักษรนี้')} (${typeof HzLv === 'undefined' ? '' : HzLv.label()})</p>` : '';
+
+    world.innerHTML = svg + wingLabels + nodesHtml + emptyMsg;
+
+    const moreBar = host.querySelector('.dg-more-bar');
+    if (moreBar) {
+      if (wLay.more > 0) {
+        moreBar.innerHTML = innerWidth < 620
+          ? `<button type="button" class="dg-more-pill" data-wmore="${esc2(wLay.f)}">+${wLay.more} ${T('ดูเพิ่มอีก')}</button><button type="button" class="dg-more-pill alt" data-view="grid">${T('กริด')} →</button>`
+          : `<button type="button" class="dg-more-pill" data-wmore="${esc2(wLay.f)}">+${wLay.more} ${T('ดูเพิ่มอีก')}</button>`;
+      } else if (wLay.isExpanded && wLay.hasMoreToggle) {
+        moreBar.innerHTML = `<button type="button" class="dg-more-pill alt" data-wless="${esc2(wLay.f)}">${T('ย่อเหลือคำหลัก')}</button>`;
+      } else moreBar.innerHTML = '';
+    }
+
+    host.querySelectorAll('.dg-legend [data-wing]').forEach(el => {
+      const n = wLay.counts[el.dataset.wing] || 0;
+      el.querySelector('.dg-cnt').textContent = n ? n : '';
+      el.classList.toggle('none', !n);
+    });
+    const tr = host.querySelector('.dg-trail');
+    if (tr) tr.innerHTML = trailHTML();
+
+    host.querySelector('.dg-side').innerHTML = wordCardHTML(wLay.f, st.wSel);
+    fitBox(wLay.box, animate, wLay.hasMoreToggle);
+  }
+
+  function drawWordGrid(rawFocus) {
+    const f = base(rawFocus), wrap = host.querySelector('.dg-grid-wrap'); if (!wrap) return;
+    const all = wordsForChar(f);
+    const groups = {
+      PRE: all.filter(w => [...w[0]][0] === f),
+      SUF: all.filter(w => { const cs = [...w[0]]; return cs[cs.length - 1] === f && cs[0] !== f; }),
+      MID: all.filter(w => { const cs = [...w[0]]; return cs[0] !== f && cs[cs.length - 1] !== f; })
+    };
+    Object.values(groups).forEach(arr => arr.sort((a, b) => a[2] - b[2] || a[0].length - b[0].length));
+
+    host.querySelectorAll('.dg-legend [data-wing]').forEach(el => {
+      const k = el.dataset.wing, n = (groups[k] || []).length;
+      el.querySelector('.dg-cnt').textContent = n ? n : '';
+      el.classList.toggle('none', !n);
+    });
+    const tr = host.querySelector('.dg-trail');
+    if (tr) tr.innerHTML = trailHTML();
+
+    const secs = ['PRE', 'SUF', 'MID'].map(k => {
+      const arr = groups[k];
+      if (!arr.length || (st.wFilter && st.wFilter !== k)) return '';
+      return `<section class="dg-gsec w-${k}">
+        <h4 class="dg-gsh"><i></i><b lang="zh-Hans">${W_WINGS[k].zh}</b><span>${T(W_WINGS[k].th)}</span><small>${arr.length}</small></h4>
+        <div class="dg-glist dg-wglist">${arr.map(w => {
+          const dot = typeof HzKit !== 'undefined' && HzKit.wordDotHtml ? HzKit.wordDotHtml(w[0]) : '';
+          const gl = typeof HzKit !== 'undefined' ? HzKit.wordGloss(w[0], w[3], !!w[4]) : { t: w[3], fb: !w[4] };
+          return `<button type="button" class="dg-gtile dg-wgtile${st.wSel === w[0] ? ' on' : ''}"${lvWordC(w[2])} data-wn="${esc2(w[0])}">
+            ${dot}<span class="pyx">${esc2(w[1])}</span>
+            <b lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${markWord(w[0], f)}</b>
+            ${gl.t ? `<small class="${gl.fb ? 'fb' : ''}">${esc2(shortM(gl.t))}</small>` : ''}
+          </button>`;
+        }).join('')}</div>
+      </section>`;
+    }).join('');
+
+    wrap.innerHTML = secs || `<p class="tr-empty">${T('ยังไม่มีคำศัพท์ HSK ที่ใช้ตัวอักษรนี้')} (${typeof HzLv === 'undefined' ? '' : HzLv.label()})</p>`;
+    host.querySelector('.dg-side').innerHTML = wordCardHTML(f, st.wSel);
+  }
+
+  /* ---------- Char Grid view ---------- */
   function drawGrid(f) {
     const wrap = host.querySelector('.dg-grid-wrap'); if (!wrap) return;
     const parts = partsOf(f).map(q => ({ c: q, stage: 'PART' }));
     const used = new Set([f, ...parts.map(p => p.c)]);
     const direct = directKidsOf(f, used);
     const all = parts.slice();
-    // Collect stack chains deeply + direct kids
     for (const c of direct) {
       const stg = stageOf(c, f) || 'CHAMPION';
       all.push({ c, stage: stg });
@@ -940,9 +1355,7 @@ const OffyDigi = (() => {
     }
     const byStage = new Map(ORDER.map(s => [s, []]));
     all.forEach(it => { if (byStage.has(it.stage)) byStage.get(it.stage).push(it); });
-    byStage.forEach((arr, k) => {
-      if (k !== 'STACK') arr.sort((a, b) => ((D.c[a.c] || [])[1] || 9) - ((D.c[b.c] || [])[1] || 9));
-    });
+    byStage.forEach((arr, k) => { if (k !== 'STACK') arr.sort((a, b) => ((D.c[a.c] || [])[1] || 9) - ((D.c[b.c] || [])[1] || 9)); });
 
     host.querySelectorAll('.dg-legend [data-stage]').forEach(el => {
       const n = (byStage.get(el.dataset.stage) || []).length;
@@ -960,11 +1373,9 @@ const OffyDigi = (() => {
         <div class="dg-glist">${arr.map(it => {
           const c = it.c, m = meanOf(c), isB = !!BONUS[c];
           const dot = !isB && typeof HzKit !== 'undefined' ? HzKit.dotHtml(c) : '';
-          const sd = side(c);
-          const py = sd ? sd.split(' · ')[0] : pyOf(c);
-          const rep = repBadge(c, it.stage);
+          const sd = side(c), py = sd ? sd.split(' · ')[0] : pyOf(c);
           return `<button type="button" class="dg-gtile${it.stage === 'PART' ? ' is-part' : ''}${isB ? ' is-bonus' : ''}"${lvC(c)} data-n="${esc2(c)}">
-            ${dot}${rep}<span class="pyx">${esc2(py)}</span>
+            ${dot}${repBadge(c, it.stage)}<span class="pyx">${esc2(py)}</span>
             <b lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(c))}</b>
             ${m.t ? `<small class="${m.fb ? 'fb' : ''}">${esc2(shortM(m.t))}</small>` : ''}
           </button>`;
@@ -973,23 +1384,22 @@ const OffyDigi = (() => {
     }).join('');
 
     wrap.innerHTML = secs || `<p class="tr-empty">${T('ยังไม่มีอักษร HSK ที่ต่อยอดจากตัวนี้')} (${typeof HzLv === 'undefined' ? '' : HzLv.label()})</p>`;
-    const card = host.querySelector('.dg-side');
-    card.innerHTML = cardHTML(f, stageForFocus(f), st.trail[st.trail.length - 2]);
+    host.querySelector('.dg-side').innerHTML = cardHTML(f, stageForFocus(f), st.trail[st.trail.length - 2]);
     writeBig(f);
   }
 
-  /* ---------- Level 2 Constellation drawing + tween ---------- */
+  /* ---------- Char Constellation Drawing (Level 2 · Realm 1) ---------- */
   function drawRadial(f, tween) {
     const world = host.querySelector('.dg-world'); if (!world) return;
     st.stageFilter = null;
-    world.classList.remove('sf-on', 'z-dim');
+    world.classList.remove('sf-on', 'z-dim', 'hov');
     host.querySelectorAll('.dg-legend [data-stage].on').forEach(el => { el.classList.remove('on'); el.setAttribute('aria-pressed', 'false'); });
     const next = layoutConstellation(f), prev = cur, from = new Map();
-    lay = next; skyLay = null;
+    lay = next; skyLay = null; wLay = null; wSkyLay = null;
     let svg = world.querySelector('svg.dg-svg');
     if (!svg) { svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'dg-svg'); svg.setAttribute('width', '1'); svg.setAttribute('height', '1'); world.prepend(svg); }
     else svg.setAttribute('class', 'dg-svg');
-    world.querySelectorAll('.dg-sky-n, .dg-sky-lbl, .dg-more, .dg-sec, .dg-none').forEach(el => el.remove());
+    world.querySelectorAll('.dg-sky-n, .dg-sky-lbl, .dg-wing-lbl, .dg-wn, .dg-wroot, .dg-more, .dg-sec, .dg-none').forEach(el => el.remove());
 
     const keep = new Set(next.nodes.map(n => n.key));
     [...world.querySelectorAll('.dg-n')].forEach(el => { if (!keep.has(el.dataset.n)) { el.classList.add('out'); setTimeout(() => el.remove(), 340); } });
@@ -1057,8 +1467,7 @@ const OffyDigi = (() => {
       cur = pos;
     };
 
-    const card = host.querySelector('.dg-side');
-    card.innerHTML = cardHTML(f, next.nodes[0].stage, st.trail[st.trail.length - 2]);
+    host.querySelector('.dg-side').innerHTML = cardHTML(f, next.nodes[0].stage, st.trail[st.trail.length - 2]);
     const tr = host.querySelector('.dg-trail');
     if (tr) tr.innerHTML = trailHTML();
     writeBig(f);
@@ -1087,7 +1496,6 @@ const OffyDigi = (() => {
   function hover(key) {
     const world = host.querySelector('.dg-world'); if (!world || !lay) return;
     world.querySelectorAll('.hl').forEach(x => x.classList.remove('hl'));
-    // Never dim the constellation when hovering the center focus star (r0)
     if (!key || (lay.nodes[0] && lay.nodes[0].key === key)) { world.classList.remove('hov'); return; }
     const near = new Set([key]);
     lay.links.forEach(l => { if (l.from === key || l.to === key) { near.add(l.from); near.add(l.to); } });
@@ -1117,7 +1525,7 @@ const OffyDigi = (() => {
     box.onclick = () => { if (w && box.contains(holder)) { box.classList.add('writing'); w.animateCharacter({ onComplete: () => box.classList.remove('writing') }); } };
   }
 
-  /* ---------- Camera Framing (works for both Sky Map & Level 2 Constellation) ---------- */
+  /* ---------- Camera Framing ---------- */
   let ro = null, roT = 0;
   function watchShape() {
     if (typeof ResizeObserver === 'undefined') return;
@@ -1125,9 +1533,13 @@ const OffyDigi = (() => {
     if (ro) ro.disconnect();
     ro = new ResizeObserver(() => { clearTimeout(roT); roT = setTimeout(() => {
       if (!host || !host.isConnected || !v.isConnected) return;
-      if (isSky() && skyLay) {
-        if (Math.abs(viewAspect() - skyLay.asp) > .14) drawSky();
+      if (isSky()) {
+        const curSky = isWord() ? wSkyLay : skyLay;
+        if (curSky && Math.abs(viewAspect() - curSky.asp) > .14) isWord() ? drawWordSky() : drawSky();
         else applySkyZone(false);
+      } else if (isWord() && wLay) {
+        if (Math.abs(viewAspect() - wLay.asp) > .14) drawWordConstellation(wLay.f, false);
+        else fitBox(wLay.box, false, wLay.hasMoreToggle);
       } else if (radial() && lay) {
         if (Math.abs(viewAspect() - lay.asp) > .14) drawRadial(st.trail[st.trail.length - 1], false);
         else fitBox(lay.box, false, lay.hasMoreToggle);
@@ -1171,6 +1583,61 @@ const OffyDigi = (() => {
     else if (isGrid()) drawGrid(c);
     else if (radial()) drawRadial(c, true);
     else paint();
+  }
+
+  function focusWord(ch, preselectZh = null) {
+    const f = base(ch);
+    if (!D.cw[f] || !D.cw[f].length) return false;
+    const wasSky = isSky() || !isWord();
+    S().digiRealm = 'word'; Store.save();
+    st.mode = 'focus';
+    st.wSel = preselectZh || null;
+    const i = st.wTrail.indexOf(f);
+    if (i >= 0) st.wTrail = st.wTrail.slice(0, i + 1); else st.wTrail.push(f);
+    if (st.wTrail.length > 12) st.wTrail = st.wTrail.slice(-12);
+    tone([[580, 880, 0, .09, 'sine'], [880, 1280, .06, .11, 'sine']]);
+    if (wasSky) paint();
+    else if (isGrid()) drawWordGrid(f);
+    else drawWordConstellation(f, true);
+    return true;
+  }
+
+  function setWordBase(ch, preselectZh = null) {
+    const f = base(ch);
+    if (!D.cw[f] || !D.cw[f].length) return false;
+    const wasSky = isSky() || !isWord();
+    S().digiRealm = 'word'; Store.save();
+    st.mode = 'focus';
+    st.wTrail = [f]; st.wSel = preselectZh || null; st.wOpen = {}; st.wFilter = null;
+    tone([[440, 880, 0, .1, 'sine']]);
+    if (wasSky) paint();
+    else if (isGrid()) drawWordGrid(f);
+    else drawWordConstellation(f, true);
+    return true;
+  }
+
+  function switchRealm(nextRealm) {
+    if (realm() === nextRealm) return;
+    S().digiRealm = nextRealm; Store.save();
+    sfx('tap');
+    if (st.mode === 'focus') {
+      if (nextRealm === 'word') {
+        const curChar = base(st.trail[st.trail.length - 1]);
+        if (wordsForChar(curChar).length > 0) {
+          st.wTrail = [curChar]; st.wSel = null;
+        } else {
+          st.mode = 'sky';
+        }
+      } else {
+        const curChar = st.wTrail[st.wTrail.length - 1];
+        if (D.c[curChar] || D.cc[curChar] || radOfGlyph.get(curChar) || BONUS[curChar]) {
+          st.trail = [curChar];
+        } else {
+          st.mode = 'sky';
+        }
+      }
+    }
+    paint();
   }
 
   /* ---------- tree drawing (left → right) ---------- */
@@ -1302,7 +1769,8 @@ const OffyDigi = (() => {
     const A = (D.amb || {})[g];
     if (A && !radOfGlyph.get(g) && !BONUS[g]) g = `${g}@${A[A.length - 1]}`;
     if (!D.cc[g] && !D.c[g] && !radOfGlyph.get(g) && !BONUS[g]) return false;
-    const wasSky = isSky();
+    const wasSky = isSky() || isWord();
+    S().digiRealm = 'char'; Store.save();
     st.mode = 'focus';
     st.trail = [g]; st.sel = null; st.open = {}; st.stageFilter = null;
     tone([[440, 880, 0, .12, 'square']]);
@@ -1313,9 +1781,24 @@ const OffyDigi = (() => {
     return true;
   }
 
+  function handleSearch(rawVal) {
+    const val = String(rawVal || '').trim();
+    if (!val) return;
+    const chars = [...val];
+    if (isWord()) {
+      // Multi-char word search (e.g. "电影" or "学生"): jump to char[0] & select exact word!
+      if (chars.length >= 2) {
+        const hit = D.w.find(w => w[0] === val || showWord(w[0]) === val);
+        if (hit) { setWordBase([...hit[0]][0], hit[0]); return; }
+      }
+      if (!setWordBase(chars[0])) toast(T('ยังไม่มีคำศัพท์ HSK ที่ใช้ตัวอักษรนี้'), { icon: 'info' });
+    } else {
+      if (!setBase(chars[0])) toast(T('ยังไม่มีอักษร HSK ที่ต่อยอดจากตัวนี้'), { icon: 'info' });
+    }
+  }
+
   function backToSky() {
-    st.mode = 'sky';
-    st.stageFilter = null;
+    st.mode = 'sky'; st.stageFilter = null; st.wFilter = null;
     tone([[580, 440, 0, .09, 'sine']]);
     paint();
   }
@@ -1323,14 +1806,58 @@ const OffyDigi = (() => {
   function bind() {
     let drag = null; const pts = new Map(); let pinch = 0;
     host.addEventListener('click', e => {
-      const b = e.target.closest('button, [data-view]'); if (!b || (drag && drag.moved)) return;
+      const b = e.target.closest('button, [data-view], [data-realm]'); if (!b || (drag && drag.moved)) return;
       const d = b.dataset;
       if (d.close !== undefined) { const fx = host.querySelector('.dg-fx'); fx.hidden = true; fx.innerHTML = ''; return; }
+      if (d.realm) { switchRealm(d.realm); return; }
       if (d.skyback !== undefined) { backToSky(); return; }
       if (d.sky) { setBase(d.sky); return; }
+      if (d.whub) { isSky() ? setWordBase(d.whub) : focusWord(d.whub); return; }
+      if (d.toword) { setWordBase(d.toword); return; }
+      if (d.tochar) { setBase(d.tochar); return; }
       if (d.skyall !== undefined) { st.skyAll = !st.skyAll; st.skyZone = 'all'; drawSky(); return; }
-      if (d.zone) { st.skyZone = st.skyZone === d.zone && d.zone !== 'all' ? 'all' : d.zone; applySkyZone(true); return; }
+      if (d.zone) {
+        if (isWord()) st.wSkyZone = st.wSkyZone === d.zone && d.zone !== 'all' ? 'all' : d.zone;
+        else st.skyZone = st.skyZone === d.zone && d.zone !== 'all' ? 'all' : d.zone;
+        applySkyZone(true);
+        return;
+      }
       if (d.view) { if (viewMode() !== d.view) { S().digiView = d.view; Store.save(); paint(); } return; }
+      if (d.wn) {
+        st.wSel = d.wn;
+        host.querySelectorAll('.dg-wn, .dg-wgtile').forEach(el => el.classList.toggle('on', el.dataset.wn === d.wn));
+        const curF = st.wTrail[st.wTrail.length - 1];
+        host.querySelector('.dg-side').innerHTML = wordCardHTML(curF, d.wn);
+        try { TTS.speak(d.wn); } catch (err) {}
+        return;
+      }
+      if (d.wroot) {
+        st.wSel = null;
+        host.querySelectorAll('.dg-wn, .dg-wgtile').forEach(el => el.classList.remove('on'));
+        host.querySelector('.dg-side').innerHTML = wordCardHTML(d.wroot, null);
+        try { TTS.speak(d.wroot); } catch (err) {}
+        return;
+      }
+      if (d.wtrail !== undefined) { focusWord(st.wTrail[+d.wtrail]); return; }
+      if (d.wmore) { st.wOpen[d.wmore] = true; drawWordConstellation(d.wmore, true); return; }
+      if (d.wless) { delete st.wOpen[d.wless]; drawWordConstellation(d.wless, true); return; }
+      if (d.wing && b.closest('.dg-legend')) {
+        if (b.classList.contains('none')) return;
+        st.wFilter = st.wFilter === d.wing ? null : d.wing;
+        host.querySelectorAll('.dg-legend [data-wing]').forEach(el => {
+          const on = el.dataset.wing === st.wFilter;
+          el.classList.toggle('on', on); el.setAttribute('aria-pressed', on);
+        });
+        if (isGrid()) { drawWordGrid(st.wTrail[st.wTrail.length - 1]); return; }
+        const world = host.querySelector('.dg-world');
+        if (world) {
+          world.classList.toggle('sf-on', !!st.wFilter);
+          world.querySelectorAll('.dg-n, .dg-l').forEach(el => {
+            el.classList.toggle('sf-hi', !st.wFilter || el.classList.contains('r0') || el.classList.contains('w-' + st.wFilter));
+          });
+        }
+        return;
+      }
       if (d.n) {
         if (radial()) { ripple(d.n); hover(null); focusOn(d.n); }
         else if (isGrid()) { focusOn(d.n); }
@@ -1347,7 +1874,8 @@ const OffyDigi = (() => {
       if (d.zoom !== undefined) {
         const v = host.querySelector('.dg-view');
         if (d.zoom === '0') {
-          if (isSky()) { st.skyZone = 'all'; applySkyZone(true); }
+          if (isSky()) { if (isWord()) st.wSkyZone = 'all'; else st.skyZone = 'all'; applySkyZone(true); }
+          else if (isWord() && wLay) fitBox(wLay.box, true, wLay.hasMoreToggle);
           else if (radial() && lay) fitBox(lay.box, true, lay.hasMoreToggle);
           else drawTree();
         } else zoomAt(d.zoom === '1' ? 1.24 : 1 / 1.24, v.clientWidth / 2, v.clientHeight / 2);
@@ -1376,17 +1904,11 @@ const OffyDigi = (() => {
     });
     host.addEventListener('keydown', e => {
       if (e.key === 'Escape') { const fx = host.querySelector('.dg-fx'); if (fx && !fx.hidden) { fx.hidden = true; fx.innerHTML = ''; } }
-      if (e.key === 'Enter' && e.target.matches('.dg-q input')) {
-        const g = Array.from(e.target.value.trim())[0];
-        if (g && !setBase(g)) toast(`${T('ยังไม่มีอักษร HSK ที่ต่อยอดจากตัวนี้')}`, { icon: 'info' });
-        else if (g) e.target.value = '';
-      }
+      if (e.key === 'Enter' && e.target.matches('.dg-q input')) { handleSearch(e.target.value); e.target.value = ''; }
     });
     host.addEventListener('change', e => {
       if (!e.target.matches('.dg-q input')) return;
-      const g = Array.from(e.target.value.trim())[0];
-      if (g && !setBase(g)) toast(`${T('ยังไม่มีอักษร HSK ที่ต่อยอดจากตัวนี้')}`, { icon: 'info' });
-      else if (g) e.target.value = '';
+      handleSearch(e.target.value); e.target.value = '';
     });
     host.addEventListener('pointerdown', e => {
       const v = e.target.closest('.dg-view'); if (!v || e.target.closest('.dg-zoom, .dg-more-bar')) return;
@@ -1406,7 +1928,7 @@ const OffyDigi = (() => {
     });
     const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch = 0; if (!pts.size) setTimeout(() => { drag = null; }, 0); };
     host.addEventListener('pointerup', up); host.addEventListener('pointercancel', up);
-    host.addEventListener('pointerover', e => { if (e.pointerType === 'touch' || isSky() || !radial()) return; const n = e.target.closest('.dg-n'); hover(n ? n.dataset.n : null); });
+    host.addEventListener('pointerover', e => { if (e.pointerType === 'touch' || isSky() || isWord() || !radial()) return; const n = e.target.closest('.dg-n'); hover(n ? n.dataset.n : null); });
     host.addEventListener('pointerleave', () => hover(null));
     host.addEventListener('wheel', e => { const v = e.target.closest('.dg-view'); if (!v) return; e.preventDefault(); const r = v.getBoundingClientRect(); zoomAt(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
   }

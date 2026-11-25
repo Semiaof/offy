@@ -136,6 +136,23 @@ const HzKit = (() => {
     return '';
   }
 
+  /* Learned status of an exact HSK word from Store.d.words ('mastered' | 'learning' | '') */
+  function wordStatus(zh) {
+    if (typeof Store === 'undefined' || !Store.d || !Store.d.words) return '';
+    const w = findWord(zh);
+    if (!w) return '';
+    const st = Store.status(w.id);
+    if (st === 'mastered') return 'mastered';
+    if (st === 'learning' || st === 'review') return 'learning';
+    return '';
+  }
+
+  function wordDotHtml(zh) {
+    const st = wordStatus(zh);
+    if (!st) return '';
+    return `<i class="hz-dot ${st === 'mastered' ? 'm' : 'l'}" title="${esc(st === 'mastered' ? T('จำได้แล้ว') : T('กำลังเรียน'))}" aria-label="${esc(st === 'mastered' ? T('จำได้แล้ว') : T('กำลังเรียน'))}"></i>`;
+  }
+
   function dotHtml(c) {
     const st = charStatus(c);
     if (!st) return '';
@@ -235,7 +252,7 @@ const HzKit = (() => {
     if (d.hzjump && d.hzch) { e.stopPropagation(); try { sfx('tap'); } catch (err) {} HanziView.jump(d.hzjump, d.hzch); }
   });
 
-  return { lang, findWord, wordGloss, charMean, short, charStatus, dotHtml, openWord, strokeSheet, crossBar };
+  return { lang, findWord, wordGloss, charMean, short, charStatus, wordStatus, dotHtml, wordDotHtml, openWord, strokeSheet, crossBar };
 })();
 
 /* HSK levels + translation language + 简/繁 controls in the #/hanzi top header */
@@ -269,9 +286,6 @@ const HzLv = (() => {
   function paintLang() {
     const cur = HzKit.lang();
     const opt = LANG_OPTS.find(o => o[0] === cur) || LANG_OPTS[0];
-    const pyOn = !S().hzHidePy;
-    const v = document.getElementById('v-hanzi');
-    if (v) v.classList.toggle('hz-no-py', !pyOn);
     const btn = document.getElementById('hzLangBtn');
     if (btn) {
       btn.innerHTML = `<span class="hz-lg-short">${opt[1]}</span><span class="hz-lg-full">${opt[2]}</span>${ic('chev-d')}`;
@@ -279,8 +293,7 @@ const HzLv = (() => {
     const list = document.getElementById('hzLangs');
     if (list) {
       list.innerHTML = `<span class="hz-lv-t">${T('ภาษา')}</span>` + LANG_OPTS.map(([code, sh, full]) =>
-        `<button type="button" data-hzlang="${code}" class="${code === cur ? 'on' : ''}" role="radio" aria-checked="${code === cur}"><b>${sh}</b><span>${full}</span></button>`).join('')
-        + `<button type="button" class="hz-py-tog${pyOn ? ' on' : ''}" data-hzpytog aria-pressed="${pyOn}">${ic(pyOn ? 'eye' : 'eye-off')}<span>${T('พินอิน')}</span></button>`;
+        `<button type="button" data-hzlang="${code}" class="${code === cur ? 'on' : ''}" role="radio" aria-checked="${code === cur}"><b>${sh}</b><span>${full}</span></button>`).join('');
     }
   }
   function closePops(exceptId) {
@@ -334,14 +347,6 @@ const HzLv = (() => {
         langBtn.classList.toggle('open', open);
         if (typeof HanziView !== 'undefined' && HanziView.fit) setTimeout(HanziView.fit, 40);
       }
-      return;
-    }
-    const pyTog = e.target.closest('[data-hzpytog]');
-    if (pyTog) {
-      try { sfx('tap'); } catch (err) {}
-      S().hzHidePy = !S().hzHidePy;
-      try { Store.save(); } catch (err) {}
-      paintLang();
       return;
     }
     const pickLang = e.target.closest('#hzLangs [data-hzlang]');

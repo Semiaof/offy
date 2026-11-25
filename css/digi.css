@@ -3,22 +3,35 @@
 .dg {
   --ROOKIE: var(--ink); --STACK: #b87e14; --ARMOR: #c08a1e; --CHAMPION: #2d7a5c;
   --ULTIMATE: #c0517a; --VARIANT: #6e5bbd; --PART: #8a8f86;
+  --WPRE: #2d7a5c; --WSUF: #2f69b2; --WSUB: var(--STACK); --WMID: #8a56c4;
   position: relative; color: var(--ink); display: grid; gap: 10px;
 }
 :root[data-theme="dark"] .dg {
   --STACK: #f2c45a; --ARMOR: #e0b44f; --CHAMPION: #5cc095;
   --ULTIMATE: #ec8bb0; --VARIANT: #a99af0; --PART: #8b9288;
+  --WPRE: #5cc095; --WSUF: #6da7f0; --WSUB: var(--STACK); --WMID: #b794f6;
 }
 .dg .s-ROOKIE { --sc: var(--ROOKIE); } .dg .s-STACK { --sc: var(--STACK); }
 .dg .s-ARMOR { --sc: var(--ARMOR); } .dg .s-CHAMPION { --sc: var(--CHAMPION); }
 .dg .s-ULTIMATE { --sc: var(--ULTIMATE); } .dg .s-VARIANT { --sc: var(--VARIANT); }
 .dg .s-PART { --sc: var(--PART); }
+.dg .w-PRE { --sc: var(--WPRE); } .dg .w-SUF { --sc: var(--WSUF); }
+.dg .w-SUB { --sc: var(--WSUB); } .dg .w-MID { --sc: var(--WMID); }
 .dg .pyx { font-family: var(--pinyin); color: var(--accent-ink); }
 .dg [lang="zh-Hans"], .dg [lang="zh-Hant"] { font-family: var(--hz); }
 
-/* top search bar */
-.dg-top { display: flex; align-items: center; gap: 8px; }
+/* top search bar + dual realm switch (字 อักษร | 词 คำศัพท์) */
+.dg-top { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+.dg-tg.dg-realm { flex: none; padding: 3px; border-radius: 13px; background: var(--surface-3); border: 1px solid var(--line); }
+.dg-tg.dg-realm span { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 10px; font-size: 13px; font-weight: 700; white-space: nowrap; }
+.dg-tg.dg-realm b { font-family: var(--hz); font-weight: 500; font-size: 15px; line-height: 1; }
 .dg-q { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); }
+@media (max-width: 520px) {
+  .dg-top { flex-wrap: wrap; gap: 6px; }
+  .dg-tg.dg-realm { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+  .dg-tg.dg-realm span { height: 34px; padding: 0 8px; }
+  .dg-q { flex: 1 1 100%; height: 42px; }
+}
 .dg-q:focus-within { border-color: var(--accent); }
 .dg-q input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; color: var(--ink); font: 15px var(--ui); }
 
@@ -309,3 +322,88 @@
 .dg-asm-again { height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 600; color: var(--ink-2); background: var(--surface); }
 .dg-asm-again .ic { width: 16px; height: 16px; }
 .dg-asm.rm * { transition-duration: .01s !important; }
+
+/* =====================================================================
+   Realm 2 · Word Constellation (กลุ่มดาวคำศัพท์) & Pinyin-hide Alignment
+   ===================================================================== */
+.dg-l.lk-wpre { stroke: color-mix(in srgb, var(--WPRE) 58%, var(--line-2)); stroke-width: 1.45; opacity: .82; }
+.dg-l.lk-wsuf { stroke: color-mix(in srgb, var(--WSUF) 58%, var(--line-2)); stroke-width: 1.45; opacity: .82; }
+.dg-l.lk-wsub { stroke: var(--STACK); stroke-width: 2.1; opacity: .94; }
+.dg-l.lk-wmid { stroke: color-mix(in srgb, var(--WMID) 55%, var(--line-2)); stroke-width: 1.3; opacity: .78; stroke-dasharray: 4 4; }
+
+.dg-wing-lbl { position: absolute; left: 0; top: 0; display: inline-flex; align-items: center; gap: 5px; height: 28px; padding: 0 12px; border-radius: 99px;
+  border: 1px solid color-mix(in srgb, var(--sc) 36%, var(--line)); background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(8px);
+  color: var(--sc); font: 700 12.5px var(--ui); white-space: nowrap; pointer-events: none; box-shadow: var(--sh-1); }
+
+.dg-wn { --hy: -43px; z-index: 2; }
+.dg-wpill { position: relative; display: inline-flex; align-items: center; justify-content: center; height: 46px; min-width: 78px; padding: 0 13px; border-radius: 15px;
+  font-style: normal; font-size: 23px; line-height: 1; white-space: nowrap;
+  background: var(--surface); border: 2px solid var(--lc, var(--line-2)); color: var(--ink);
+  box-shadow: var(--sh-1); transition: transform .16s, box-shadow .18s, border-color .18s; }
+.dg-wpill mark { background: none; color: var(--accent-ink); font-weight: 700; }
+.dg-wn:hover .dg-wpill { transform: translateY(-2px); }
+.dg-wn.on .dg-wpill { box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--lc, var(--accent)) 36%, transparent), var(--sh-2); transform: scale(1.04); }
+.dg-wn.k-wsub .dg-wpill { box-shadow: 0 0 0 2px color-mix(in srgb, var(--STACK) 24%, transparent), var(--sh-1); }
+.dg-wpill .hz-dot { left: 5px; top: 5px; }
+
+/* Word Grid tiles */
+.dg-wglist { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
+.dg-wgtile { padding: 8px 6px 7px; }
+.dg-wgtile b { font-size: 21px; white-space: nowrap; }
+.dg-wgtile b mark { background: none; color: var(--accent-ink); font-weight: 700; }
+.dg-wgtile.on { box-shadow: 0 0 0 2.5px color-mix(in srgb, var(--lc, var(--accent)) 36%, transparent); }
+
+/* Word Sky guide legend icons & quick hub counts */
+.dg-sky-key .k-wsuf { background: var(--WSUF); height: 3px; }
+.dg-sky-key .k-wpre { background: var(--WPRE); height: 3px; }
+.dg-sky-key .k-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--good); margin: 0 5px; }
+.dg-qchain small { margin-left: 5px; font: 600 11px var(--ui); color: var(--muted); }
+
+/* Word Focus Detail Card */
+.dg-wbadge { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--ink-2); }
+.dg-st-pill { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 9px; border-radius: 99px; font: 700 11px var(--ui);
+  background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+.dg-st-pill.m { color: var(--good); background: color-mix(in srgb, var(--good) 12%, var(--surface)); border-color: color-mix(in srgb, var(--good) 35%, transparent); }
+.dg-st-pill.l { color: var(--gold); background: color-mix(in srgb, var(--gold) 14%, var(--surface)); border-color: color-mix(in srgb, var(--gold) 38%, transparent); }
+.dg-whero { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 12px 0; }
+.dg-wbig { display: inline-flex; align-items: center; justify-content: center; min-height: 62px; padding: 8px 16px; border-radius: 16px;
+  font-size: 34px; line-height: 1.1; border: 2.5px solid var(--lc, var(--ink)); background: var(--surface); color: var(--ink); box-shadow: var(--sh-1); }
+.dg-wbig mark { background: none; color: var(--accent-ink); }
+.dg-wmeta { min-width: 0; flex: 1 1 140px; }
+.dg-wmeta .dg-mean em { font-style: normal; font-size: 10px; font-weight: 800; color: var(--faint); border: 1px solid var(--line-2); border-radius: 4px; padding: 0 4px; }
+.dg-hops { display: grid; gap: 6px; }
+.dg-hop { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 11px; border-radius: 13px; text-align: left;
+  border: 1.5px solid color-mix(in srgb, var(--lc, var(--line-2)) 52%, var(--line)); background: var(--surface-2);
+  transition: border-color .16s, background .16s, transform .14s; }
+.dg-hop:hover { border-color: var(--lc, var(--accent)); background: var(--accent-soft); }
+.dg-hop:active { transform: scale(.98); }
+.dg-hop b { flex: none; width: 38px; height: 38px; display: grid; place-items: center; border-radius: 11px; font-weight: 400; font-size: 24px;
+  border: 2px solid var(--lc, var(--line-2)); background: var(--surface); color: var(--ink); }
+.dg-hop span { flex: 1; min-width: 0; display: grid; font-size: 12.5px; color: var(--ink-2); }
+.dg-hop span em { font-style: normal; font-family: var(--pinyin); font-weight: 600; font-size: 12px; color: var(--accent-ink); }
+.dg-hop small { flex: none; font: 700 12px var(--ui); color: var(--accent-ink); white-space: nowrap; }
+.dg-wfoot { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
+.dg-wstats dt { font-family: var(--hz); font-size: 12.5px; }
+.dg-toword { width: 100%; margin: 4px 0 10px; height: 38px; padding: 0 12px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--line)); background: var(--accent-soft); color: var(--accent-ink);
+  font: 700 12.5px var(--ui); transition: border-color .16s, transform .14s; }
+.dg-toword .ic { width: 15px; height: 15px; }
+.dg-toword:active { transform: scale(.98); }
+
+/* Keep SVG constellation lines pixel-centered on boxes when global Pinyin is hidden */
+body.hide-pinyin .dg-n { --hy: -29px; }
+body.hide-pinyin .dg-n.r0 { --hy: -38px; }
+body.hide-pinyin .dg-n.r2 { --hy: -27px; }
+body.hide-pinyin .dg-n.k-stack { --hy: -29px; }
+body.hide-pinyin .dg-wn { --hy: -23px; }
+body.hide-pinyin .dg-sky-n.t0 { --hy: -33px; }
+body.hide-pinyin .dg-sky-n.t1 { --hy: -28px; }
+body.hide-pinyin .dg-sky-n.t2 { --hy: -24px; }
+@media (max-width: 520px) {
+  .dg-wpill { height: 42px; min-width: 72px; padding: 0 11px; font-size: 20px; border-radius: 13px; }
+  .dg-wn { --hy: -41px; }
+  body.hide-pinyin .dg-n { --hy: -25px; }
+  body.hide-pinyin .dg-n.r0 { --hy: -34px; }
+  body.hide-pinyin .dg-n.r2 { --hy: -23px; }
+  body.hide-pinyin .dg-wn { --hy: -21px; }
+}
