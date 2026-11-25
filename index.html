@@ -106,8 +106,8 @@
 <link rel="stylesheet" href="css/cbook.css?v=1.0.1">
 <link rel="stylesheet" href="css/ibooks.css?v=6.7.0">
 <link rel="stylesheet" href="css/tree.css?v=7.4.0">
-<link rel="stylesheet" href="css/digi.css?v=7.9.0">
-<link rel="stylesheet" href="css/compose.css?v=8.1.0">
+<link rel="stylesheet" href="css/digi.css?v=8.0.0">
+<link rel="stylesheet" href="css/compose.css?v=8.2.0">
 <script>
 /* apply the saved / system theme before first paint */
 (function () {
@@ -517,6 +517,7 @@
         <div class="ph-t"><p class="eyebrow">汉字 · Hanzi</p><h1>อักษร</h1></div>
         <div class="ph-a hz-head-a">
           <button type="button" class="hz-lv-btn" id="hzLvBtn" aria-expanded="false" aria-controls="hzLvPop"></button>
+          <button type="button" class="hz-lang-btn" id="hzLangBtn" aria-expanded="false" aria-controls="hzLangPop" aria-label="ภาษาคำแปล"></button>
           <button type="button" class="hz-trad" id="hzTrad" aria-label="简 / 繁" aria-pressed="false"><span class="on" lang="zh-Hans">简</span><span lang="zh-Hant">繁</span></button>
           <button class="ibtn" id="hzFull" aria-label="เต็มจอ" data-tip="เต็มจอ"><svg class="ic"><use href="#i-expand"/></svg></button>
         </div>
@@ -527,6 +528,9 @@
       </div>
       <div class="hz-lv-pop" id="hzLvPop" hidden>
         <div class="hz-lv" id="hzLv" role="group" aria-label="ระดับ HSK"></div>
+      </div>
+      <div class="hz-lv-pop hz-lang-pop" id="hzLangPop" hidden>
+        <div class="hz-langs" id="hzLangs" role="radiogroup" aria-label="ภาษาคำแปล"></div>
       </div>
       <article class="card hz-card" id="hzStage"></article>
     </section>
@@ -691,11 +695,11 @@
 <script src="js/refbooks.js?v=1.0.0"></script>
 <script src="js/cbook.js?v=1.2.0"></script>
 <script src="js/ibooks.js?v=7.0.0"></script>
-<script src="js/tree.js?v=7.7.0"></script>
-<script src="js/digi.js?v=7.9.0"></script>
-<script src="js/compose.js?v=7.6.0"></script>
+<script src="js/tree.js?v=7.8.0"></script>
+<script src="js/digi.js?v=8.0.0"></script>
+<script src="js/compose.js?v=7.7.0"></script>
 <script src="js/handpad.js?v=7.1.0"></script>
-<script src="js/hanzi.js?v=7.4.0"></script>
+<script src="js/hanzi.js?v=7.5.0"></script>
 <script src="js/credits.js?v=7.8.0"></script>
 <script src="data/hsk.js?v=10.1.0"></script>
 <script src="js/five.js?v=7.2.0"></script>

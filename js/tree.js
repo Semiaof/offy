@@ -45,7 +45,7 @@ const OffyTree = (() => {
     const mo = typeof HzKit !== 'undefined' ? HzKit.charMean(c, D, null) : { t: (LANG !== 'en' && x[9]) || x[10] || '', fb: false };
     const sh = mo.t ? (typeof HzKit !== 'undefined' ? HzKit.short(mo.t, 8) : mo.t.slice(0, 8)) : '';
     const dot = typeof HzKit !== 'undefined' ? HzKit.dotHtml(c) : '';
-    return `<button class="tr-c${on ? ' on' : ''}"${x[1] ? ` style="--lc:var(--hsk${x[1]})"` : ''} data-ch="${esc(c)}" lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${dot}<b>${esc(cg(c))}</b><span class="pyx">${esc(x[0] || '')}</span>${sh ? `<small class="tr-cm${mo.fb ? ' fb' : ''}">${esc(sh)}</small>` : ''}</button>`;
+    return `<button class="tr-c${on ? ' on' : ''}"${x[1] ? ` style="--lc:var(--hsk${x[1]})"` : ''} data-ch="${esc(c)}" lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${dot}<span class="pyx">${esc(x[0] || '')}</span><b>${esc(cg(c))}</b>${sh ? `<small class="tr-cm${mo.fb ? ' fb' : ''}">${esc(sh)}</small>` : ''}</button>`;
   };
   const byLevel = list => { const g = {}; list.forEach(c => { const l = (D.c[c] || [])[1] || 7; (g[l] = g[l] || []).push(c); }); return Object.keys(g).sort().map(l => [+l, g[l]]); };
 
@@ -61,8 +61,9 @@ const OffyTree = (() => {
     const groups = {}; list.forEach(r => (groups[r[2]] = groups[r[2]] || []).push(r));
     return `<div class="tr-tools"><div class="seg sm tr-seg"><button data-all="0" class="${st.all ? '' : 'on'}">${T('รากที่มีอักษรใน HSK')}</button><button data-all="1" class="${st.all ? 'on' : ''}">${T('ทั้ง 214 ราก')}</button></div></div>
       ${Object.keys(groups).map(s => `<p class="tr-h">${s} ${T('ขีด')}</p><div class="tr-rads">${groups[s].map(r => {
-        const n = nodeChars({ r: r[0] }), on = st.node && st.node.r === r[0];
-        const fs = radForms(r); return `<button class="tr-r${on ? ' on' : ''}" data-r="${r[0]}"><b lang="zh-Hans">${esc(radG(r))}</b>${fs.length ? `<i lang="zh-Hans">${fs.map(esc).join('')}</i>` : ''}<span>${esc(LANG === 'en' ? r[5] : r[4])}</span><small>${n[0].length + n[1].length}</small></button>`;
+        const n = nodeChars({ r: r[0] }), on = st.node && st.node.r === r[0], hl = typeof HzKit !== 'undefined' ? HzKit.lang() : LANG;
+        const rName = ({ th: r[4], en: r[5], vi: r[6], ja: r[7] }[hl]) || r[4] || r[5];
+        const fs = radForms(r); return `<button class="tr-r${on ? ' on' : ''}" data-r="${r[0]}"><b lang="zh-Hans">${esc(radG(r))}</b>${fs.length ? `<i lang="zh-Hans">${fs.map(esc).join('')}</i>` : ''}<span>${esc(rName)}</span><small>${n[0].length + n[1].length}</small></button>`;
       }).join('')}</div>`).join('') || `<p class="tr-empty">—</p>`}`;
   }
   function colChars() {
@@ -71,14 +72,16 @@ const OffyTree = (() => {
     const [own, has] = nodeChars(n);
     let head;
     if (n.r) {
-      const r = radOf(n.r), g = radG(r);
+      const r = radOf(n.r), g = radG(r), hl = typeof HzKit !== 'undefined' ? HzKit.lang() : LANG;
+      const mainTitle = ({ th: r[4], en: r[5], vi: r[6], ja: r[7] }[hl]) || r[4] || r[5];
       const langs = [
-        r[5] ? `<b>EN</b> ${esc(r[5])}` : '',
-        r[6] ? `<span lang="vi"><b>VI</b> ${esc(r[6])}</span>` : '',
-        r[7] ? `<span lang="ja"><b>JA</b> ${esc(r[7])}</span>` : ''
+        hl !== 'th' && r[4] ? `<b>TH</b> ${esc(r[4])}` : '',
+        hl !== 'en' && r[5] ? `<b>EN</b> ${esc(r[5])}` : '',
+        hl !== 'vi' && r[6] ? `<span lang="vi"><b>VI</b> ${esc(r[6])}</span>` : '',
+        hl !== 'ja' && r[7] ? `<span lang="ja"><b>JA</b> ${esc(r[7])}</span>` : ''
       ].filter(Boolean).join(' · ');
       head = `<div class="tr-node"><div class="tr-glyphs" lang="zh-Hans"><b>${esc(g)}</b>${radForms(r).map(f => `<span>${esc(f)}</span>`).join('')}</div>
-        <div class="tr-names"><div class="tr-nh"><b>${esc(LANG === 'en' ? r[5] : r[4])}</b> <span class="pyx">${esc(r[3])}</span><button type="button" class="tr-say" data-say="${esc(g)}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></div>
+        <div class="tr-names"><div class="tr-nh"><b>${esc(mainTitle)}</b> <span class="pyx">${esc(r[3])}</span><button type="button" class="tr-say" data-say="${esc(g)}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></div>
         <small>#${r[0]} · ${r[2]} ${T('ขีด')}</small>
         ${langs ? `<p class="tr-langs-txt">${langs}</p>` : ''}
         <div class="tr-nacts"><button type="button" class="hz-xbtn sm" data-hzjump="digi" data-hzch="${esc(g)}">${ic('bolt')}<span>${T('สายวิวัฒนาการ')}</span></button><button type="button" class="hz-xbtn sm" data-hzjump="compose" data-hzch="${esc(g)}">${ic('wand')}<span>${T('ผสมอักษร')}</span></button></div></div></div>`;

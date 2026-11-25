@@ -39,7 +39,12 @@ const HzKit = (() => {
 
   function lang() {
     try {
-      if (typeof f5main === 'function') return f5main();
+      const sl = S().hzLang;
+      if (sl && ['th', 'en', 'vi', 'ja'].includes(sl)) return sl;
+      if (typeof f5main === 'function') {
+        const m = f5main();
+        if (['th', 'en', 'vi', 'ja'].includes(m)) return m;
+      }
     } catch (e) {}
     return typeof LANG !== 'undefined' && LANG === 'en' ? 'en' : 'th';
   }
@@ -233,9 +238,15 @@ const HzKit = (() => {
   return { lang, findWord, wordGloss, charMean, short, charStatus, dotHtml, openWord, strokeSheet, crossBar };
 })();
 
-/* HSK levels shown on every tab of this page (collapsible via #hzLvBtn chip) */
+/* HSK levels + translation language + 简/繁 controls in the #/hanzi top header */
 const HzLv = (() => {
   const ALL = [1, 2, 3, 4, 5, 6, 7];
+  const LANG_OPTS = [
+    ['th', 'TH', 'ไทย'],
+    ['en', 'EN', 'English'],
+    ['vi', 'VI', 'Tiếng Việt'],
+    ['ja', 'JA', '日本語']
+  ];
   const get = () => { const v = S().hzLv; return Array.isArray(v) && v.length ? v : ALL.slice(); };
   const name = l => l === 7 ? '7–9' : String(l);
   const label = () => {
@@ -255,6 +266,27 @@ const HzLv = (() => {
     if (sp[0]) sp[0].classList.toggle('on', !tr);
     if (sp[1]) sp[1].classList.toggle('on', tr);
   }
+  function paintLang() {
+    const cur = HzKit.lang();
+    const opt = LANG_OPTS.find(o => o[0] === cur) || LANG_OPTS[0];
+    const btn = document.getElementById('hzLangBtn');
+    if (btn) {
+      btn.innerHTML = `<span class="hz-lg-short">${opt[1]}</span><span class="hz-lg-full">${opt[2]}</span>${ic('chev-d')}`;
+    }
+    const list = document.getElementById('hzLangs');
+    if (list) {
+      list.innerHTML = `<span class="hz-lv-t">${T('ภาษา')}</span>` + LANG_OPTS.map(([code, sh, full]) =>
+        `<button type="button" data-hzlang="${code}" class="${code === cur ? 'on' : ''}" role="radio" aria-checked="${code === cur}"><b>${sh}</b><span>${full}</span></button>`).join('');
+    }
+  }
+  function closePops(exceptId) {
+    [['hzLvPop', 'hzLvBtn'], ['hzLangPop', 'hzLangBtn']].forEach(([pid, bid]) => {
+      if (pid === exceptId) return;
+      const p = document.getElementById(pid), b = document.getElementById(bid);
+      if (p) p.hidden = true;
+      if (b) { b.setAttribute('aria-expanded', 'false'); b.classList.remove('open'); }
+    });
+  }
   function paint() {
     const on = get(), all = on.length === ALL.length;
     const btn = document.getElementById('hzLvBtn');
@@ -268,6 +300,7 @@ const HzLv = (() => {
       el.innerHTML = `<span class="hz-lv-t">HSK</span>${ALL.map(l => `<button data-l="${l}" class="${on.includes(l) ? 'on' : ''}${l === 7 ? ' w' : ''}" style="--c:var(--hsk${l})" aria-pressed="${on.includes(l)}" aria-label="HSK ${name(l)}">${name(l)}</button>`).join('')}
         <button class="hz-lv-all${all ? ' on' : ''}" data-l="all">${T('ทั้งหมด')}</button>`;
     }
+    paintLang();
     paintTrad();
   }
   document.addEventListener('click', e => {
@@ -277,11 +310,36 @@ const HzLv = (() => {
       const pop = document.getElementById('hzLvPop');
       if (pop) {
         const open = pop.hidden;
+        closePops('hzLvPop');
         pop.hidden = !open;
         toggleBtn.setAttribute('aria-expanded', open);
         toggleBtn.classList.toggle('open', open);
         if (typeof HanziView !== 'undefined' && HanziView.fit) setTimeout(HanziView.fit, 40);
       }
+      return;
+    }
+    const langBtn = e.target.closest('#hzLangBtn');
+    if (langBtn) {
+      try { sfx('tap'); } catch (err) {}
+      const pop = document.getElementById('hzLangPop');
+      if (pop) {
+        const open = pop.hidden;
+        closePops('hzLangPop');
+        pop.hidden = !open;
+        langBtn.setAttribute('aria-expanded', open);
+        langBtn.classList.toggle('open', open);
+        if (typeof HanziView !== 'undefined' && HanziView.fit) setTimeout(HanziView.fit, 40);
+      }
+      return;
+    }
+    const pickLang = e.target.closest('#hzLangs [data-hzlang]');
+    if (pickLang) {
+      try { sfx('tap'); } catch (err) {}
+      S().hzLang = pickLang.dataset.hzlang;
+      try { Store.save(); } catch (err) {}
+      paintLang();
+      closePops(null);
+      dispatchEvent(new CustomEvent('hz-lv'));
       return;
     }
     const tradBtn = e.target.closest('#hzTrad');
@@ -301,7 +359,7 @@ const HzLv = (() => {
     if (on.includes(n)) { if (on.length === 1) { b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); return; } set(on.filter(x => x !== n)); }
     else set(on.concat(n));
   });
-  return { get, has: l => get().includes(l > 7 ? 7 : l), set, paint, paintTrad, label };
+  return { get, has: l => get().includes(l > 7 ? 7 : l), set, paint, paintTrad, paintLang, label };
 })();
 
 const HanziView = (() => {

@@ -123,7 +123,7 @@ const OffyCompose = (() => {
         const mo = cx && typeof HzKit !== 'undefined' ? HzKit.charMean(c.r, D, null) : { t: '' };
         const sh = mo.t ? (typeof HzKit !== 'undefined' ? HzKit.short(mo.t, 6) : mo.t.slice(0, 6)) : '';
         return `<button class="cp-c${l ? '' : ' part'}${xb(c.r)}" style="--lc:var(--hsk${l || 'C'});--d:${Math.min(j, 14) * 18}ms" data-pick="${esc(c.r)}" data-z="${z}" data-j="${j}" lang="zh-Hans">
-          ${dot}<b>${esc(disp(c.r))}</b>${cx && cx[0] ? `<span class="pyx cp-cpy">${esc(cx[0])}</span>` : ''}<small>+${esc(c.add.map(disp).join(''))}${sh ? ` · ${esc(sh)}` : ''}</small><i>${l ? 'HSK ' + LVN(l) : T('นอก HSK')}</i></button>`;
+          ${dot}${cx && cx[0] ? `<span class="pyx cp-cpy">${esc(cx[0])}</span>` : ''}<b>${esc(disp(c.r))}</b><small>+${esc(c.add.map(disp).join(''))}${sh ? ` · ${esc(sh)}` : ''}</small><i>${l ? 'HSK ' + LVN(l) : T('นอก HSK')}</i></button>`;
       }).join('');
       return `<section class="cp-z z-${z}"><h4>${zoneIcon(z)}${T(ZN[z])}<span>${list.length}</span></h4>
         <div class="cp-cs">${btns}${list.length > lim ? `<button class="cp-more" data-more="${z}">${T('ดูเพิ่มอีก')} ${list.length - lim} ${T('ตัว')}</button>` : ''}</div></section>`;

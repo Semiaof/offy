@@ -92,29 +92,34 @@ const OffyDigi = (() => {
     const except = new Set([f, ...parts.map(p => p.c)]);
     let kids = kidsOf(f, except).map(c => ({ c, stage: stageOf(c, f) }));
     const mobile = innerWidth < 700;
-    const defaultCap = mobile ? Math.max(8, 12 - parts.length) : 30;
-    // On mobile big clans, pick the lowest-HSK (most useful) characters first so the radial graph stays crisp & readable
-    if (mobile && !st.open[f] && kids.length > defaultCap) {
+    const defaultCap = mobile ? Math.max(8, 12 - parts.length) : innerWidth < 1100 ? 24 : 30;
+    // On mobile/tablet big clans, pick the lowest-HSK (most useful) characters first so the radial graph stays crisp & readable
+    if (!st.open[f] && kids.length > defaultCap) {
       kids = kids.slice().sort((a, b) => ((D.c[a.c] || [])[1] || 9) - ((D.c[b.c] || [])[1] || 9) || ORDER.indexOf(a.stage) - ORDER.indexOf(b.stage));
     }
     const cap = st.open[f] ? 999 : defaultCap, more = Math.max(0, kids.length - cap);
     kids = kids.slice(0, cap).sort((a, b) => ORDER.indexOf(a.stage) - ORDER.indexOf(b.stage) || ((D.c[a.c] || [])[1] || 9) - ((D.c[b.c] || [])[1] || 9));
     const ring1 = parts.concat(kids), n1 = Math.max(ring1.length, 1);
-    const stagger = n1 > 14;                                     // big clans: alternate two distances so labels never touch
-    const SG = 104, GAP = stagger ? 68 : 116;                    // generous room so pinyin + Thai meaning never collide
-    const asp = Math.max(.84, Math.min(2.4, viewAspect() * .94)), k = 1 + (asp - 1) * Math.max(0, Math.min(1, (n1 - 6) / 12));
-    const unit = oval(Math.max(k, 1), Math.max(1 / k, 1)).P;     // perimeter of the oval with its short side = 1
-    const short = Math.max(stagger ? 176 : 152, Math.min(480, n1 * GAP / unit));
+    // Multi-ring radial layout: 1 ring (<=14), 2 staggered rings (15..40), 3 staggered rings (>40) — no crushing radius cap so boxes NEVER overlap!
+    const layers = n1 > 40 ? 3 : n1 > 14 ? 2 : 1;
+    const SG = layers === 3 ? 146 : 150;
+    const GAP = layers === 3 ? 56 : layers === 2 ? 80 : 140;
+    const asp = Math.max(.84, Math.min(2.2, viewAspect() * .94)), k = 1 + (asp - 1) * Math.max(0, Math.min(1, (n1 - 6) / 14));
+    const unit = oval(Math.max(k, 1), Math.max(1 / k, 1)).P;
+    const minShort = layers === 3 ? 250 : layers === 2 ? 215 : 172;
+    const short = Math.max(minShort, n1 * GAP / unit);
     const A1 = short * Math.max(k, 1), B1 = short * Math.max(1 / k, 1), E1 = oval(A1, B1);
     const ds = E1.P / n1, top = E1.sAt(-Math.PI / 2), s0 = top - (parts.length ? parts.length * ds / 2 : 0) + ds / 2;
     kids.forEach(k2 => except.add(k2.c));
-    const g2cap = stagger ? 0 : kids.length <= 8 ? 4 : 2;
-    const A2 = A1 + 128, B2 = B1 + 128, E2 = g2cap ? oval(A2, B2) : null;
+    const g2cap = layers > 1 ? 0 : kids.length <= 8 ? 4 : 2;
+    const A2 = A1 + 150, B2 = B1 + 150, E2 = g2cap ? oval(A2, B2) : null;
     const tOf = [];
     ring1.forEach((it, i) => {
       const t = E1.tAt(s0 + i * ds); tOf.push(t);
       let [x, y] = E1.pt(t);
-      const off = !stagger ? 0 : i % 2 ? SG : n1 % 2 && i === n1 - 1 ? SG / 2 : 0;   // odd count: the last one sits between, so the ring closes cleanly
+      let off = 0;
+      if (layers === 2) off = i % 2 ? SG : (n1 % 2 && i === n1 - 1 ? SG * .5 : 0);
+      else if (layers === 3) off = (i % 3) * SG;
       if (off) { const d = Math.hypot(x, y) || 1; x += x / d * off; y += y / d * off; }
       nodes.push({ key: it.c, c: it.c, x, y, ring: 1, stage: it.stage, a: Math.atan2(y, x) });
       links.push({ from: it.stage === 'PART' ? it.c : f, to: it.stage === 'PART' ? f : it.c, stage: it.stage });
@@ -128,11 +133,15 @@ const OffyDigi = (() => {
       });
     });
     const has2 = nodes.some(n => n.ring === 2);
-    const lab = stagger ? SG + 108 : has2 ? 204 : 108, edge = stagger ? SG + 92 : has2 ? 128 + 92 : 94;   // leave ample room for labels below bottom nodes
+    const maxOff = (layers - 1) * SG;
+    const lab = layers > 1 ? maxOff + 114 : has2 ? 244 : 114;
+    const edge = layers > 1 ? maxOff + 106 : has2 ? 150 + 106 : 106;
     const sectors = ORDER.map(s2 => { const idx = ring1.map((it, i) => it.stage === s2 ? i : -1).filter(i => i >= 0); if (!idx.length) return null;
       const t = E1.tAt(s0 + (idx[0] + idx[idx.length - 1]) / 2 * ds);
       return { s: s2, n: idx.length, x: (A1 + lab) * Math.cos(t), y: (B1 + lab) * Math.sin(t) + (Math.sin(t) > .3 ? 18 : 0) }; }).filter(Boolean);
-    return { nodes, links, A1, B1, A2: stagger ? A1 + SG : A2, B2: stagger ? B1 + SG : B2, sectors, more, has2: has2 || stagger,
+    return { nodes, links, A1, B1, A2: layers > 1 ? A1 + SG : A2, B2: layers > 1 ? B1 + SG : B2,
+      A3: layers === 3 ? A1 + SG * 2 : 0, B3: layers === 3 ? B1 + SG * 2 : 0,
+      sectors, more, has2: has2 || layers > 1, layers,
       outerX: A1 + edge, outerY: B1 + edge, labelY: B1 + lab, asp: viewAspect() };
   }
   function stageForFocus(f) {
@@ -176,14 +185,16 @@ const OffyDigi = (() => {
   const shortM = s => typeof HzKit !== 'undefined' ? HzKit.short(s, 11) : String(s || '').slice(0, 11);
   const lvC = c => { const x = D.c[c]; return ` style="--lc:var(--hsk${x ? x[1] : 'C'})"`; };      // outside HSK (radicals, parts): grey     // every character wears its HSK level colour
   const lvQ = l => `<i class="lvq" style="--c:var(--hsk${l})">${l === 7 ? '7–9' : l}</i>`;
+  /* Pinyin ABOVE the box, character square in MIDDLE, translated meaning BELOW */
   const nodeInner = (c, stage) => {
     const dot = typeof HzKit !== 'undefined' ? HzKit.dotHtml(c) : '';
     const sd = side(c);
-    const pyOrSide = sd
+    const pyTxt = D.c[c] ? D.c[c][0] : (radOfGlyph.get(c) || [])[3] || '';
+    const topLbl = sd
       ? `<span class="dg-side-tag" title="${esc2(sd)}">${esc2(sd.split(' · ')[0])}</span>`
-      : `<span class="pyx">${esc2(D.c[c] ? D.c[c][0] : (radOfGlyph.get(c) || [])[3] || '')}</span>`;
+      : `<span class="pyx">${esc2(pyTxt)}</span>`;
     const m = meanOf(c);
-    return `<i class="dg-hex"${lvC(c)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(c))}${dot}</i>${pyOrSide}${m.t ? `<small class="dg-m${m.fb ? ' fb' : ''}" lang="${m.fb ? 'en' : mLang()}">${esc2(shortM(m.t))}</small>` : ''}`;
+    return `${topLbl}<i class="dg-hex"${lvC(c)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(c))}${dot}</i>${m.t ? `<small class="dg-m${m.fb ? ' fb' : ''}" lang="${m.fb ? 'en' : mLang()}">${esc2(shortM(m.t))}</small>` : ''}`;
   };
   function cardHTML(c, stage, parent) {
     const x = D.c[c], stg = STAGES[stage] || STAGES.ROOKIE, g = show(c);
@@ -288,8 +299,8 @@ const OffyDigi = (() => {
           const sd = side(c);
           const py = sd ? sd.split(' · ')[0] : (x ? x[0] : (radOfGlyph.get(c) || [])[3] || '');
           return `<button type="button" class="dg-gtile${it.stage === 'PART' ? ' is-part' : ''}"${lvC(c)} data-n="${esc2(c)}">
-            ${dot}<b lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(c))}</b>
-            <span class="pyx">${esc2(py)}</span>
+            ${dot}<span class="pyx">${esc2(py)}</span>
+            <b lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(c))}</b>
             ${m.t ? `<small class="${m.fb ? 'fb' : ''}">${esc2(shortM(m.t))}</small>` : ''}
           </button>`;
         }).join('')}</div>
@@ -364,7 +375,7 @@ const OffyDigi = (() => {
         el.style.opacity = isNew && t < 1 ? Math.min(1, t * 2.2).toFixed(2) : '';
       });
       const rr = .82 + .18 * out3(g);
-      svg.innerHTML = `<ellipse class="dg-ring1" rx="${(next.A1 * rr).toFixed(1)}" ry="${(next.B1 * rr).toFixed(1)}" style="opacity:${g.toFixed(2)}"/>${next.has2 ? `<ellipse class="dg-ring2" rx="${(next.A2 * rr).toFixed(1)}" ry="${(next.B2 * rr).toFixed(1)}" style="opacity:${g.toFixed(2)}"/>` : ''}`
+      svg.innerHTML = `<ellipse class="dg-ring1" rx="${(next.A1 * rr).toFixed(1)}" ry="${(next.B1 * rr).toFixed(1)}" style="opacity:${g.toFixed(2)}"/>${next.has2 ? `<ellipse class="dg-ring2" rx="${(next.A2 * rr).toFixed(1)}" ry="${(next.B2 * rr).toFixed(1)}" style="opacity:${g.toFixed(2)}"/>` : ''}${next.A3 ? `<ellipse class="dg-ring2" rx="${(next.A3 * rr).toFixed(1)}" ry="${(next.B3 * rr).toFixed(1)}" style="opacity:${g.toFixed(2)}"/>` : ''}`
         + next.links.map(l => { const a = pos.get(l.from), b = pos.get(l.to); if (!a || !b) return '';
           const mx = (a.x + b.x) / 2 * .92, my = (a.y + b.y) / 2 * .92, far = l.stage === 'PART' ? l.from : l.to;
           const p = born.has(far) ? out3(prog.get(far) || 0) : 1, part = l.stage === 'PART';
@@ -416,6 +427,7 @@ const OffyDigi = (() => {
     try { if (!window.HanziWriter) await Fx.script('https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js'); } catch (e) { return; }
     if (tok !== hwTok || !box.isConnected || !window.HanziWriter) return;
     const size = box.clientWidth - 8, ink = getComputedStyle(box).color, line = getComputedStyle(box).getPropertyValue('--line') || '#ddd';
+    if (size < 20) return;
     const holder = document.createElement('div'); holder.className = 'dg-hw';
     let w;
     try {
@@ -438,8 +450,8 @@ const OffyDigi = (() => {
     }, 160); });
     ro.observe(v);
   }
-  // zoom so the whole oval (and its labels below bottom nodes) fits cleanly inside the viewport
-  const fitK = (vw, vh) => Math.max(.34, Math.min(1.12, vw / (2 * (lay.outerX + 34)), vh / (2 * (lay.outerY + 42))));
+  // zoom so the whole multi-ring oval (including top pinyin & bottom meanings) fits cleanly inside the viewport
+  const fitK = (vw, vh) => Math.max(.14, Math.min(1.12, vw / (2 * (lay.outerX + 36)), vh / (2 * (lay.outerY + 44))));
   function fitRadial() {
     const v = host.querySelector('.dg-view'); if (!v || !lay) return;
     const vw = v.clientWidth || 600, vh = v.clientHeight || 480;
@@ -487,7 +499,7 @@ const OffyDigi = (() => {
     apply();
   }
   function apply() { const w = host && host.querySelector('.dg-world'); if (w) w.style.transform = `translate(${st.tx}px,${st.ty}px) scale(${st.k})`; }
-  function zoomAt(f, cx, cy) { const k = Math.max(.3, Math.min(2.4, st.k * f)); st.tx = cx - (cx - st.tx) * (k / st.k); st.ty = cy - (cy - st.ty) * (k / st.k); st.k = k; apply(); }
+  function zoomAt(f, cx, cy) { const k = Math.max(.14, Math.min(2.6, st.k * f)); st.tx = cx - (cx - st.tx) * (k / st.k); st.ty = cy - (cy - st.ty) * (k / st.k); st.k = k; apply(); }
 
   /* ---------- sound (synthesised; follows the app's sound setting) ---------- */
   let ac = null;

@@ -77,19 +77,19 @@
 .dg-l { fill: none; stroke: var(--line-2); stroke-width: 1.2; }
 .dg-l.part { stroke-dasharray: 3 5; }
 .dg-ring1, .dg-ring2 { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 6; }
-.dg-n { position: absolute; display: grid; justify-items: center; gap: 2px; padding: 0; color: var(--ink); --hy: -29px; animation: dgIn .4s cubic-bezier(.2, .9, .3, 1.15) both; }
+.dg-n { position: absolute; display: grid; justify-items: center; gap: 3px; padding: 0; color: var(--ink); --hy: -48px; animation: dgIn .4s cubic-bezier(.2, .9, .3, 1.15) both; }
 .dg.is-radial .dg-n, .dg.is-radial .dg-more, .dg-sec, .dg-none.r { left: 0; top: 0; }
 .dg-n.t { width: 92px; }
 .dg-hex { position: relative; font-style: normal; width: 58px; height: 58px; display: grid; place-items: center; font-size: 31px; line-height: 1; border-radius: 16px;
   background: var(--surface); border: 1px solid var(--line-2); box-shadow: var(--sh-1); transition: border-color .2s, transform .2s, box-shadow .2s; }
 .dg-hex::after { content: ""; position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--sc); }
-.dg-n .pyx { font-size: 11.5px; }
+.dg-n .pyx { font-size: 11.5px; min-height: 16px; line-height: 16px; white-space: nowrap; }
 .dg-n small { font-size: 10.5px; font-weight: 600; color: var(--muted); white-space: nowrap; }
 .dg-n:hover .dg-hex { border-color: var(--sc); transform: translateY(-2px); }
-.dg-n.r0 { --hy: -38px; z-index: 2; }
+.dg-n.r0 { --hy: -57px; z-index: 2; }
 .dg-n.r0 .dg-hex { width: 76px; height: 76px; font-size: 44px; border-radius: 20px; border: 1.5px solid var(--ink); box-shadow: var(--sh-2); }
 .dg-n.r0 .dg-hex::after { top: 8px; right: 8px; width: 9px; height: 9px; }
-.dg-n.r2 { --hy: -22px; }
+.dg-n.r2 { --hy: -41px; }
 .dg-n.r2 .dg-hex { width: 44px; height: 44px; font-size: 24px; border-radius: 12px; box-shadow: none; }
 .dg-n.r2 .dg-hex::after { top: 4px; right: 4px; width: 6px; height: 6px; }
 .dg-n.r2 small { display: none; }
@@ -181,9 +181,9 @@
   .dg-view { height: 52dvh; min-height: 360px; }
   .dg-stats { grid-template-columns: repeat(2, 1fr); }
   .dg-hint { display: none; }
-  .dg-n { --hy: -25px; }
+  .dg-n { --hy: -44px; }
   .dg-hex { width: 50px; height: 50px; font-size: 26px; border-radius: 14px; }
-  .dg-n.r0 { --hy: -34px; }
+  .dg-n.r0 { --hy: -53px; }
   .dg-n.r0 .dg-hex { width: 68px; height: 68px; font-size: 38px; border-radius: 18px; }
   .dg-n .dg-m { max-width: 76px; font-size: 10px; }
   .dg-wbtn { grid-template-columns: auto auto 1fr; }
