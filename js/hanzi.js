@@ -351,7 +351,11 @@ const HzLv = (() => {
       dispatchEvent(new CustomEvent('hz-lv'));
       return;
     }
-    const b = e.target.closest('#hzLv [data-l]'); if (!b) return;
+    const b = e.target.closest('#hzLv [data-l]');
+    if (!b) {
+      if (!e.target.closest('#hzLvPop, #hzLangPop, #hzLvBtn, #hzLangBtn')) closePops(null);
+      return;
+    }
     try { sfx('tap'); } catch (err) { }
     const on = get(), l = b.dataset.l;
     if (l === 'all') { set(ALL); return; }

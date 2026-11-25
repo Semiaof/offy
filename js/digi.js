@@ -29,7 +29,7 @@ const OffyDigi = (() => {
     PART: { th: 'ส่วนประกอบ', sh: 'ประกอบ', zh: '件', d: 'ส่วนที่ประกอบขึ้นเป็นตัวนี้' }
   };
   const ORDER = ['PART', 'ARMOR', 'CHAMPION', 'ULTIMATE', 'VARIANT'];
-  const COLW = 210, ROWH = 104, NODE = 92, PAD = 40;
+  const COLW = 210, ROWH = 114, NODE = 92, PAD = 40;
   const st = { base: '青', trail: ['青'], sel: null, open: {}, stageFilter: null, tx: 0, ty: 0, k: 1, fitted: false };
   let D = null, host = null, rad = null, formsOf = null, radOfGlyph = null, tree = null, cur = new Map(), anim = 0;
 
@@ -49,7 +49,9 @@ const OffyDigi = (() => {
   /* look-alike forms of different radicals come tagged from the data: 阝@170 (left · 阜) vs 阝@163 (right · 邑), 月@130 (⺼ flesh) … */
   const base = c => String(c).split('@')[0];
   const side = c => { const [g, no] = String(c).split('@'); if (!no) return ''; const r = rad.get(+no); if (!r) return '';
-    return `${g === '阝' ? (no === '170' ? T('ซ้าย') + ' ' : T('ขวา') + ' ') : ''}${r[1]} · ${LANG === 'en' ? r[5] : r[4]}`; };
+    const hl = typeof HzKit !== 'undefined' ? HzKit.lang() : LANG;
+    const rn = ({ th: r[4], en: r[5], vi: r[6], ja: r[7] }[hl]) || r[4] || r[5];
+    return `${g === '阝' ? (no === '170' ? T('ซ้าย') + ' ' : T('ขวา') + ' ') : ''}${r[1]} · ${rn}`; };
   const show = c => { const x = D.c[c]; if (x) return trad() && x[8] ? x[8] : c; const r = radOfGlyph.get(c); return r && base(c) === r[1] ? radG(r) : base(c); };
   const viewMode = () => S().digiView || 'radial';
   const radial = () => viewMode() === 'radial';
@@ -484,7 +486,7 @@ const OffyDigi = (() => {
     const world = host.querySelector('.dg-world');
     world.style.width = tree.w + 'px'; world.style.height = tree.h + 'px';
     let links = '';
-    tree.all.forEach(n => n.kids.forEach(k => { const x1 = n.x + NODE, y1 = n.y + NODE / 2, x2 = k.x, y2 = k.y + NODE / 2, mx = (x1 + x2) / 2;
+    tree.all.forEach(n => n.kids.forEach(k => { const x1 = n.x + NODE, y1 = n.y + 48, x2 = k.x, y2 = k.y + 48, mx = (x1 + x2) / 2;
       links += `<path class="dg-l s-${k.stage}" d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}"/>`; }));
     world.innerHTML = `<svg class="dg-svg tree" width="${tree.w}" height="${tree.h}" aria-hidden="true">${links}</svg>`
       + tree.all.map(n => `<button class="dg-n t s-${n.stage}${(st.sel || base) === n.c ? ' on' : ''}" data-n="${esc2(n.c)}" style="left:${n.x}px;top:${n.y}px">${nodeInner(n.c, n.stage)}</button>`).join('')

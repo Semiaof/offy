@@ -53,7 +53,8 @@ body.hz-full { --tab: 0px; }
 body.hz-full .nav { display: none !important; }
 body.hz-full .main { margin-left: 0; }
 body.hz-full #v-hanzi.view { padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
-body.hz-full #v-hanzi .ph { display: none; }
+body.hz-full #v-hanzi .ph { display: flex; margin-bottom: 6px; }
+body.hz-full #v-hanzi .ph .ph-t, body.hz-full #hzFull { display: none; }
 body.hz-full #v-hanzi .hz-exit { display: grid; }
 body.hz-full #v-hanzi .hz-bar { margin-bottom: 10px; }
 

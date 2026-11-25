@@ -30,7 +30,9 @@ const OffyTree = (() => {
   /* look-alike forms arrive tagged: 阝@170 (left · 阜) / 阝@163 (right · 邑), 月@130 (⺼ flesh) … */
   const base = g => String(g).split('@')[0];
   const side = g => { const [c, no] = String(g).split('@'); if (!no) return ''; const r = rad.get(+no); if (!r) return '';
-    return `${c === '阝' ? (no === '170' ? T('ซ้าย') + ' ' : T('ขวา') + ' ') : ''}${r[1]} · ${LANG === 'en' ? r[5] : r[4]}`; };
+    const hl = typeof HzKit !== 'undefined' ? HzKit.lang() : LANG;
+    const rn = ({ th: r[4], en: r[5], vi: r[6], ja: r[7] }[hl]) || r[4] || r[5];
+    return `${c === '阝' ? (no === '170' ? T('ซ้าย') + ' ' : T('ขวา') + ' ') : ''}${r[1]} · ${rn}`; };
   /* 简 / 繁 (one setting with the Digivolution chapter): simplified by default, never both mixed */
   const trad = () => !!S().hzTrad;
   const radG = r => trad() || D.c[r[1]] ? r[1] : ((r[8].find(f => f[1] === 'ตัวย่อ') || r[8].find(f => D.c[f[0]]) || [])[0] || r[1]);
@@ -99,8 +101,9 @@ const OffyTree = (() => {
     const c = st.ch;
     if (!c) return `<p class="tr-empty">${T('เลือกอักษรเพื่อดูคำที่ใช้')}</p>`;
     const x = D.c[c] || [], r = x[3] && radOf(x[3]), ws = (D.cw[c] || []).filter(i => lvOk(D.w[i][2]));
+    const hl = typeof HzKit !== 'undefined' ? HzKit.lang() : LANG;
     const mo = typeof HzKit !== 'undefined' ? HzKit.charMean(c, D, null) : { t: (LANG !== 'en' && x[9]) || x[10] || '', fb: false };
-    const meaning = mo.t + (mo.fb || LANG === 'en' || !x[10] || mo.t === x[10] ? '' : ` · ${x[10]}`);
+    const meaning = mo.t + (mo.fb || hl === 'en' || !x[10] || mo.t === x[10] ? '' : ` · ${x[10]}`);
     const comps = (x[4] || []).map(g => `<button class="tr-chip" data-g="${esc(g)}" lang="zh-Hans">${esc(base(g))}${side(g) ? `<small>${esc(side(g))}</small>` : ''}</button>`).join('<i>+</i>');
     const word = i => {
       const w = D.w[i], hi = esc(w[0]).split(esc(c)).join(`<mark>${esc(c)}</mark>`);
