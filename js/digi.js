@@ -102,6 +102,24 @@ const OffyDigi = (() => {
   ];
   const QUICK_WORD_HUBS = ['学', '电', '心', '水', '生', '手', '大', '高', '气', '机'];
 
+  /* Phonetic Sound Family (声旁) fallback Pinyin & 3 Predictability Nebulae */
+  const PHON_PY = { '尧': 'yáo', '佥': 'qiān', '圭': 'guī', '甬': 'yǒng', '亥': 'hài', '咅': 'pǒu', '曷': 'hé', '屯': 'tún' };
+  const PHON_ZONES = [
+    { id: 'exact', icon: '🟢', th: 'เดาเสียงแม่นมาก', en: 'High Accuracy',
+      chars: ['方', '马', '令', '巴', '丁', '交', '青', '包', '羊', '半', '非', '龙', '干', '支', '由', '中', '生', '分'] },
+    { id: 'near',  icon: '🟡', th: 'เสียงคล้ายเป็นชุด', en: 'Close Rime Family',
+      chars: ['尚', '肖', '占', '艮', '少', '尧', '佥', '甬', '且', '隹', '京', '亥', '屯', '丬', '合', '加'] },
+    { id: 'diff',  icon: '🔴', th: 'เสียงเปลี่ยนบ่อย ต้องระวัง', en: 'Watch Out (Shifted)',
+      chars: ['者', '工', '白', '莫', '皮', '圭', '各', '欠', '古', '咅', '区', '曷'] }
+  ];
+  const QUICK_PHON = ['青', '方', '艮', '令', '尚', '肖', '占', '工', '莫', '皮'];
+  const PH_META = {
+    exact: { th: 'เสียงตรง',              sh: 'ตรง',     d: 'ออกเสียงเหมือนตัวแม่ (เปลี่ยนแค่เสียงวรรณยุกต์)' },
+    near:  { th: 'เสียงคล้าย',            sh: 'คล้าย',   d: 'สระหรือพยัญชนะใกล้เคียงกับตัวแม่ พอเดาเสียงได้' },
+    diff:  { th: 'เสียงเปลี่ยนต้องระวัง', sh: 'เปลี่ยน', d: 'เสียงอ่านเปลี่ยนไปจากตัวแม่ชัดเจน ต้องจำแยก!' }
+  };
+  const PH_ORDER = ['exact', 'near', 'diff'];
+
   const STAGES = {
     ROOKIE:   { th: 'อักษรตั้งต้น',          sh: 'ตั้งต้น',   zh: '基', d: 'จุดเริ่มต้นของตระกูลอักษรนี้' },
     STACK:    { th: 'ซ้ำร่างวิวัฒนาการ',     sh: 'ซ้ำร่าง',   zh: '叠', d: 'ซ้อนอักษรตัวเดิม 2–4 ตัวเพื่อขยายความหมาย (เช่น 木→林→森 · 又→双→叒→叕)' },
@@ -126,18 +144,23 @@ const OffyDigi = (() => {
     skyZone: 'all',
     skyAll: false,
     wSkyZone: 'all',
+    pSkyZone: 'all',
     trail: ['木'],
     wTrail: ['学'],
+    pTrail: ['青'],
+    charForm: null,     // radical variant form filter (e.g. '氵' or '氺' for 水)
     wSel: null,         // currently selected word in Word Constellation
+    pSel: null,         // currently selected char in Phonetic Constellation
     sel: null,
     open: {},           // char focus expanded satellites
     wOpen: {},          // word focus expanded words
     stageFilter: null,
     wFilter: null,
+    pFilter: null,
     tx: 0, ty: 0, k: 1, fitted: false
   };
   let D = null, host = null, rad = null, formsOf = null, radOfGlyph = null, tree = null;
-  let cur = new Map(), anim = 0, lay = null, skyLay = null, wLay = null, wSkyLay = null;
+  let cur = new Map(), anim = 0, lay = null, skyLay = null, wLay = null, wSkyLay = null, pLay = null, pSkyLay = null;
 
   Object.assign(window.OFFY_EN || {}, {
     'สายวิวัฒนาการ': 'Character families', 'สายวิวัฒนาการอักษร': 'Character families',
@@ -175,12 +198,21 @@ const OffyDigi = (() => {
     'ดูเพิ่มอีก': 'more words', 'ย่อเหลือคำหลัก': 'Show core words',
     'เปิดการ์ด 5 ภาษา': 'Open 5-lang card', 'กระโดดไปกลุ่มดาวคำของ…': 'Hop to partner char…',
     'ดูสายวิวัฒนาการอักษร': 'View char evolution', 'ดูกลุ่มดาวคำของตัวนี้': 'View word constellation',
-    'คำ': 'words', 'ยังไม่เรียน': 'New'
+    'คำ': 'words', 'ยังไม่เรียน': 'New',
+    'เสียงพ้อง': 'Sounds', 'ท้องฟ้าแกนเสียง': 'Phonetic Sound Sky',
+    'เสียงตรง': 'Exact sound', 'เสียงคล้าย': 'Close sound', 'เสียงเปลี่ยนต้องระวัง': 'Shifted (watch out!)', 'เสียงเปลี่ยน': 'Shifted',
+    'ตรง': 'Exact', 'คล้าย': 'Close', 'เปลี่ยน': 'Shifted',
+    'แกนเสียงยอดฮิต': 'Top Phonetic Families', 'ดูกลุ่มดาวเสียงพ้อง': 'View sound family',
+    'รูปแปลงร่าง': 'Variant forms', 'ยังไม่มีอักษร HSK ที่ใช้แกนเสียงนี้': 'No HSK characters use this phonetic base',
+    'ค้นหาแกนเสียง เช่น 青, 方, 艮, 令, 占…': 'Search phonetic base e.g. 青, 方, 艮, 令, 占…',
+    'แตะแกนเสียงเพื่อดูความแม่นของเสียงอ่าน · กรอบสียังคงเป็นระดับ HSK': 'Tap any phonetic base · box borders remain HSK levels',
+    'แตะอักษรเพื่อเทียบเสียงอ่านและฟังเสียง · กรอบสี = ระดับ HSK': 'Tap any char to compare pronunciation · border = HSK level'
   });
 
   /* ---------- realm, simplified/traditional & common helpers ---------- */
-  const realm = () => (S().digiRealm === 'word' ? 'word' : 'char');
+  const realm = () => (S().digiRealm === 'word' ? 'word' : S().digiRealm === 'phon' ? 'phon' : 'char');
   const isWord = () => realm() === 'word';
+  const isPhon = () => realm() === 'phon';
   const trad = () => !!S().hzTrad;
   const base = c => String(c || '').split('@')[0];
   const radG = r => {
@@ -241,9 +273,14 @@ const OffyDigi = (() => {
   const pyOf = c => {
     if (BONUS[c]) return BONUS[c].py;
     if (D.c[c]) return D.c[c][0];
+    if (PHON_PY[c]) return PHON_PY[c];
     const r = radOfGlyph.get(c);
     return r ? r[3] : '';
   };
+  const matchPy = (pyA, pyB) => (typeof HzKit !== 'undefined' && HzKit.matchPhonetic) ? HzKit.matchPhonetic(pyA, pyB) : '';
+  const pyBadgeHTML = (pyTxt, acc) => acc
+    ? `<span class="pyx ph-b ph-${acc}" title="${esc2(T(PH_META[acc].th))}"><i></i>${esc2(pyTxt)}</span>`
+    : `<span class="pyx">${esc2(pyTxt)}</span>`;
   const partsRaw = c => {
     if (BONUS[c]) return BONUS[c].parts;
     return (D.c[c] && D.c[c][4]) || [];
@@ -445,24 +482,37 @@ const OffyDigi = (() => {
     }
 
     const ids = zoneList.map(z => z.id);
-    const [z0, z1, z2, z3, z4] = ids.map(id => zoneClusters.get(id));
     const offsets = {};
-    if (portrait) {
-      const r1H = Math.max(z0.h, z1.h), r2H = Math.max(z2.h, z3.h);
-      const y1 = 0, y2 = r1H / 2 + r2H / 2 + gap, y3 = y2 + r2H / 2 + z4.h / 2 + gap;
-      offsets[ids[0]] = [-(z0.w / 2 + gap * .45), y1];
-      offsets[ids[1]] = [+(z1.w / 2 + gap * .45), y1];
-      offsets[ids[2]] = [-(z2.w / 2 + gap * .45), y2];
-      offsets[ids[3]] = [+(z3.w / 2 + gap * .45), y2];
-      offsets[ids[4]] = [0, y3];
+    if (ids.length === 3) {
+      const [z0, z1, z2] = ids.map(id => zoneClusters.get(id));
+      if (portrait) {
+        const y1 = 0, y2 = z0.h / 2 + z1.h / 2 + gap, y3 = y2 + z1.h / 2 + z2.h / 2 + gap;
+        offsets[ids[0]] = [0, y1]; offsets[ids[1]] = [0, y2]; offsets[ids[2]] = [0, y3];
+      } else {
+        const topH = Math.max(z0.h, z1.h), yTop = -(topH / 2 + gap * .45), yBot = +(z2.h / 2 + gap * .45);
+        offsets[ids[0]] = [-(z0.w / 2 + gap * .55), yTop];
+        offsets[ids[1]] = [+(z1.w / 2 + gap * .55), yTop];
+        offsets[ids[2]] = [0, yBot];
+      }
     } else {
-      const topH = Math.max(z0.h, z1.h), botH = Math.max(z3.h, z4.h, z2.h);
-      const yTop = -(topH / 2 + gap * .45), yBot = +(botH / 2 + gap * .45);
-      offsets[ids[0]] = [-(z0.w / 2 + gap * .55), yTop];
-      offsets[ids[1]] = [+(z1.w / 2 + gap * .55), yTop];
-      offsets[ids[3]] = [-(z4.w / 2 + z3.w / 2 + gap * .9), yBot];
-      offsets[ids[4]] = [0, yBot + 16];
-      offsets[ids[2]] = [+(z4.w / 2 + z2.w / 2 + gap * .9), yBot];
+      const [z0, z1, z2, z3, z4] = ids.map(id => zoneClusters.get(id));
+      if (portrait) {
+        const r1H = Math.max(z0.h, z1.h), r2H = Math.max(z2.h, z3.h);
+        const y1 = 0, y2 = r1H / 2 + r2H / 2 + gap, y3 = y2 + r2H / 2 + z4.h / 2 + gap;
+        offsets[ids[0]] = [-(z0.w / 2 + gap * .45), y1];
+        offsets[ids[1]] = [+(z1.w / 2 + gap * .45), y1];
+        offsets[ids[2]] = [-(z2.w / 2 + gap * .45), y2];
+        offsets[ids[3]] = [+(z3.w / 2 + gap * .45), y2];
+        offsets[ids[4]] = [0, y3];
+      } else {
+        const topH = Math.max(z0.h, z1.h), botH = Math.max(z3.h, z4.h, z2.h);
+        const yTop = -(topH / 2 + gap * .45), yBot = +(botH / 2 + gap * .45);
+        offsets[ids[0]] = [-(z0.w / 2 + gap * .55), yTop];
+        offsets[ids[1]] = [+(z1.w / 2 + gap * .55), yTop];
+        offsets[ids[3]] = [-(z4.w / 2 + z3.w / 2 + gap * .9), yBot];
+        offsets[ids[4]] = [0, yBot + 16];
+        offsets[ids[2]] = [+(z4.w / 2 + z2.w / 2 + gap * .9), yBot];
+      }
     }
 
     const nodes = [], links = [], labels = [], zoneBoxes = {};
@@ -527,7 +577,18 @@ const OffyDigi = (() => {
 
     const parts = partsOf(f).map(q => ({ c: q, stage: 'PART' }));
     parts.forEach(p => used.add(p.c));
-    const direct = directKidsOf(f, used);
+    let direct = directKidsOf(f, used);
+
+    // Radical variant form filter (e.g. 水 → 水 / 氵 三点水 / 氺 水字底)
+    const rObj = radOfGlyph.get(f);
+    const formBuckets = (rObj && typeof HzKit !== 'undefined' && HzKit.radFormBuckets)
+      ? HzKit.radFormBuckets(direct.filter(c => !!D.c[c]), rObj, D) : [];
+    if (st.charForm && !formBuckets.some(b => b.key === st.charForm)) st.charForm = null;
+    if (st.charForm) {
+      const hit = formBuckets.find(b => b.key === st.charForm);
+      const allow = new Set(hit ? hit.chars : []);
+      direct = direct.filter(c => allow.has(c));
+    }
 
     const stackRoots = [], branchItems = [], leafItems = [];
     for (const c of direct) {
@@ -709,8 +770,116 @@ const OffyDigi = (() => {
     }).filter(Boolean);
 
     return {
-      nodes, links, sectors, more, isExpanded,
+      nodes, links, sectors, more, isExpanded, formBuckets,
       hasMoreToggle: more > 0 || (isExpanded && (leafItems.length > (hasHeroChains ? 8 : 20) || branchItems.length > 7)),
+      box: { minX: minX - 24, maxX: maxX + 24, minY: minY - 24, maxY: maxY + 24 },
+      asp: viewAspect()
+    };
+  }
+
+  /* =====================================================================
+     REALM 3 · PHONETIC SOUND FAMILIES (声旁 · 🟢 เสียงตรง / 🟡 คล้าย / 🔴 เปลี่ยน)
+     HSK level colored borders on every box remain 100% UNTOUCHED!
+     ===================================================================== */
+  function phonKidsOf(f) {
+    const b = base(f), fs = formsOf(f), basePy = pyOf(b);
+    const out = [];
+    for (const [c, x] of Object.entries(D.c)) {
+      if (c === b || !lvOk(x[1])) continue;
+      const isSound = (x[12] && (x[12] === b || fs.has(x[12]))) || (stageOf(c, f) === 'ARMOR');
+      if (!isSound) continue;
+      const acc = matchPy(basePy, x[0]) || 'diff';
+      out.push({ c, x, acc });
+    }
+    const ord = { exact: 0, near: 1, diff: 2 };
+    out.sort((a, b2) => ord[a.acc] - ord[b2.acc] || a.x[1] - b2.x[1]);
+    return out;
+  }
+
+  function layoutPhonSky() {
+    const byZone = new Map(PHON_ZONES.map(z => [z.id, []]));
+    for (const z of PHON_ZONES) {
+      const arr = byZone.get(z.id);
+      for (const ch of z.chars) {
+        const ks = phonKidsOf(ch);
+        if (!ks.length) continue;
+        const cE = ks.filter(k => k.acc === 'exact').length;
+        const cN = ks.filter(k => k.acc === 'near').length;
+        const cD = ks.filter(k => k.acc === 'diff').length;
+        const tier = ks.length >= 10 ? 0 : ks.length >= 7 ? 1 : 2;
+        arr.push({ key: ch, cnt: ks.length, tier, cE, cN, cD });
+      }
+      arr.sort((a, b) => b.cnt - a.cnt);
+    }
+    return layoutNebulae(PHON_ZONES, byZone, 66);
+  }
+
+  function layoutPhonConstellation(rawFocus) {
+    const f = base(rawFocus), basePy = pyOf(f);
+    const all = phonKidsOf(f);
+    const byAcc = { exact: [], near: [], diff: [] };
+    all.forEach(it => byAcc[it.acc].push(it));
+
+    const nodes = [{ key: f, c: f, x: 0, y: 0, ring: 0, acc: 'root', kind: 'root' }];
+    const links = [];
+    const activeGroups = PH_ORDER.filter(k => byAcc[k].length > 0);
+
+    // Place 🟢 exact at TOP, 🟡 near at BOTTOM-RIGHT, 🔴 diff at BOTTOM-LEFT — labels sit OUTWARD (0 collisions!)
+    const sectorPlan = activeGroups.length === 1
+      ? [[activeGroups[0], -Math.PI / 2, Math.PI * 1.9]]
+      : activeGroups.length === 2
+      ? [[activeGroups[0], -Math.PI * 0.5, Math.PI * 0.92], [activeGroups[1], Math.PI * 0.5, Math.PI * 0.92]]
+      : [['exact', -Math.PI * 0.5, Math.PI * 0.72], ['near', Math.PI * 0.28, Math.PI * 0.58], ['diff', Math.PI * 0.78, Math.PI * 0.48]];
+
+    for (const [acc, centerA, spanA] of sectorPlan) {
+      const list = byAcc[acc];
+      if (!list || !list.length) continue;
+      let idx = 0, layer = 0;
+      while (idx < list.length) {
+        const r = 182 + layer * 134;
+        const cap = Math.max(4, Math.floor((spanA * r) / 118));
+        const take = Math.min(list.length - idx, cap);
+        for (let j = 0; j < take; j++) {
+          const it = list[idx + j];
+          const t = take > 1 ? (j / (take - 1) - 0.5) : 0;
+          const ang = centerA + t * Math.min(spanA, (take - 1) * 0.36 + 0.2);
+          nodes.push({ key: it.c, c: it.c, x: Math.cos(ang) * r, y: Math.sin(ang) * r, ring: 1, acc, kind: 'phon' });
+          links.push({ from: f, to: it.c, acc, kind: 'ph' + acc });
+        }
+        idx += take; layer++;
+      }
+    }
+
+    relaxOverlap(nodes, true, 108, 118, 128, 136, 26);
+
+    const groupLabels = [];
+    const iconOf = { exact: '🟢', near: '🟡', diff: '🔴' };
+    for (const acc of activeGroups) {
+      const grp = nodes.filter(n => n.acc === acc);
+      if (!grp.length) continue;
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, sumY = 0;
+      grp.forEach(n => {
+        minX = Math.min(minX, n.x - 56); maxX = Math.max(maxX, n.x + 56);
+        minY = Math.min(minY, n.y - 62); maxY = Math.max(maxY, n.y + 56);
+        sumY += n.y;
+      });
+      const avgY = sumY / grp.length;
+      const ly = avgY <= 10 ? minY - 32 : maxY + 26;
+      const lbl = acc === 'diff' ? `${iconOf[acc]} ${T('เสียงเปลี่ยน')} (${grp.length})` : `${iconOf[acc]} ${T(PH_META[acc].th)} (${grp.length})`;
+      groupLabels.push({ acc, text: lbl, x: (minX + maxX) / 2, y: ly });
+    }
+
+    let minX = -160, maxX = 160, minY = -160, maxY = 160;
+    nodes.forEach(n => {
+      minX = Math.min(minX, n.x - 66); maxX = Math.max(maxX, n.x + 66);
+      minY = Math.min(minY, n.y - 76); maxY = Math.max(maxY, n.y + 66);
+    });
+    groupLabels.forEach(lb => { minY = Math.min(minY, lb.y - 24); maxY = Math.max(maxY, lb.y + 24); });
+
+    return {
+      f, basePy, nodes, links, groupLabels,
+      counts: { exact: byAcc.exact.length, near: byAcc.near.length, diff: byAcc.diff.length },
+      total: all.length,
       box: { minX: minX - 24, maxX: maxX + 24, minY: minY - 24, maxY: maxY + 24 },
       asp: viewAspect()
     };
@@ -930,17 +1099,31 @@ const OffyDigi = (() => {
     return rep ? `<em class="dg-rep">×${rep}</em>` : '';
   };
 
-  const nodeInner = (c, stage) => {
+  const nodeInner = (c, stage, focusPy = '') => {
     const dot = !BONUS[c] && typeof HzKit !== 'undefined' ? HzKit.dotHtml(c) : '';
     const sd = side(c);
     const pyTxt = pyOf(c);
+    const phAcc = (stage === 'ARMOR' && focusPy && pyTxt) ? matchPy(focusPy, pyTxt) : '';
     const topLbl = sd
       ? `<span class="dg-side-tag" title="${esc2(sd)}">${esc2(sd.split(' · ')[0])}</span>`
-      : `<span class="pyx">${esc2(pyTxt)}</span>`;
+      : pyBadgeHTML(pyTxt, phAcc);
     const m = meanOf(c);
     const rep = repBadge(c, stage);
     return `${topLbl}<i class="dg-hex"${lvC(c)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(c))}${dot}${rep}</i>${m.t ? `<small class="dg-m${m.fb ? ' fb' : ''}" lang="${m.fb ? 'en' : mLang()}">${esc2(shortM(m.t))}</small>` : ''}`;
   };
+
+  function phonNodeInner(n) {
+    if (n.ring === 0) return nodeInner(n.c, 'ROOKIE');
+    const dot = typeof HzKit !== 'undefined' ? HzKit.dotHtml(n.c) : '';
+    const m = meanOf(n.c);
+    return `${pyBadgeHTML(pyOf(n.c), n.acc)}<i class="dg-hex"${lvC(n.c)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(n.c))}${dot}</i>${m.t ? `<small class="dg-m${m.fb ? ' fb' : ''}" lang="${m.fb ? 'en' : mLang()}">${esc2(shortM(m.t))}</small>` : ''}`;
+  }
+
+  function phonSkyNodeInner(n) {
+    const py = pyOf(n.key);
+    const mini = `<span class="dg-ph-mini">${n.cE ? `<em class="pe">${n.cE}</em>` : ''}${n.cN ? `<em class="pn">${n.cN}</em>` : ''}${n.cD ? `<em class="pd">${n.cD}</em>` : ''}</span>`;
+    return `<span class="pyx">${esc2(py)}</span><i class="dg-hex"${lvC(n.key)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(n.key))}</i>${mini}`;
+  }
 
   function wordNodeInner(n, focusChar) {
     if (n.ring === 0) return nodeInner(n.c, 'ROOKIE');
@@ -999,6 +1182,84 @@ const OffyDigi = (() => {
       </ul>
       <p class="dg-wt">${T('แม่คำยอดฮิต')}</p>
       <div class="dg-qchains">${items}</div>
+    </div>`;
+  }
+
+  function phonSkyGuideHTML() {
+    const items = QUICK_PHON.map(ch => {
+      const cnt = phonKidsOf(ch).length;
+      return `<button type="button" class="dg-qchain" data-phub="${esc2(ch)}"><span lang="zh-Hans">${esc2(show(ch))}</span><small>${esc2(pyOf(ch))} · ${cnt}</small></button>`;
+    }).join('');
+    return `<div class="dg-card dg-sky-card">
+      <div class="dg-ch"><span class="dg-stage s-ARMOR">${T('ท้องฟ้าแกนเสียง')}</span><span class="dg-id">265 声旁</span></div>
+      <p class="dg-sky-lead">${LANG === 'en'
+        ? 'Tap any phonetic component to see which HSK characters keep the exact sound vs shift. Character box borders stay 100% HSK level colors!'
+        : 'แตะแกนเสียง (声旁) เพื่อเทียบความแม่นของเสียงอ่าน ช่วยเดาเสียงศัพท์ใหม่ในข้อสอบ HSK — โดยคงสีกรอบตามระดับ HSK ไว้เหมือนเดิมทุกตัว'}</p>
+      <ul class="dg-sky-key">
+        <li><i class="k-phexact"></i><span><b>🟢 ${T('เสียงตรง')}</b> · ${LANG === 'en' ? 'Same syllable (tone may shift): 方 → 房/防/访' : 'พยัญชนะ+สระตรงเป๊ะ เปลี่ยนแค่วรรณยุกต์ เช่น 方→房/防/访'}</span></li>
+        <li><i class="k-phnear"></i><span><b>🟡 ${T('เสียงคล้าย')}</b> · ${LANG === 'en' ? 'Close rime or initial: 艮 → 眼/限 · 青 → 睛/精' : 'สระหรือพยัญชนะใกล้เคียง เช่น 艮→眼/限 · 青→睛/精'}</span></li>
+        <li><i class="k-phdiff"></i><span><b>🔴 ${T('เสียงเปลี่ยนต้องระวัง')}</b> · ${LANG === 'en' ? 'Diverged sound — memorize separately: 青 → 猜 cāi' : 'เสียงเปลี่ยนไปเลย ต้องจำแยก เช่น 青→猜 (cāi) · 占→贴 (tiē)'}</span></li>
+      </ul>
+      <p class="dg-wt">${T('แกนเสียงยอดฮิต')}</p>
+      <div class="dg-qchains">${items}</div>
+    </div>`;
+  }
+
+  function phonCardHTML(f, selChar) {
+    const basePy = pyOf(f), kids = phonKidsOf(f);
+    const cE = kids.filter(k => k.acc === 'exact').length;
+    const cN = kids.filter(k => k.acc === 'near').length;
+    const cD = kids.filter(k => k.acc === 'diff').length;
+    const hit = selChar ? kids.find(k => k.c === selChar) : null;
+    if (hit) {
+      const c = hit.c, x = hit.x, acc = hit.acc;
+      const mo = meanOf(c), icon = acc === 'exact' ? '🟢' : acc === 'near' ? '🟡' : '🔴';
+      const parts = partsRaw(c).map(q => {
+        const rv = typeof HzKit !== 'undefined' && HzKit.radVar ? HzKit.radVar(q) : null;
+        const sub = side(q) || (rv ? `${rv.zh} ${rv.py}` : '');
+        return `<button class="dg-part${base(q) === f ? ' base' : ''}" data-tochar="${esc2(q)}" lang="zh-Hans">${esc2(show(q))}${sub ? `<small>${esc2(sub)}</small>` : ''}</button>`;
+      }).join('<i>+</i>');
+      const words = (D.cw[c] || []).slice(0, 6).map(i => {
+        const w = D.w[i];
+        const gl = typeof HzKit !== 'undefined' ? HzKit.wordGloss(w[0], w[3], !!w[4]) : { t: w[3], fb: !w[4] };
+        return `<li><button type="button" class="dg-wbtn" data-dgword="${esc2(w[0])}">${lvQ(w[2])}<b lang="zh-Hans">${esc2(showWord(w[0]))}</b><span class="pyx">${esc2(w[1])}</span><span class="dg-wgl">${gl.fb ? '<em>EN</em>' : ''}${esc2(gl.t)}</span></button><button type="button" class="tr-say" data-say="${esc2(w[0])}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></li>`;
+      }).join('');
+      return `<div class="dg-card dg-pcard">
+        <div class="dg-ch"><span class="dg-ph-pill ph-${acc}">${icon} ${T(PH_META[acc].th)}</span><span class="dg-wbadge">${lvQ(x[1])}<span>HSK ${x[1] === 7 ? '7–9' : x[1]}</span></span></div>
+        <div class="dg-ph-cmp">
+          <div class="dg-ph-box"><b lang="zh-Hans">${esc2(show(f))}</b><span class="pyx">${esc2(basePy)}</span></div>
+          <i class="dg-ph-arr">→</i>
+          <div class="dg-ph-box on"${lvC(c)}><b lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(c))}</b>${pyBadgeHTML(x[0], acc)}</div>
+          <button class="dg-say" data-say="${esc2(c)}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button>
+        </div>
+        <p class="dg-mean">${esc2(mo.t)}${mo.fb || mLang() === 'en' || !x[10] ? '' : ` · ${esc2(x[10])}`}</p>
+        <p class="dg-sd">${esc2(PH_META[acc].d)}</p>
+        ${parts ? `<p class="dg-row"><span>${T('โครงสร้าง')}</span>${parts}</p>` : ''}
+        <div class="hz-xbar">
+          <button type="button" class="hz-xbtn" data-tochar="${esc2(c)}">${ic('bolt')}<span>${T('ดูสายวิวัฒนาการอักษร')} ${esc2(show(c))}</span></button>
+          ${wordsForChar(c).length ? `<button type="button" class="hz-xbtn" data-toword="${esc2(c)}">${ic('star')}<span>${T('คำศัพท์')} (${wordsForChar(c).length})</span></button>` : ''}
+        </div>
+        ${words ? `<p class="dg-wt">${T('คำที่ใช้ตัวนี้')} <small>${T('แตะเพื่อดู 5 ภาษา')}</small></p><ul class="dg-ws">${words}</ul>` : ''}
+      </div>`;
+    }
+
+    const mo = meanOf(f);
+    const pct = kids.length ? Math.round(((cE + cN) / kids.length) * 100) : 0;
+    return `<div class="dg-card dg-pcard">
+      <div class="dg-ch"><span class="dg-stage s-ARMOR">声旁 · ${T('เสียงพ้อง')}</span><span class="dg-id">${kids.length} ${T('ตัว')} · ${pct}%</span></div>
+      <div class="dg-hero"><div class="dg-big"${lvC(f)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(f))}</div>
+        <div><p class="dg-py"><span class="pyx">${esc2(basePy)}</span><button class="dg-say" data-say="${esc2(f)}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></p>
+          ${mo.t ? `<p class="dg-mean">${esc2(mo.t)}</p>` : ''}<p class="dg-sd">${LANG === 'en' ? 'Tap any star to hear & compare its sound with ' + show(f) : 'แตะอักษรรอบ ๆ เพื่อฟังเสียงและเทียบความแม่นกับ ' + show(f)}</p></div></div>
+      <dl class="dg-stats dg-pstats">
+        <div class="pe"><dt>🟢 ${T('ตรง')}</dt><dd>${cE}</dd></div>
+        <div class="pn"><dt>🟡 ${T('คล้าย')}</dt><dd>${cN}</dd></div>
+        <div class="pd"><dt>🔴 ${T('เปลี่ยน')}</dt><dd>${cD}</dd></div>
+        <div><dt>${T('ทั้งหมด')}</dt><dd>${kids.length}</dd></div>
+      </dl>
+      <div class="hz-xbar">
+        <button type="button" class="hz-xbtn" data-tochar="${esc2(f)}">${ic('bolt')}<span>${T('ดูสายวิวัฒนาการอักษร')} ${esc2(show(f))}</span></button>
+        ${wordsForChar(f).length ? `<button type="button" class="hz-xbtn" data-toword="${esc2(f)}">${ic('star')}<span>${T('คำศัพท์')} (${wordsForChar(f).length})</span></button>` : ''}
+      </div>
     </div>`;
   }
 
@@ -1072,7 +1333,18 @@ const OffyDigi = (() => {
       return `<li><button type="button" class="dg-wbtn" data-dgword="${esc2(w[0])}">${lvQ(w[2])}<b lang="zh-Hans">${esc2(showWord(w[0]))}</b><span class="pyx">${esc2(w[1])}</span><span class="dg-wgl">${gl.fb ? '<em>EN</em>' : ''}${esc2(gl.t)}</span></button><button type="button" class="tr-say" data-say="${esc2(w[0])}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></li>`;
     }).join('') : '';
     const cat = parent && (x || b) && stageOf(c, parent) ? catalyst(c, parent) : [];
-    const parts = partsRaw(c).map(q => `<button class="dg-part${parent && formsOf(parent).has(q) ? ' base' : ''}" data-dgo="${esc2(q)}" lang="zh-Hans">${esc2(show(q))}${side(q) ? `<small>${esc2(side(q))}</small>` : ''}</button>`).join('<i>+</i>');
+    const parts = partsRaw(c).map(q => {
+      const rv = typeof HzKit !== 'undefined' && HzKit.radVar ? HzKit.radVar(q) : null;
+      const sub = side(q) || (rv ? `${rv.zh} ${rv.py}` : '');
+      return `<button class="dg-part${parent && formsOf(parent).has(q) ? ' base' : ''}" data-dgo="${esc2(q)}" lang="zh-Hans">${esc2(show(q))}${sub ? `<small>${esc2(sub)}</small>` : ''}</button>`;
+    }).join('<i>+</i>');
+    const rSelf = radOfGlyph.get(c);
+    const selfVars = (rSelf && typeof HzKit !== 'undefined' && HzKit.radFormBuckets)
+      ? HzKit.radFormBuckets(Object.keys(D.c), rSelf, D).filter(bk => bk.info) : [];
+    const varRow = selfVars.length >= 2
+      ? `<p class="dg-row"><span>${T('รูปแปลงร่าง')}</span>${selfVars.map(bk => `<button type="button" class="dg-part${st.charForm === bk.key ? ' base' : ''}" data-cform="${esc2(bk.key)}" lang="zh-Hans">${esc2(bk.glyph)}<small>${esc2(bk.info.zh)} · ${esc2(bk.info.py)}</small></button>`).join('')}</p>` : '';
+    const phonCnt = !b ? phonKidsOf(c).length : 0;
+    const toPhonBtn = phonCnt >= 2 ? `<button type="button" class="hz-xbtn" data-tophon="${esc2(base(c))}">${ic('vol')}<span>${T('เสียงพ้อง')} (${phonCnt})</span></button>` : '';
     const mo = meanOf(c), meaning = mo.t + (mo.fb || mLang() === 'en' || !x || !x[10] ? '' : ` · ${x[10]}`);
     const reg = x ? [[T('ไต้หวัน'), x[8], 'zh-Hant'], [T('ญี่ปุ่น'), x[13], 'ja']].filter(f => f[1]) : (b && b.trad ? [[T('ตัวเต็ม'), b.trad, 'zh-Hant']] : []);
     const twins = side(c) ? ((D.amb || {})[base(c)] || []).filter(no => `${base(c)}@${no}` !== c).map(no => `${base(c)}@${no}`) : [];
@@ -1084,9 +1356,10 @@ const OffyDigi = (() => {
       <div class="dg-hero"><div class="dg-big${b ? ' is-bonus' : ''}"${lvC(c)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(g)}</div>
         <div><p class="dg-py"><span class="pyx">${esc2(pyOf(c))}</span><button class="dg-say" data-say="${esc2(base(c))}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></p>
           ${meaning ? `<p class="dg-mean">${esc2(meaning)}</p>` : ''}<p class="dg-sd">${esc2(stg.d)}</p></div></div>
-      ${xbar}${toWordBtn}
+      ${xbar}${toPhonBtn ? `<div class="hz-xbar">${toPhonBtn}</div>` : ''}${toWordBtn}
       ${x ? `<dl class="dg-stats"><div><dt>HSK</dt><dd>${x[1] === 7 ? '7-9' : x[1]}</dd></div><div><dt>${T('ขีด')}</dt><dd>${esc2(x[2])}</dd></div>${rr ? `<div><dt>部首</dt><dd lang="zh-Hans">${esc2(radG(rr))}</dd></div>` : ''}${x[6] ? `<div><dt>六书</dt><dd lang="zh-Hans">${esc2(x[6])}</dd></div>` : ''}</dl>`
         : b ? `<dl class="dg-stats"><div><dt>HSK</dt><dd>${T('นอก HSK')}</dd></div><div><dt>${T('ขีด')}</dt><dd>${b.strokes}</dd></div><div><dt>六书</dt><dd lang="zh-Hans">会意</dd></div><div><dt>${T('ซ้ำร่าง')}</dt><dd>×${b.rep}</dd></div></dl>` : ''}
+      ${varRow}
       ${parts ? `<p class="dg-row"><span>${T('โครงสร้าง')}</span>${parts}</p>` : ''}
       ${twins.length ? `<p class="dg-row"><span>${T('หน้าตาเหมือน แต่คนละตัว')}</span>${twins.map(q => `<button class="dg-part" data-dgo="${esc2(q)}" lang="zh-Hans">${esc2(base(q))}<small>${esc2(side(q))}</small></button>`).join('')}</p>` : ''}
       ${cat.length ? `<p class="dg-row"><span>${T('ส่วนที่เพิ่ม')}</span>${cat.map(q => `<b class="dg-cat" lang="zh-Hans">${esc2(show(q))}</b>`).join(' ')}</p>` : ''}
@@ -1101,23 +1374,38 @@ const OffyDigi = (() => {
       return `<button type="button" class="dg-sky-back" data-skyback>✦ ${T('ท้องฟ้าคำศัพท์')}</button>`
         + st.wTrail.map((c, i) => `<i>›</i><button class="${i === st.wTrail.length - 1 ? 'on' : ''}" data-wtrail="${i}" lang="zh-Hans">${esc2(show(c))}</button>`).join('');
     }
+    if (isPhon()) {
+      return `<button type="button" class="dg-sky-back" data-skyback>✦ ${T('ท้องฟ้าแกนเสียง')}</button>`
+        + st.pTrail.map((c, i) => `<i>›</i><button class="${i === st.pTrail.length - 1 ? 'on' : ''}" data-ptrail="${i}" lang="zh-Hans">${esc2(show(c))}</button>`).join('');
+    }
     return `<button type="button" class="dg-sky-back" data-skyback>✦ ${T('ท้องฟ้าทั้งหมด')}</button>`
       + st.trail.map((c, i) => `<i>›</i><button class="${i === st.trail.length - 1 ? 'on' : ''}" data-trail="${i}" lang="zh-Hans">${esc2(show(c))}</button>`).join('');
   };
 
-  /* ---------- paint (unified dual-realm frame) ---------- */
+  function paintCharFormBar(f, buckets) {
+    const bar = host && host.querySelector('.dg-forms-slot');
+    if (!bar) return;
+    if (!buckets || buckets.length < 2) { bar.innerHTML = ''; return; }
+    const tot = buckets.reduce((s, b) => s + b.count, 0);
+    bar.innerHTML = `<div class="hz-forms" role="group" aria-label="${T('รูปแปลงร่าง')}">
+      <button type="button" class="${st.charForm ? '' : 'on'}" data-cform="">${T('ทั้งหมด')} <small>${tot}</small></button>
+      ${buckets.map(bk => `<button type="button" class="${st.charForm === bk.key ? 'on' : ''}" data-cform="${esc2(bk.key)}"><b lang="zh-Hans">${esc2(bk.glyph)}</b>${bk.info ? `<span>${esc2(bk.info.zh)} <em>${esc2(bk.info.py)}</em></span>` : ''}<small>${bk.count}</small></button>`).join('')}
+    </div>`;
+  }
+
+  /* ---------- paint (unified 3-realm frame: 字 อักษร | 声 เสียงพ้อง | 词 คำศัพท์) ---------- */
   function paint() {
     if (!host) return;
     cancelAnimationFrame(anim); cur = new Map();
-    st.stageFilter = null; st.wFilter = null;
-    const wordMode = isWord(), sky = isSky();
-    const vm = wordMode && viewMode() === 'tree' ? 'radial' : viewMode();
-    const focus = wordMode ? st.wTrail[st.wTrail.length - 1] : st.trail[st.trail.length - 1];
+    st.stageFilter = null; st.wFilter = null; st.pFilter = null;
+    const wordMode = isWord(), phonMode = isPhon(), sky = isSky();
+    const vm = (wordMode || phonMode) && viewMode() === 'tree' ? 'radial' : viewMode();
+    const focus = wordMode ? st.wTrail[st.wTrail.length - 1] : phonMode ? st.pTrail[st.pTrail.length - 1] : st.trail[st.trail.length - 1];
 
     let subArea = '';
     if (sky) {
-      const zList = wordMode ? WORD_ZONES : ZONES;
-      const curZ = wordMode ? st.wSkyZone : st.skyZone;
+      const zList = wordMode ? WORD_ZONES : phonMode ? PHON_ZONES : ZONES;
+      const curZ = wordMode ? st.wSkyZone : phonMode ? st.pSkyZone : st.skyZone;
       subArea = `<div class="dg-zones">
         <button type="button" class="${curZ === 'all' ? 'on' : ''}" data-zone="all">✦ ${T('ทั้งหมด')}</button>
         ${zList.map(z => `<button type="button" class="${curZ === z.id ? 'on' : ''}" data-zone="${z.id}">${z.icon} ${LANG === 'en' ? z.en : z.th}</button>`).join('')}
@@ -1131,6 +1419,16 @@ const OffyDigi = (() => {
         <div class="dg-legend">${W_ORDER.map(k => `<button type="button" class="w-${k}" data-wing="${k}" aria-pressed="false"><i></i><b lang="zh-Hans">${W_WINGS[k].zh}</b><span>${LANG === 'en' ? T(W_WINGS[k].sh) : W_WINGS[k].sh}</span><em class="dg-cnt"></em></button>`).join('')}</div>
       </div>
       <nav class="dg-trail" aria-label="trail">${trailHTML()}</nav>`;
+    } else if (phonMode) {
+      const pIcon = { exact: '🟢', near: '🟡', diff: '🔴' };
+      subArea = `<div class="dg-subbar">
+        <div class="dg-tg dg-vw" role="tablist">
+          <span class="${vm === 'radial' ? 'on' : ''}" data-view="radial">${T('กลุ่มดาว')}</span>
+          <span class="${vm === 'grid' ? 'on' : ''}" data-view="grid">${T('กริด')}</span>
+        </div>
+        <div class="dg-legend">${PH_ORDER.map(k => `<button type="button" class="ph-${k}" data-pacc="${k}" aria-pressed="false"><span>${pIcon[k]} ${T(PH_META[k].sh)}</span><em class="dg-cnt"></em></button>`).join('')}</div>
+      </div>
+      <nav class="dg-trail" aria-label="trail">${trailHTML()}</nav>`;
     } else {
       subArea = `<div class="dg-subbar">
         <div class="dg-tg dg-vw" role="tablist">
@@ -1140,22 +1438,29 @@ const OffyDigi = (() => {
         </div>
         <div class="dg-legend">${ORDER.map(k => `<button type="button" class="s-${k}" data-stage="${k}" aria-pressed="false"><i></i><b lang="zh-Hans">${STAGES[k].zh}</b><span>${LANG === 'en' ? T(STAGES[k].th) : STAGES[k].sh}</span><em class="dg-cnt"></em></button>`).join('')}</div>
       </div>
-      <nav class="dg-trail" aria-label="trail">${trailHTML()}</nav>`;
+      <nav class="dg-trail" aria-label="trail">${trailHTML()}</nav>
+      <div class="dg-forms-slot"></div>`;
     }
 
     const hintTxt = sky
-      ? (wordMode ? T('แตะอักษรแม่คำเพื่อดูกลุ่มดาวคำศัพท์ · ลากหรือซูมได้') : T('แตะรากศัพท์เพื่อเจาะเข้ากลุ่มดาว · ลากหรือซูมได้'))
+      ? (wordMode ? T('แตะอักษรแม่คำเพื่อดูกลุ่มดาวคำศัพท์ · ลากหรือซูมได้') : phonMode ? T('แตะแกนเสียงเพื่อดูความแม่นของเสียงอ่าน · กรอบสียังคงเป็นระดับ HSK') : T('แตะรากศัพท์เพื่อเจาะเข้ากลุ่มดาว · ลากหรือซูมได้'))
       : wordMode ? T('แตะคำเพื่อฟังเสียงและดูรายละเอียด · แตะตัวกลางดูสรุป')
+      : phonMode ? T('แตะอักษรเพื่อเทียบเสียงอ่านและฟังเสียง · กรอบสี = ระดับ HSK')
       : vm === 'radial' ? T('แตะตัวไหนก็ได้เพื่อย้ายมาไว้ตรงกลาง')
       : T('ลากเพื่อเลื่อน · หมุนล้อหรือบีบเพื่อซูม');
 
-    host.innerHTML = `<div class="dg${wordMode ? ' is-word' : ''}${sky ? ' is-sky is-radial' : (vm === 'radial' ? ' is-radial' : '')}${!sky && vm === 'grid' ? ' is-grid' : ''}">
+    const qPh = wordMode ? T('ค้นหาแม่คำ หรือคำศัพท์ เช่น 学, 电, 心, 电影…')
+      : phonMode ? T('ค้นหาแกนเสียง เช่น 青, 方, 艮, 令, 占…')
+      : T('ค้นหาอักษรหรือราก เช่น 木, 森, 想, 叒…');
+
+    host.innerHTML = `<div class="dg${wordMode ? ' is-word' : ''}${phonMode ? ' is-phon' : ''}${sky ? ' is-sky is-radial' : (vm === 'radial' ? ' is-radial' : '')}${!sky && vm === 'grid' ? ' is-grid' : ''}">
       <div class="dg-top">
         <div class="dg-tg dg-realm" role="tablist" aria-label="mode">
-          <span class="${wordMode ? '' : 'on'}" data-realm="char"><b lang="zh-Hans">字</b>${T('อักษร')}</span>
+          <span class="${!wordMode && !phonMode ? 'on' : ''}" data-realm="char"><b lang="zh-Hans">字</b>${T('อักษร')}</span>
+          <span class="${phonMode ? 'on' : ''}" data-realm="phon"><b lang="zh-Hans">声</b>${T('เสียงพ้อง')}</span>
           <span class="${wordMode ? 'on' : ''}" data-realm="word"><b lang="zh-Hans">词</b>${T('คำศัพท์')}</span>
         </div>
-        <label class="dg-q">${ic('search')}<input maxlength="6" placeholder="${wordMode ? T('ค้นหาแม่คำ หรือคำศัพท์ เช่น 学, 电, 心, 电影…') : T('ค้นหาอักษรหรือราก เช่น 木, 森, 想, 叒…')}" value=""><button class="q-pen" data-handpad=".dg-q input" aria-label="${T('เขียนค้นหา')}">${ic('pen')}</button></label>
+        <label class="dg-q">${ic('search')}<input maxlength="6" placeholder="${qPh}" value=""><button class="q-pen" data-handpad=".dg-q input" aria-label="${T('เขียนค้นหา')}">${ic('pen')}</button></label>
       </div>
       ${subArea}
       <div class="dg-body">
@@ -1171,10 +1476,13 @@ const OffyDigi = (() => {
       </div>
       <div class="dg-fx" hidden></div></div>`;
 
-    if (sky) { wordMode ? drawWordSky() : drawSky(); watchShape(); }
+    if (sky) { wordMode ? drawWordSky() : phonMode ? drawPhonSky() : drawSky(); watchShape(); }
     else if (wordMode) {
       if (vm === 'grid') drawWordGrid(focus);
       else { st.fitted = false; drawWordConstellation(focus, false); watchShape(); }
+    } else if (phonMode) {
+      if (vm === 'grid') drawPhonGrid(focus);
+      else { st.fitted = false; drawPhonConstellation(focus, false); watchShape(); }
     } else {
       if (vm === 'radial') { st.fitted = false; drawRadial(focus, false); watchShape(); }
       else if (vm === 'grid') drawGrid(focus);
@@ -1226,16 +1534,110 @@ const OffyDigi = (() => {
     applySkyZone(false);
   }
 
+  function drawPhonSky() {
+    const world = host.querySelector('.dg-world'); if (!world) return;
+    pSkyLay = layoutPhonSky(); lay = null; wLay = null; skyLay = null; wSkyLay = null; pLay = null;
+    const svg = `<svg class="dg-svg sky" width="1" height="1" aria-hidden="true">${pSkyLay.links.map(l =>
+      `<line class="dg-sky-l" data-zone="${l.zone}" x1="${l.from.x.toFixed(1)}" y1="${l.from.y.toFixed(1)}" x2="${l.to.x.toFixed(1)}" y2="${l.to.y.toFixed(1)}"/>`
+    ).join('')}</svg>`;
+    const labels = pSkyLay.labels.map(lb =>
+      `<button type="button" class="dg-sky-lbl" data-zone="${lb.id}" style="transform:translate(${lb.x.toFixed(1)}px,${lb.y.toFixed(1)}px) translate(-50%,-50%)">${lb.icon} <span>${esc2(lb.title)}</span><em>${lb.count}</em></button>`
+    ).join('');
+    const stars = pSkyLay.nodes.map(n =>
+      `<button type="button" class="dg-n dg-sky-n t${n.tier} is-phub" data-phub="${esc2(n.key)}" data-zone="${n.zone}" style="transform:translate(${n.x.toFixed(1)}px,${n.y.toFixed(1)}px) translate(-50%,var(--hy))" aria-label="${esc2(show(n.key))}">${phonSkyNodeInner(n)}</button>`
+    ).join('');
+    world.innerHTML = svg + labels + stars;
+    const moreBar = host.querySelector('.dg-more-bar');
+    if (moreBar) moreBar.innerHTML = '';
+    host.querySelector('.dg-side').innerHTML = phonSkyGuideHTML();
+    applySkyZone(false);
+  }
+
+  function drawPhonConstellation(f, animate) {
+    const world = host.querySelector('.dg-world'); if (!world) return;
+    st.pFilter = null;
+    world.classList.remove('sf-on', 'z-dim', 'hov');
+    host.querySelectorAll('.dg-legend [data-pacc].on').forEach(el => { el.classList.remove('on'); el.setAttribute('aria-pressed', 'false'); });
+    pLay = layoutPhonConstellation(f);
+    lay = null; wLay = null; skyLay = null; wSkyLay = null; pSkyLay = null;
+
+    const posMap = new Map(pLay.nodes.map(n => [n.key, n]));
+    const svg = `<svg class="dg-svg" width="1" height="1" aria-hidden="true">${pLay.links.map(l => {
+      const a = posMap.get(l.from), b = posMap.get(l.to); if (!a || !b) return '';
+      return `<line class="dg-l lk-${l.kind} ph-${l.acc}" data-a="${esc2(l.from)}" data-b="${esc2(l.to)}" x1="${a.x.toFixed(1)}" y1="${a.y.toFixed(1)}" x2="${b.x.toFixed(1)}" y2="${b.y.toFixed(1)}"/>`;
+    }).join('')}</svg>`;
+
+    const labels = pLay.groupLabels.map(lb =>
+      `<span class="dg-wing-lbl ph-${lb.acc}" style="transform:translate(${lb.x.toFixed(1)}px,${lb.y.toFixed(1)}px) translate(-50%,-50%)">${esc2(lb.text)}</span>`
+    ).join('');
+
+    const nodesHtml = pLay.nodes.map(n => {
+      const isR = n.ring === 0, on = !isR && st.pSel === n.c;
+      const cls = isR ? 'dg-n r0 dg-proot on' : `dg-n dg-pn r1 ph-${n.acc}${on ? ' on' : ''}`;
+      const attr = isR ? `data-proot="${esc2(n.c)}"` : `data-pn="${esc2(n.c)}"`;
+      return `<button type="button" class="${cls}" ${attr} style="transform:translate(${n.x.toFixed(1)}px,${n.y.toFixed(1)}px) translate(-50%,var(--hy))" aria-label="${esc2(show(n.c))}">${phonNodeInner(n)}</button>`;
+    }).join('');
+
+    const emptyMsg = pLay.nodes.length <= 1
+      ? `<p class="dg-none r" style="transform:translate(-50%,0) translate(0px,106px)">${T('ยังไม่มีอักษร HSK ที่ใช้แกนเสียงนี้')} (${typeof HzLv === 'undefined' ? '' : HzLv.label()})</p>` : '';
+
+    world.innerHTML = svg + labels + nodesHtml + emptyMsg;
+    const moreBar = host.querySelector('.dg-more-bar');
+    if (moreBar) moreBar.innerHTML = '';
+
+    host.querySelectorAll('.dg-legend [data-pacc]').forEach(el => {
+      const n = pLay.counts[el.dataset.pacc] || 0;
+      el.querySelector('.dg-cnt').textContent = n ? n : '';
+      el.classList.toggle('none', !n);
+    });
+    const tr = host.querySelector('.dg-trail');
+    if (tr) tr.innerHTML = trailHTML();
+    host.querySelector('.dg-side').innerHTML = phonCardHTML(pLay.f, st.pSel);
+    fitBox(pLay.box, animate, false);
+  }
+
+  function drawPhonGrid(rawFocus) {
+    const f = base(rawFocus), wrap = host.querySelector('.dg-grid-wrap'); if (!wrap) return;
+    const all = phonKidsOf(f);
+    const groups = { exact: [], near: [], diff: [] };
+    all.forEach(it => groups[it.acc].push(it));
+    host.querySelectorAll('.dg-legend [data-pacc]').forEach(el => {
+      const n = (groups[el.dataset.pacc] || []).length;
+      el.querySelector('.dg-cnt').textContent = n ? n : '';
+      el.classList.toggle('none', !n);
+    });
+    const tr = host.querySelector('.dg-trail');
+    if (tr) tr.innerHTML = trailHTML();
+    const icons = { exact: '🟢', near: '🟡', diff: '🔴' };
+    const secs = PH_ORDER.map(acc => {
+      const arr = groups[acc];
+      if (!arr.length || (st.pFilter && st.pFilter !== acc)) return '';
+      return `<section class="dg-gsec ph-${acc}">
+        <h4 class="dg-gsh"><span>${icons[acc]} ${T(PH_META[acc].th)}</span><small>${arr.length}</small></h4>
+        <div class="dg-glist">${arr.map(it => {
+          const c = it.c, m = meanOf(c), dot = typeof HzKit !== 'undefined' ? HzKit.dotHtml(c) : '';
+          return `<button type="button" class="dg-gtile${st.pSel === c ? ' on' : ''}"${lvC(c)} data-pn="${esc2(c)}">
+            ${dot}${pyBadgeHTML(it.x[0], acc)}
+            <b lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(c))}</b>
+            ${m.t ? `<small class="${m.fb ? 'fb' : ''}">${esc2(shortM(m.t))}</small>` : ''}
+          </button>`;
+        }).join('')}</div>
+      </section>`;
+    }).join('');
+    wrap.innerHTML = secs || `<p class="tr-empty">${T('ยังไม่มีอักษร HSK ที่ใช้แกนเสียงนี้')} (${typeof HzLv === 'undefined' ? '' : HzLv.label()})</p>`;
+    host.querySelector('.dg-side').innerHTML = phonCardHTML(f, st.pSel);
+  }
+
   function applySkyZone(animate) {
     const world = host && host.querySelector('.dg-world');
-    const curSky = isWord() ? wSkyLay : skyLay;
+    const curSky = isWord() ? wSkyLay : isPhon() ? pSkyLay : skyLay;
     if (!world || !curSky) return;
-    const z = isWord() ? st.wSkyZone : st.skyZone;
+    const z = isWord() ? st.wSkyZone : isPhon() ? st.pSkyZone : st.skyZone;
     world.classList.toggle('z-dim', z !== 'all');
     world.querySelectorAll('[data-zone]').forEach(el => el.classList.toggle('z-hi', z === 'all' || el.dataset.zone === z));
     host.querySelectorAll('.dg-zones [data-zone]').forEach(b => b.classList.toggle('on', b.dataset.zone === z));
     const box = (z !== 'all' && curSky.zoneBoxes[z]) || curSky.box;
-    fitBox(box, animate, !isWord());
+    fitBox(box, animate, !isWord() && !isPhon());
   }
 
   /* ---------- Word Constellation Drawing (Level 2 · Realm 2) ---------- */
@@ -1336,7 +1738,18 @@ const OffyDigi = (() => {
     const wrap = host.querySelector('.dg-grid-wrap'); if (!wrap) return;
     const parts = partsOf(f).map(q => ({ c: q, stage: 'PART' }));
     const used = new Set([f, ...parts.map(p => p.c)]);
-    const direct = directKidsOf(f, used);
+    let direct = directKidsOf(f, used);
+    const rObj = radOfGlyph.get(f);
+    const formBuckets = (rObj && typeof HzKit !== 'undefined' && HzKit.radFormBuckets)
+      ? HzKit.radFormBuckets(direct.filter(c => !!D.c[c]), rObj, D) : [];
+    if (st.charForm && !formBuckets.some(b => b.key === st.charForm)) st.charForm = null;
+    paintCharFormBar(f, formBuckets);
+    if (st.charForm) {
+      const hit = formBuckets.find(b => b.key === st.charForm);
+      const allow = new Set(hit ? hit.chars : []);
+      direct = direct.filter(c => allow.has(c));
+    }
+    const focusPy = pyOf(f);
     const all = parts.slice();
     for (const c of direct) {
       const stg = stageOf(c, f) || 'CHAMPION';
@@ -1374,8 +1787,9 @@ const OffyDigi = (() => {
           const c = it.c, m = meanOf(c), isB = !!BONUS[c];
           const dot = !isB && typeof HzKit !== 'undefined' ? HzKit.dotHtml(c) : '';
           const sd = side(c), py = sd ? sd.split(' · ')[0] : pyOf(c);
+          const phAcc = (!sd && it.stage === 'ARMOR' && focusPy && py) ? matchPy(focusPy, py) : '';
           return `<button type="button" class="dg-gtile${it.stage === 'PART' ? ' is-part' : ''}${isB ? ' is-bonus' : ''}"${lvC(c)} data-n="${esc2(c)}">
-            ${dot}${repBadge(c, it.stage)}<span class="pyx">${esc2(py)}</span>
+            ${dot}${repBadge(c, it.stage)}${pyBadgeHTML(py, phAcc)}
             <b lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(c))}</b>
             ${m.t ? `<small class="${m.fb ? 'fb' : ''}">${esc2(shortM(m.t))}</small>` : ''}
           </button>`;
@@ -1395,7 +1809,9 @@ const OffyDigi = (() => {
     world.classList.remove('sf-on', 'z-dim', 'hov');
     host.querySelectorAll('.dg-legend [data-stage].on').forEach(el => { el.classList.remove('on'); el.setAttribute('aria-pressed', 'false'); });
     const next = layoutConstellation(f), prev = cur, from = new Map();
-    lay = next; skyLay = null; wLay = null; wSkyLay = null;
+    lay = next; skyLay = null; wLay = null; wSkyLay = null; pLay = null; pSkyLay = null;
+    paintCharFormBar(f, next.formBuckets);
+    const focusPy = pyOf(f);
     let svg = world.querySelector('svg.dg-svg');
     if (!svg) { svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'dg-svg'); svg.setAttribute('width', '1'); svg.setAttribute('height', '1'); world.prepend(svg); }
     else svg.setAttribute('class', 'dg-svg');
@@ -1414,9 +1830,11 @@ const OffyDigi = (() => {
         const src = parentKey && (prev.get(parentKey) || next.nodes.find(m => m.key === parentKey));
         from.set(n.key, old || (src ? { x: src.x, y: src.y } : { x: 0, y: 0 }));
       } else from.set(n.key, old || { x: n.x, y: n.y });
+      const inLink = n.ring > 0 ? next.links.find(l => l.to === n.key) : null;
+      const pPy = inLink ? pyOf(inLink.from) : focusPy;
       el.className = `dg-n r${n.ring} k-${n.kind} s-${n.stage}${n.ring === 0 ? ' on' : ''}${BONUS[n.c] ? ' is-bonus' : ''}`;
       el.setAttribute('aria-label', `${show(n.c)} ${T(STAGES[n.stage].th)}`);
-      el.innerHTML = nodeInner(n.c, n.stage);
+      el.innerHTML = nodeInner(n.c, n.stage, n.ring > 0 ? pPy : '');
     });
 
     if (!next.nodes.some(n => n.ring > 0 && n.stage !== 'PART')) {
@@ -1534,12 +1952,15 @@ const OffyDigi = (() => {
     ro = new ResizeObserver(() => { clearTimeout(roT); roT = setTimeout(() => {
       if (!host || !host.isConnected || !v.isConnected) return;
       if (isSky()) {
-        const curSky = isWord() ? wSkyLay : skyLay;
-        if (curSky && Math.abs(viewAspect() - curSky.asp) > .14) isWord() ? drawWordSky() : drawSky();
+        const curSky = isWord() ? wSkyLay : isPhon() ? pSkyLay : skyLay;
+        if (curSky && Math.abs(viewAspect() - curSky.asp) > .14) isWord() ? drawWordSky() : isPhon() ? drawPhonSky() : drawSky();
         else applySkyZone(false);
       } else if (isWord() && wLay) {
         if (Math.abs(viewAspect() - wLay.asp) > .14) drawWordConstellation(wLay.f, false);
         else fitBox(wLay.box, false, wLay.hasMoreToggle);
+      } else if (isPhon() && pLay) {
+        if (Math.abs(viewAspect() - pLay.asp) > .14) drawPhonConstellation(pLay.f, false);
+        else fitBox(pLay.box, false, false);
       } else if (radial() && lay) {
         if (Math.abs(viewAspect() - lay.asp) > .14) drawRadial(st.trail[st.trail.length - 1], false);
         else fitBox(lay.box, false, lay.hasMoreToggle);
@@ -1574,7 +1995,7 @@ const OffyDigi = (() => {
   function focusOn(c) {
     if (!D.c[c] && !D.cc[c] && !radOfGlyph.get(c) && !BONUS[c]) return;
     const wasSky = isSky();
-    st.mode = 'focus';
+    st.mode = 'focus'; st.charForm = null;
     const i = st.trail.indexOf(c);
     if (i >= 0) st.trail = st.trail.slice(0, i + 1); else st.trail.push(c);
     if (st.trail.length > 12) st.trail = st.trail.slice(-12);
@@ -1616,25 +2037,51 @@ const OffyDigi = (() => {
     return true;
   }
 
+  function setPhonBase(ch, preselectC = null) {
+    const f = base(ch);
+    if (!phonKidsOf(f).length) return false;
+    const wasSky = isSky() || !isPhon();
+    S().digiRealm = 'phon'; Store.save();
+    st.mode = 'focus';
+    st.pTrail = [f]; st.pSel = preselectC || null; st.pFilter = null;
+    tone([[490, 880, 0, .1, 'sine']]);
+    if (wasSky) paint();
+    else if (isGrid()) drawPhonGrid(f);
+    else drawPhonConstellation(f, true);
+    return true;
+  }
+
+  function focusPhon(ch) {
+    const f = base(ch);
+    if (!phonKidsOf(f).length) return false;
+    const wasSky = isSky() || !isPhon();
+    S().digiRealm = 'phon'; Store.save();
+    st.mode = 'focus'; st.pSel = null;
+    const i = st.pTrail.indexOf(f);
+    if (i >= 0) st.pTrail = st.pTrail.slice(0, i + 1); else st.pTrail.push(f);
+    if (st.pTrail.length > 12) st.pTrail = st.pTrail.slice(-12);
+    tone([[580, 880, 0, .09, 'sine']]);
+    if (wasSky) paint();
+    else if (isGrid()) drawPhonGrid(f);
+    else drawPhonConstellation(f, true);
+    return true;
+  }
+
   function switchRealm(nextRealm) {
     if (realm() === nextRealm) return;
+    const curChar = isWord() ? st.wTrail[st.wTrail.length - 1] : isPhon() ? st.pTrail[st.pTrail.length - 1] : base(st.trail[st.trail.length - 1]);
     S().digiRealm = nextRealm; Store.save();
     sfx('tap');
     if (st.mode === 'focus') {
       if (nextRealm === 'word') {
-        const curChar = base(st.trail[st.trail.length - 1]);
-        if (wordsForChar(curChar).length > 0) {
-          st.wTrail = [curChar]; st.wSel = null;
-        } else {
-          st.mode = 'sky';
-        }
+        if (wordsForChar(curChar).length > 0) { st.wTrail = [curChar]; st.wSel = null; }
+        else st.mode = 'sky';
+      } else if (nextRealm === 'phon') {
+        if (phonKidsOf(curChar).length > 0) { st.pTrail = [curChar]; st.pSel = null; }
+        else st.mode = 'sky';
       } else {
-        const curChar = st.wTrail[st.wTrail.length - 1];
-        if (D.c[curChar] || D.cc[curChar] || radOfGlyph.get(curChar) || BONUS[curChar]) {
-          st.trail = [curChar];
-        } else {
-          st.mode = 'sky';
-        }
+        if (D.c[curChar] || D.cc[curChar] || radOfGlyph.get(curChar) || BONUS[curChar]) { st.trail = [curChar]; st.charForm = null; }
+        else st.mode = 'sky';
       }
     }
     paint();
@@ -1769,10 +2216,10 @@ const OffyDigi = (() => {
     const A = (D.amb || {})[g];
     if (A && !radOfGlyph.get(g) && !BONUS[g]) g = `${g}@${A[A.length - 1]}`;
     if (!D.cc[g] && !D.c[g] && !radOfGlyph.get(g) && !BONUS[g]) return false;
-    const wasSky = isSky() || isWord();
+    const wasSky = isSky() || isWord() || isPhon();
     S().digiRealm = 'char'; Store.save();
     st.mode = 'focus';
-    st.trail = [g]; st.sel = null; st.open = {}; st.stageFilter = null;
+    st.trail = [g]; st.sel = null; st.open = {}; st.stageFilter = null; st.charForm = null;
     tone([[440, 880, 0, .12, 'square']]);
     if (wasSky) paint();
     else if (radial()) drawRadial(g, true);
@@ -1786,19 +2233,25 @@ const OffyDigi = (() => {
     if (!val) return;
     const chars = [...val];
     if (isWord()) {
-      // Multi-char word search (e.g. "电影" or "学生"): jump to char[0] & select exact word!
       if (chars.length >= 2) {
         const hit = D.w.find(w => w[0] === val || showWord(w[0]) === val);
         if (hit) { setWordBase([...hit[0]][0], hit[0]); return; }
       }
       if (!setWordBase(chars[0])) toast(T('ยังไม่มีคำศัพท์ HSK ที่ใช้ตัวอักษรนี้'), { icon: 'info' });
+    } else if (isPhon()) {
+      const ch = chars[0];
+      // If user searches a compound char like 请 or 猜, jump straight to its phonetic base (青) with 请/猜 preselected!
+      if (!setPhonBase(ch)) {
+        const ph = D.c[ch] && D.c[ch][12];
+        if (!ph || !setPhonBase(ph, ch)) toast(T('ยังไม่มีอักษร HSK ที่ใช้แกนเสียงนี้'), { icon: 'info' });
+      }
     } else {
       if (!setBase(chars[0])) toast(T('ยังไม่มีอักษร HSK ที่ต่อยอดจากตัวนี้'), { icon: 'info' });
     }
   }
 
   function backToSky() {
-    st.mode = 'sky'; st.stageFilter = null; st.wFilter = null;
+    st.mode = 'sky'; st.stageFilter = null; st.wFilter = null; st.pFilter = null;
     tone([[580, 440, 0, .09, 'sine']]);
     paint();
   }
@@ -1813,11 +2266,54 @@ const OffyDigi = (() => {
       if (d.skyback !== undefined) { backToSky(); return; }
       if (d.sky) { setBase(d.sky); return; }
       if (d.whub) { isSky() ? setWordBase(d.whub) : focusWord(d.whub); return; }
+      if (d.phub) { isSky() ? setPhonBase(d.phub) : focusPhon(d.phub); return; }
       if (d.toword) { setWordBase(d.toword); return; }
+      if (d.tophon) { setPhonBase(d.tophon); return; }
       if (d.tochar) { setBase(d.tochar); return; }
+      if (d.cform !== undefined) {
+        sfx('tap');
+        st.charForm = st.charForm === d.cform ? null : (d.cform || null);
+        const curF = st.trail[st.trail.length - 1];
+        if (isGrid()) drawGrid(curF); else if (radial()) drawRadial(curF, true); else paint();
+        return;
+      }
+      if (d.pn) {
+        st.pSel = d.pn;
+        host.querySelectorAll('.dg-pn, .dg-gtile[data-pn]').forEach(el => el.classList.toggle('on', el.dataset.pn === d.pn));
+        const curF = st.pTrail[st.pTrail.length - 1];
+        host.querySelector('.dg-side').innerHTML = phonCardHTML(curF, d.pn);
+        try { TTS.speak(d.pn); } catch (err) {}
+        return;
+      }
+      if (d.proot) {
+        st.pSel = null;
+        host.querySelectorAll('.dg-pn, .dg-gtile[data-pn]').forEach(el => el.classList.remove('on'));
+        host.querySelector('.dg-side').innerHTML = phonCardHTML(d.proot, null);
+        try { TTS.speak(d.proot); } catch (err) {}
+        return;
+      }
+      if (d.ptrail !== undefined) { focusPhon(st.pTrail[+d.ptrail]); return; }
+      if (d.pacc && b.closest('.dg-legend')) {
+        if (b.classList.contains('none')) return;
+        st.pFilter = st.pFilter === d.pacc ? null : d.pacc;
+        host.querySelectorAll('.dg-legend [data-pacc]').forEach(el => {
+          const on = el.dataset.pacc === st.pFilter;
+          el.classList.toggle('on', on); el.setAttribute('aria-pressed', on);
+        });
+        if (isGrid()) { drawPhonGrid(st.pTrail[st.pTrail.length - 1]); return; }
+        const world = host.querySelector('.dg-world');
+        if (world) {
+          world.classList.toggle('sf-on', !!st.pFilter);
+          world.querySelectorAll('.dg-n, .dg-l').forEach(el => {
+            el.classList.toggle('sf-hi', !st.pFilter || el.classList.contains('r0') || el.classList.contains('ph-' + st.pFilter));
+          });
+        }
+        return;
+      }
       if (d.skyall !== undefined) { st.skyAll = !st.skyAll; st.skyZone = 'all'; drawSky(); return; }
       if (d.zone) {
         if (isWord()) st.wSkyZone = st.wSkyZone === d.zone && d.zone !== 'all' ? 'all' : d.zone;
+        else if (isPhon()) st.pSkyZone = st.pSkyZone === d.zone && d.zone !== 'all' ? 'all' : d.zone;
         else st.skyZone = st.skyZone === d.zone && d.zone !== 'all' ? 'all' : d.zone;
         applySkyZone(true);
         return;
@@ -1874,8 +2370,9 @@ const OffyDigi = (() => {
       if (d.zoom !== undefined) {
         const v = host.querySelector('.dg-view');
         if (d.zoom === '0') {
-          if (isSky()) { if (isWord()) st.wSkyZone = 'all'; else st.skyZone = 'all'; applySkyZone(true); }
+          if (isSky()) { if (isWord()) st.wSkyZone = 'all'; else if (isPhon()) st.pSkyZone = 'all'; else st.skyZone = 'all'; applySkyZone(true); }
           else if (isWord() && wLay) fitBox(wLay.box, true, wLay.hasMoreToggle);
+          else if (isPhon() && pLay) fitBox(pLay.box, true, false);
           else if (radial() && lay) fitBox(lay.box, true, lay.hasMoreToggle);
           else drawTree();
         } else zoomAt(d.zoom === '1' ? 1.24 : 1 / 1.24, v.clientWidth / 2, v.clientHeight / 2);
@@ -1928,7 +2425,7 @@ const OffyDigi = (() => {
     });
     const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch = 0; if (!pts.size) setTimeout(() => { drag = null; }, 0); };
     host.addEventListener('pointerup', up); host.addEventListener('pointercancel', up);
-    host.addEventListener('pointerover', e => { if (e.pointerType === 'touch' || isSky() || isWord() || !radial()) return; const n = e.target.closest('.dg-n'); hover(n ? n.dataset.n : null); });
+    host.addEventListener('pointerover', e => { if (e.pointerType === 'touch' || isSky() || isWord() || isPhon() || !radial()) return; const n = e.target.closest('.dg-n'); hover(n ? n.dataset.n : null); });
     host.addEventListener('pointerleave', () => hover(null));
     host.addEventListener('wheel', e => { const v = e.target.closest('.dg-view'); if (!v) return; e.preventDefault(); const r = v.getBoundingClientRect(); zoomAt(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
   }

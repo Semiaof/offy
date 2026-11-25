@@ -4,12 +4,14 @@
   --ROOKIE: var(--ink); --STACK: #b87e14; --ARMOR: #c08a1e; --CHAMPION: #2d7a5c;
   --ULTIMATE: #c0517a; --VARIANT: #6e5bbd; --PART: #8a8f86;
   --WPRE: #2d7a5c; --WSUF: #2f69b2; --WSUB: var(--STACK); --WMID: #8a56c4;
+  --PHE: #1e874b; --PHN: #c78308; --PHD: #d43f3f;
   position: relative; color: var(--ink); display: grid; gap: 10px;
 }
 :root[data-theme="dark"] .dg {
   --STACK: #f2c45a; --ARMOR: #e0b44f; --CHAMPION: #5cc095;
   --ULTIMATE: #ec8bb0; --VARIANT: #a99af0; --PART: #8b9288;
   --WPRE: #5cc095; --WSUF: #6da7f0; --WSUB: var(--STACK); --WMID: #b794f6;
+  --PHE: #4ad682; --PHN: #f2be47; --PHD: #f56d6d;
 }
 .dg .s-ROOKIE { --sc: var(--ROOKIE); } .dg .s-STACK { --sc: var(--STACK); }
 .dg .s-ARMOR { --sc: var(--ARMOR); } .dg .s-CHAMPION { --sc: var(--CHAMPION); }
@@ -28,8 +30,8 @@
 .dg-q { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface-2); color: var(--muted); }
 @media (max-width: 520px) {
   .dg-top { flex-wrap: wrap; gap: 6px; }
-  .dg-tg.dg-realm { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
-  .dg-tg.dg-realm span { height: 34px; padding: 0 8px; }
+  .dg-tg.dg-realm { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); }
+  .dg-tg.dg-realm span { height: 34px; padding: 0 5px; font-size: 12px; gap: 4px; }
   .dg-q { flex: 1 1 100%; height: 42px; }
 }
 .dg-q:focus-within { border-color: var(--accent); }
@@ -407,3 +409,59 @@ body.hide-pinyin .dg-sky-n.t2 { --hy: -24px; }
   body.hide-pinyin .dg-n.r2 { --hy: -23px; }
   body.hide-pinyin .dg-wn { --hy: -21px; }
 }
+
+/* =====================================================================
+   Realm 3 · Phonetic Sound Families (声 เสียงพ้อง) & Pinyin Accuracy Badges
+   STRICT RULE: Accuracy color lives ONLY on Pinyin pill & links — NEVER alters HSK box borders!
+   ===================================================================== */
+.dg .ph-exact { --sc: var(--PHE); }
+.dg .ph-near  { --sc: var(--PHN); }
+.dg .ph-diff  { --sc: var(--PHD); }
+.dg-forms-slot:empty { display: none; }
+
+/* Pinyin accuracy pill badge above character box (leaves .dg-hex HSK border 100% untouched) */
+.dg .pyx.ph-b { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; border-radius: 99px;
+  font-size: 12px; font-weight: 700; line-height: 16px; min-height: 18px; }
+.dg .pyx.ph-b i { width: 6px; height: 6px; border-radius: 50%; flex: none; display: block; }
+.dg .pyx.ph-exact { color: var(--PHE); background: color-mix(in srgb, var(--PHE) 14%, var(--surface)); }
+.dg .pyx.ph-exact i { background: var(--PHE); }
+.dg .pyx.ph-near  { color: var(--PHN); background: color-mix(in srgb, var(--PHN) 16%, var(--surface)); }
+.dg .pyx.ph-near i  { background: var(--PHN); }
+.dg .pyx.ph-diff  { color: var(--PHD); background: color-mix(in srgb, var(--PHD) 16%, var(--surface)); }
+.dg .pyx.ph-diff i  { background: var(--PHD); }
+.dg-gtile .pyx.ph-b { font-size: 10.5px; padding: 1px 5px; line-height: 14px; min-height: 16px; }
+.dg-gtile .pyx.ph-b i { width: 5px; height: 5px; }
+
+/* Phonetic constellation links */
+.dg-l.lk-phexact { stroke: var(--PHE); stroke-width: 1.75; opacity: .78; }
+.dg-l.lk-phnear  { stroke: var(--PHN); stroke-width: 1.55; opacity: .78; }
+.dg-l.lk-phdiff  { stroke: var(--PHD); stroke-width: 1.65; stroke-dasharray: 5 4; opacity: .82; }
+.dg-pn.on .dg-hex { box-shadow: 0 0 0 3.5px color-mix(in srgb, var(--lc, var(--accent)) 36%, transparent), var(--sh-2); transform: scale(1.05); }
+
+/* Phonetic Sky micro-count bar (🟢4 🟡2 🔴1) */
+.dg-ph-mini { display: inline-flex; align-items: center; gap: 4px; font: 700 10.5px/1 var(--ui); }
+.dg-ph-mini em { font-style: normal; display: inline-flex; align-items: center; gap: 2px; }
+.dg-ph-mini em::before { content: ""; width: 5px; height: 5px; border-radius: 50%; display: block; }
+.dg-ph-mini .pe { color: var(--PHE); } .dg-ph-mini .pe::before { background: var(--PHE); }
+.dg-ph-mini .pn { color: var(--PHN); } .dg-ph-mini .pn::before { background: var(--PHN); }
+.dg-ph-mini .pd { color: var(--PHD); } .dg-ph-mini .pd::before { background: var(--PHD); }
+
+/* Phonetic Sky legend icons */
+.dg-sky-key .k-phexact { background: var(--PHE); height: 3.5px; }
+.dg-sky-key .k-phnear  { background: var(--PHN); height: 3.5px; }
+.dg-sky-key .k-phdiff  { background: repeating-linear-gradient(90deg, var(--PHD) 0 5px, transparent 5px 8px); height: 3.5px; }
+
+/* Phonetic Detail Card: Sound Comparison Banner */
+.dg-ph-pill { display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 9px; border-radius: 99px; font: 700 11.5px var(--ui); }
+.dg-ph-pill.ph-exact { color: var(--PHE); background: color-mix(in srgb, var(--PHE) 14%, var(--surface)); }
+.dg-ph-pill.ph-near  { color: var(--PHN); background: color-mix(in srgb, var(--PHN) 16%, var(--surface)); }
+.dg-ph-pill.ph-diff  { color: var(--PHD); background: color-mix(in srgb, var(--PHD) 16%, var(--surface)); }
+.dg-ph-cmp { display: flex; align-items: center; gap: 10px; margin: 12px 0 8px; }
+.dg-ph-box { display: grid; justify-items: center; gap: 4px; min-width: 72px; padding: 8px 10px; border-radius: 15px;
+  border: 1.5px solid var(--line-2); background: var(--surface-2); }
+.dg-ph-box.on { border: 2.5px solid var(--lc, var(--ink)); background: var(--surface); box-shadow: var(--sh-1); }
+.dg-ph-box b { font-family: var(--hz); font-weight: 400; font-size: 34px; line-height: 1; color: var(--ink); }
+.dg-ph-arr { font-style: normal; font-weight: 800; font-size: 18px; color: var(--muted); }
+.dg-pstats .pe dd { color: var(--PHE); }
+.dg-pstats .pn dd { color: var(--PHN); }
+.dg-pstats .pd dd { color: var(--PHD); }

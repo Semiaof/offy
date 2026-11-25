@@ -284,6 +284,24 @@ button.cp-sq:active { transform: scale(.96); }
 .hz-xbtn:active { transform: scale(.96); }
 @media (hover: hover) { .hz-xbtn:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); } }
 
+/* Shared Radical Variant Form Strip (水 / 氵 三点水 / 氺 水字底) across Evolution & Tree */
+.hz-forms { display: flex; flex-wrap: nowrap; align-items: center; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 0 4px; -webkit-overflow-scrolling: touch; }
+.hz-forms::-webkit-scrollbar { display: none; }
+.hz-forms button { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 11px; border-radius: 11px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); font: 600 12px var(--ui); white-space: nowrap;
+  transition: border-color .16s, background .16s, color .16s; }
+.hz-forms button b { font-family: var(--hz); font-weight: 400; font-size: 19px; line-height: 1; color: var(--ink); }
+.hz-forms button span { display: inline-flex; align-items: baseline; gap: 4px; font-weight: 600; }
+.hz-forms button em { font-style: normal; font-family: var(--pinyin); font-size: 11px; color: var(--muted); font-weight: 500; }
+.hz-forms button small { font-weight: 700; font-size: 11px; color: var(--muted); background: var(--surface-2); border-radius: 99px; padding: 1px 6px; }
+.hz-forms button.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+.hz-forms button.on b, .hz-forms button.on em { color: var(--accent-ink); }
+.hz-forms button.on small { background: color-mix(in srgb, var(--accent) 18%, var(--surface)); color: var(--accent-ink); }
+.hz-form-note { display: inline-flex; align-items: center; gap: 6px; margin: 2px 0 6px !important; padding: 4px 10px; border-radius: 10px;
+  background: var(--surface-2); border: 1px solid var(--line); font-size: 12px !important; color: var(--ink-2); }
+.hz-form-note b { font-family: var(--hz); font-weight: 400; font-size: 18px; color: var(--ink); }
+.hz-form-note em { font-style: normal; color: var(--accent-ink); font-weight: 600; }
+
 .hz-sw { display: grid; gap: 12px; justify-items: center; padding: 4px 0 8px; }
 .hz-sw-h { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding-right: 44px; }
 .hz-sw-h > div { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }

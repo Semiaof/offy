@@ -252,7 +252,152 @@ const HzKit = (() => {
     if (d.hzjump && d.hzch) { e.stopPropagation(); try { sfx('tap'); } catch (err) {} HanziView.jump(d.hzjump, d.hzch); }
   });
 
-  return { lang, findWord, wordGloss, charMean, short, charStatus, wordStatus, dotHtml, wordDotHtml, openWord, strokeSheet, crossBar };
+  /* Shared Radical/Component Variant Names (偏旁名称): glyph → { zh, py, pos } */
+  const RAD_VAR = {
+    '水': { zh: '水字旁', py: 'shuǐzìpáng', pos: 'รูปเต็ม/ล่าง' },
+    '氵': { zh: '三点水', py: 'sāndiǎnshuǐ', pos: 'ซ้าย' },
+    '氺': { zh: '水字底', py: 'shuǐzìdǐ', pos: 'ล่าง' },
+    '火': { zh: '火字旁', py: 'huǒzìpáng', pos: 'ซ้าย/ล่าง' },
+    '灬': { zh: '四点底', py: 'sìdiǎndǐ', pos: 'ล่าง' },
+    '心': { zh: '心字底', py: 'xīnzìdǐ', pos: 'ล่าง' },
+    '忄': { zh: '竖心旁', py: 'shùxīnpáng', pos: 'ซ้าย' },
+    '⺗': { zh: '心字底', py: 'xīnzìdǐ', pos: 'ล่าง' },
+    '手': { zh: '手字底', py: 'shǒuzìdǐ', pos: 'รูปเต็ม/ล่าง' },
+    '扌': { zh: '提手旁', py: 'tíshǒupáng', pos: 'ซ้าย' },
+    '龵': { zh: '手字头', py: 'shǒuzìtóu', pos: 'บน' },
+    '人': { zh: '人字头', py: 'rénzìtóu', pos: 'รูปเต็ม/บน' },
+    '亻': { zh: '单人旁', py: 'dānrénpáng', pos: 'ซ้าย' },
+    '刀': { zh: '刀字旁', py: 'dāozìpáng', pos: 'รูปเต็ม/ล่าง' },
+    '刂': { zh: '立刀旁', py: 'lìdāopáng', pos: 'ขวา' },
+    '⺈': { zh: '斜刀头', py: 'xiédāotóu', pos: 'บน' },
+    '犬': { zh: '犬字旁', py: 'quǎnzìpáng', pos: 'รูปเต็ม' },
+    '犭': { zh: '反犬旁', py: 'fǎnquǎnpáng', pos: 'ซ้าย' },
+    '示': { zh: '示字底', py: 'shìzìdǐ', pos: 'รูปเต็ม/ล่าง' },
+    '礻': { zh: '示字旁', py: 'shìzìpáng', pos: 'ซ้าย · 1 จุด' },
+    '衣': { zh: '衣字底', py: 'yīzìdǐ', pos: 'รูปเต็ม/ล่าง' },
+    '衤': { zh: '衣字旁', py: 'yīzìpáng', pos: 'ซ้าย · 2 จุด' },
+    '肉': { zh: '肉字旁', py: 'ròuzìpáng', pos: 'รูปเต็ม' },
+    '月@130': { zh: '肉月旁', py: 'ròuyuèpáng', pos: 'ซ้าย/ล่าง (เนื้อ)' },
+    '月@74': { zh: '月字旁', py: 'yuèzìpáng', pos: 'ซ้าย/ขวา (จันทร์)' },
+    '玉': { zh: '玉字旁', py: 'yùzìpáng', pos: 'รูปเต็ม' },
+    '王': { zh: '王字旁', py: 'wángzìpáng', pos: 'ซ้าย (หยก)' },
+    '言': { zh: '言字旁', py: 'yánzìpáng', pos: 'รูปเต็ม/ล่าง' },
+    '讠': { zh: '言字旁', py: 'yánzìpáng', pos: 'ซ้าย (ตัวย่อ)' },
+    '金': { zh: '金字底', py: 'jīnzìdǐ', pos: 'รูปเต็ม/ล่าง' },
+    '钅': { zh: '金字旁', py: 'jīnzìpáng', pos: 'ซ้าย (ตัวย่อ)' },
+    '食': { zh: '食字底', py: 'shízìdǐ', pos: 'รูปเต็ม/ล่าง' },
+    '饣': { zh: '食字旁', py: 'shízìpáng', pos: 'ซ้าย (ตัวย่อ)' },
+    '糸': { zh: '绞丝底', py: 'jiǎosīdǐ', pos: 'ล่าง' },
+    '纟': { zh: '绞丝旁', py: 'jiǎosīpáng', pos: 'ซ้าย (ตัวย่อ)' },
+    '艸': { zh: '草字头', py: 'cǎozìtóu', pos: 'รูปเต็ม' },
+    '艹': { zh: '草字头', py: 'cǎozìtóu', pos: 'บน' },
+    '辵': { zh: '走之底', py: 'zǒuzhīdǐ', pos: 'รูปเต็ม' },
+    '辶': { zh: '走之底', py: 'zǒuzhīdǐ', pos: 'ล่างซ้าย' },
+    '竹': { zh: '竹字头', py: 'zhúzìtóu', pos: 'รูปเต็ม' },
+    '𥫗': { zh: '竹字头', py: 'zhúzìtóu', pos: 'บน' },
+    '足': { zh: '足字底', py: 'zúzìdǐ', pos: 'รูปเต็ม/ล่าง' },
+    '𧾷': { zh: '足字旁', py: 'zúzìpáng', pos: 'ซ้าย' },
+    '攴': { zh: '反文旁', py: 'fǎnwénpáng', pos: 'รูปเต็ม' },
+    '攵': { zh: '反文旁', py: 'fǎnwénpáng', pos: 'ขวา' },
+    '阝@170': { zh: '左耳旁', py: 'zuǒ\'ěrpáng', pos: 'ซ้าย (เนินดิน)' },
+    '阝@163': { zh: '右耳旁', py: 'yòu\'ěrpáng', pos: 'ขวา (เมือง)' },
+    '罒': { zh: '四字头', py: 'sìzìtóu', pos: 'บน' },
+    '耂': { zh: '老字头', py: 'lǎozìtóu', pos: 'บน' },
+    '冫': { zh: '两点水', py: 'liǎngdiǎnshuǐ', pos: 'ซ้าย (น้ำแข็ง)' },
+    '彳': { zh: '双人旁', py: 'shuāngrénpáng', pos: 'ซ้าย (เดิน)' },
+    '宀': { zh: '宝盖头', py: 'bǎogàitóu', pos: 'บน (หลังคา)' },
+    '广': { zh: '广字旁', py: 'guǎngzìpáng', pos: 'บนซ้าย' },
+    '疒': { zh: '病字旁', py: 'bìngzìpáng', pos: 'บนซ้าย (โรค)' },
+    '囗': { zh: '国字框', py: 'guózìkuāng', pos: 'ล้อมรอบ' },
+    '木': { zh: '木字旁', py: 'mùzìpáng', pos: 'ซ้าย/ล่าง' },
+    '口': { zh: '口字旁', py: 'kǒuzìpáng', pos: 'ซ้าย/บน/ล่าง' },
+    '土': { zh: '提土旁', py: 'títǔpáng', pos: 'ซ้าย/ล่าง' },
+    '女': { zh: '女字旁', py: 'nǚzìpáng', pos: 'ซ้าย/ล่าง' },
+    '日': { zh: '日字旁', py: 'rìzìpáng', pos: 'ซ้าย/บน' },
+    '目': { zh: '目字旁', py: 'mùzìpáng', pos: 'ซ้าย/บน' },
+    '禾': { zh: '禾木旁', py: 'hémùpáng', pos: 'ซ้าย' },
+    '石': { zh: '石字旁', py: 'shízìpáng', pos: 'ซ้าย/ล่าง' },
+    '山': { zh: '山字旁', py: 'shānzìpáng', pos: 'ซ้าย/บน' },
+    '贝': { zh: '贝字旁', py: 'bèizìpáng', pos: 'ซ้าย' },
+    '车': { zh: '车字旁', py: 'chēzìpáng', pos: 'ซ้าย' },
+    '马': { zh: '马字旁', py: 'mǎzìpáng', pos: 'ซ้าย' },
+    '虫': { zh: '虫字旁', py: 'chóngzìpáng', pos: 'ซ้าย/ล่าง' },
+    '雨': { zh: '雨字头', py: 'yǔzìtóu', pos: 'บน' },
+    '门': { zh: '门字框', py: 'ménzìkuāng', pos: 'ล้อมบน' }
+  };
+
+  function radVar(g) {
+    if (!g) return null;
+    return RAD_VAR[g] || RAD_VAR[String(g).split('@')[0]] || null;
+  }
+
+  /* Group a list of HSK characters by which variant shape of radical r appears inside x[4] */
+  function radFormBuckets(chars, r, D) {
+    if (!r || !D || !D.c) return [];
+    const AMB = D.amb || {}, key = g => AMB[g] ? `${g}@${r[0]}` : g;
+    const forms = [key(r[1])];
+    (r[8] || []).forEach(f => {
+      if (!f[0] || f[0].includes('…')) return;
+      const k = key(f[0]);
+      if (!forms.includes(k)) forms.push(k);
+    });
+    if (r[1] === '手' && !forms.includes('龵')) forms.push('龵');
+    const out = [];
+    for (const fk of forms) {
+      const bare = fk.split('@')[0];
+      const matched = chars.filter(c => {
+        const ps = (D.c[c] && D.c[c][4]) || [];
+        return ps.includes(fk) || ps.includes(bare);
+      });
+      if (matched.length) out.push({ key: fk, glyph: bare, info: radVar(fk), chars: matched, count: matched.length });
+    }
+    return out;
+  }
+
+  /* Mandarin Phonetic Accuracy Classifier (声旁 → character): 'exact' | 'near' | 'diff' */
+  const PY_INI = ['zh', 'ch', 'sh', 'b', 'p', 'm', 'f', 'd', 't', 'n', 'l', 'g', 'k', 'h', 'j', 'q', 'x', 'r', 'z', 'c', 's', 'y', 'w'];
+  const PY_RIME_GRP = [
+    new Set(['in', 'ing']), new Set(['en', 'eng', 'uen']), new Set(['an', 'ang']),
+    new Set(['en', 'an', 'in', 'uen']), new Set(['ong', 'iong']), new Set(['i', 'v'])
+  ];
+  function stripTone(s) {
+    return String(s || '').toLowerCase()
+      .replace(/[üǖǘǚǜ]/g, 'v')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+  function splitPy(syl) {
+    const s = stripTone(syl).replace(/[^a-zv]/g, '');
+    if (!s) return ['', ''];
+    let ini = '', fin = s;
+    for (const i of PY_INI) { if (s.startsWith(i)) { ini = i; fin = s.slice(i.length); break; } }
+    if (ini === 'y') { ini = ''; fin = fin.startsWith('u') ? 'v' + fin.slice(1) : (fin.startsWith('i') ? fin : 'i' + fin); }
+    else if (ini === 'w') { ini = ''; fin = fin.startsWith('u') ? fin : 'u' + fin; }
+    else if ((ini === 'j' || ini === 'q' || ini === 'x') && fin.startsWith('u')) fin = 'v' + fin.slice(1);
+    fin = ({ iu: 'iou', ui: 'uei', un: 'uen' })[fin] || fin;
+    return [ini, fin];
+  }
+  const coreRime = fin => (fin.length >= 2 && 'iuv'.includes(fin[0]) && 'aeo'.includes(fin[1])) ? fin.slice(1) : fin;
+
+  function matchPhonetic(pyBase, pyChar) {
+    const sa = String(pyBase || '').split(/[\s,/]+/).filter(Boolean);
+    const sb = String(pyChar || '').split(/[\s,/]+/).filter(Boolean);
+    if (!sa.length || !sb.length) return '';
+    let best = 'diff';
+    for (const a of sa) {
+      const [ia, fa] = splitPy(a); if (!fa) continue;
+      const ra = coreRime(fa);
+      for (const b of sb) {
+        const [ib, fb] = splitPy(b); if (!fb) continue;
+        const rb = coreRime(fb);
+        if (ia === ib && fa === fb) return 'exact';
+        if (fa === fb || ra === rb || PY_RIME_GRP.some(g => g.has(ra) && g.has(rb))) best = 'near';
+        else if (ia && ia === ib && ((ra.endsWith('ng') && rb.endsWith('ng')) || ra[0] === rb[0])) best = 'near';
+      }
+    }
+    return best;
+  }
+
+  return { lang, findWord, wordGloss, charMean, short, charStatus, wordStatus, dotHtml, wordDotHtml, openWord, strokeSheet, crossBar, radVar, radFormBuckets, matchPhonetic };
 })();
 
 /* HSK levels + translation language + 简/繁 controls in the #/hanzi top header */

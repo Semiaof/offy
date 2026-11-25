@@ -8,7 +8,7 @@
 const OffyTree = (() => {
   const SRC = 'data/tree.js?v=6';
   const LVN = l => l === 7 ? '7-9' : String(l);
-  const st = { node: null, ch: null, q: '', all: false, stage: 'r' };       // node: {r: no} | {g: component}
+  const st = { node: null, ch: null, q: '', all: false, stage: 'r', form: null };       // node: {r: no} | {g: component}
   let D = null, host = null, rad = null;
 
   Object.assign(window.OFFY_EN || {}, {
@@ -72,7 +72,7 @@ const OffyTree = (() => {
     const n = st.node;
     if (!n) return `<p class="tr-empty">${T('เลือกรากทางซ้าย')}</p>`;
     const [own, has] = nodeChars(n);
-    let head;
+    let head, formBar = '', fOwn = own, fHas = has;
     if (n.r) {
       const r = radOf(n.r), g = radG(r), hl = typeof HzKit !== 'undefined' ? HzKit.lang() : LANG;
       const mainTitle = ({ th: r[4], en: r[5], vi: r[6], ja: r[7] }[hl]) || r[4] || r[5];
@@ -82,19 +82,38 @@ const OffyTree = (() => {
         hl !== 'vi' && r[6] ? `<span lang="vi"><b>VI</b> ${esc(r[6])}</span>` : '',
         hl !== 'ja' && r[7] ? `<span lang="ja"><b>JA</b> ${esc(r[7])}</span>` : ''
       ].filter(Boolean).join(' · ');
+      const buckets = typeof HzKit !== 'undefined' && HzKit.radFormBuckets ? HzKit.radFormBuckets(own.concat(has), r, D) : [];
+      if (st.form && !buckets.some(b => b.key === st.form)) st.form = null;
+      if (buckets.length >= 2) {
+        const tot = own.length + has.length;
+        formBar = `<div class="hz-forms" role="group" aria-label="${T('รูปแปลงร่างของราก')}">
+          <button type="button" class="${st.form ? '' : 'on'}" data-rform="">${T('ทั้งหมด')} <small>${tot}</small></button>
+          ${buckets.map(bk => `<button type="button" class="${st.form === bk.key ? 'on' : ''}" data-rform="${esc(bk.key)}"><b lang="zh-Hans">${esc(bk.glyph)}</b>${bk.info ? `<span>${esc(bk.info.zh)} <em>${esc(bk.info.py)}</em></span>` : ''}<small>${bk.count}</small></button>`).join('')}
+        </div>`;
+        if (st.form) {
+          const hit = buckets.find(b => b.key === st.form);
+          const allow = new Set(hit ? hit.chars : []);
+          fOwn = own.filter(c => allow.has(c));
+          fHas = has.filter(c => allow.has(c));
+        }
+      } else if (buckets.length === 1 && buckets[0].info) {
+        const inf = buckets[0].info;
+        formBar = `<p class="hz-form-note"><b lang="zh-Hans">${esc(buckets[0].glyph)}</b> <span>${esc(inf.zh)}</span> <em class="pyx">${esc(inf.py)}</em> · ${esc(inf.pos)}</p>`;
+      }
       head = `<div class="tr-node"><div class="tr-glyphs" lang="zh-Hans"><b>${esc(g)}</b>${radForms(r).map(f => `<span>${esc(f)}</span>`).join('')}</div>
         <div class="tr-names"><div class="tr-nh"><b>${esc(mainTitle)}</b> <span class="pyx">${esc(r[3])}</span><button type="button" class="tr-say" data-say="${esc(g)}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></div>
         <small>#${r[0]} · ${r[2]} ${T('ขีด')}</small>
         ${langs ? `<p class="tr-langs-txt">${langs}</p>` : ''}
-        <div class="tr-nacts"><button type="button" class="hz-xbtn sm" data-hzjump="digi" data-hzch="${esc(g)}">${ic('bolt')}<span>${T('สายวิวัฒนาการ')}</span></button><button type="button" class="hz-xbtn sm" data-hzjump="compose" data-hzch="${esc(g)}">${ic('wand')}<span>${T('ผสมอักษร')}</span></button></div></div></div>`;
+        <div class="tr-nacts"><button type="button" class="hz-xbtn sm" data-hzjump="digi" data-hzch="${esc(g)}">${ic('bolt')}<span>${T('สายวิวัฒนาการ')}</span></button><button type="button" class="hz-xbtn sm" data-hzjump="compose" data-hzch="${esc(g)}">${ic('wand')}<span>${T('ผสมอักษร')}</span></button></div></div></div>${formBar}`;
     } else {
       const x = D.c[n.g], g = base(n.g);
       const mo = typeof HzKit !== 'undefined' ? HzKit.charMean(n.g, D, null) : { t: x ? (LANG !== 'en' && x[9]) || x[10] : '' };
-      head = `<div class="tr-node"><div class="tr-glyphs" lang="zh-Hans"><b>${esc(g)}</b></div><div class="tr-names"><div class="tr-nh"><b>${T('ส่วนประกอบ')}${side(n.g) ? ` · ${esc(side(n.g))}` : ''}</b>${x ? ` <span class="pyx">${esc(x[0])}</span>` : ''}<button type="button" class="tr-say" data-say="${esc(g)}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></div><small>${esc(mo.t || '')}</small></div></div>`;
+      const rv = typeof HzKit !== 'undefined' && HzKit.radVar ? HzKit.radVar(n.g) : null;
+      head = `<div class="tr-node"><div class="tr-glyphs" lang="zh-Hans"><b>${esc(g)}</b></div><div class="tr-names"><div class="tr-nh"><b>${rv ? esc(rv.zh) : T('ส่วนประกอบ')}${side(n.g) ? ` · ${esc(side(n.g))}` : ''}</b>${rv ? ` <span class="pyx">${esc(rv.py)}</span>` : x ? ` <span class="pyx">${esc(x[0])}</span>` : ''}<button type="button" class="tr-say" data-say="${esc(g)}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></div><small>${esc(mo.t || (rv ? rv.pos : ''))}</small></div></div>`;
     }
     const sec = (title, list) => !list.length ? '' : `<section class="tr-sec"><p class="tr-st">${title} <small>${list.length} ${T('ตัว')}</small></p>
       ${byLevel(list).map(([l, cs]) => `<div class="tr-lv"><div class="tr-lv-h">${lvTag(l)}<small>${cs.length}</small></div><div class="tr-cs">${cs.map(c => tile(c, c === st.ch)).join('')}</div></div>`).join('')}</section>`;
-    const body = n.r ? sec(T('อยู่ในหมวดนี้'), own) + sec(T('มีส่วนนี้อยู่ข้างใน แต่จัดหมวดอื่น'), has) : sec(T('อักษรที่มีส่วนนี้'), own);
+    const body = n.r ? sec(T('อยู่ในหมวดนี้'), fOwn) + sec(T('มีส่วนนี้อยู่ข้างใน แต่จัดหมวดอื่น'), fHas) : sec(T('อักษรที่มีส่วนนี้'), fOwn);
     return head + (body || `<p class="tr-empty">${T('ยังไม่มีอักษร HSK ในหมวดนี้')}</p>`);
   }
   function colWords() {
@@ -104,7 +123,11 @@ const OffyTree = (() => {
     const hl = typeof HzKit !== 'undefined' ? HzKit.lang() : LANG;
     const mo = typeof HzKit !== 'undefined' ? HzKit.charMean(c, D, null) : { t: (LANG !== 'en' && x[9]) || x[10] || '', fb: false };
     const meaning = mo.t + (mo.fb || hl === 'en' || !x[10] || mo.t === x[10] ? '' : ` · ${x[10]}`);
-    const comps = (x[4] || []).map(g => `<button class="tr-chip" data-g="${esc(g)}" lang="zh-Hans">${esc(base(g))}${side(g) ? `<small>${esc(side(g))}</small>` : ''}</button>`).join('<i>+</i>');
+    const comps = (x[4] || []).map(g => {
+      const rv = typeof HzKit !== 'undefined' && HzKit.radVar ? HzKit.radVar(g) : null;
+      const sub = side(g) || (rv ? `${rv.zh} ${rv.py}` : '');
+      return `<button class="tr-chip" data-g="${esc(g)}" lang="zh-Hans">${esc(base(g))}${sub ? `<small>${esc(sub)}</small>` : ''}</button>`;
+    }).join('<i>+</i>');
     const word = i => {
       const w = D.w[i], hi = esc(w[0]).split(esc(c)).join(`<mark>${esc(c)}</mark>`);
       const gl = typeof HzKit !== 'undefined' ? HzKit.wordGloss(w[0], w[3], !!w[4]) : { t: w[3], fb: !w[4] };
@@ -149,8 +172,9 @@ const OffyTree = (() => {
       if (d.all !== undefined) { st.all = d.all === '1'; paint(); return; }
       if (d.trad !== undefined) { S().hzTrad = !trad(); Store.save(); paint(true); return; }
       if (d.stage) { st.stage = d.stage; paint(true); return; }
-      if (d.r) { sfx('tap'); go({ node: { r: +d.r }, ch: null, stage: 'c' }); return; }
-      if (d.g) { sfx('tap'); const no = +(String(d.g).split('@')[1] || 0), asRad = no ? rad.get(no) : D.r.find(r => r[1] === d.g || r[8].some(f => f[0] === d.g)); go({ node: asRad ? { r: asRad[0] } : { g: d.g }, ch: null, stage: 'c' }); return; }
+      if (d.rform !== undefined) { sfx('tap'); st.form = d.rform || null; paint(true); return; }
+      if (d.r) { sfx('tap'); go({ node: { r: +d.r }, ch: null, form: null, stage: 'c' }); return; }
+      if (d.g) { sfx('tap'); const no = +(String(d.g).split('@')[1] || 0), asRad = no ? rad.get(no) : D.r.find(r => r[1] === d.g || r[8].some(f => f[0] === d.g)); go({ node: asRad ? { r: asRad[0] } : { g: d.g }, ch: null, form: null, stage: 'c' }); return; }
       if (d.ch) { sfx('tap'); go({ ch: d.ch, stage: 'w', scrollTop: true }); return; }
       if (d.w) { if (typeof HzKit !== 'undefined') HzKit.openWord(d.w); else { const w = WORDS.find(x => x.zh === d.w); if (w) Dict.detail(w.id); else TTS.speak(d.w); } }
     });
