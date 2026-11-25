@@ -229,8 +229,8 @@ const Mini = {
       else delete st.dataset.comboTier;
     }
     if (n >= 2) {
-      const prefix = tier === 3 ? '🐉 ' : tier === 2 ? '🔥🔥 ' : tier === 1 ? '🔥 ' : '';
-      el.textContent = `${prefix}${T('ต่อเนื่อง')} ×${n}`;
+      const iconHtml = tier === 3 ? ic('star') : tier >= 1 ? ic('flame') : '';
+      el.innerHTML = `${iconHtml}${T('ต่อเนื่อง')} ×${n}`;
       el.className = `combo show bump${tier ? ' combo-t' + tier : ''}`;
       void el.offsetWidth;
     } else {
@@ -1182,19 +1182,19 @@ const MG = {
     mount(s, el) {
       s.i = -1; s.lane = 1; s.act = 'run'; s.dist = 80;
       el.innerHTML = `<div class="m-table rn-arena" id="rnArena">
-          <div class="rn-top"><span class="rn-goal" id="rnGoal"></span><span class="rn-dist" id="rnDist">🪨 80m</span></div>
+          <div class="rn-top"><span class="rn-goal" id="rnGoal"></span><span class="rn-dist" id="rnDist">${ic('boulder')} 80m</span></div>
           <div class="rn-persp"><div class="rn-road"><i data-l="0"></i><i data-l="1"></i><i data-l="2"></i></div></div>
           <div class="rn-entities" id="rnEnts"></div>
           <div class="rn-hero" id="rnHero" style="left:50%"><div class="rn-rope"></div><div class="rn-body hz">侠</div><small id="rnState">เลนกลาง</small></div>
-          <div class="rn-boulder" id="rnBoulder">🪨 ${L('หินเพลิงยักษ์กำลังกลิ้งไล่บี้!', 'Giant fire boulder chasing!')}</div>
+          <div class="rn-boulder" id="rnBoulder">${ic('boulder')} ${L('หินเพลิงยักษ์กำลังกลิ้งไล่บี้!', 'Giant fire boulder chasing!')}</div>
         </div>
         <div class="m-panel rn-panel">
           <div class="rn-ctrl">
-            <button class="btn" data-rn="L">⬅️ ${L('ซ้าย', 'Left')} (A/←)</button>
-            <button class="btn" data-rn="R">➡️ ${L('ขวา', 'Right')} (D/→)</button>
-            <button class="btn" data-rn="J">⬆️ ${L('โดดข้ามหนาม', 'Jump')} (W/↑)</button>
-            <button class="btn" data-rn="S">⬇️ ${L('สไลด์ลอดคาน', 'Slide')} (S/↓)</button>
-            <button class="btn" data-rn="G">🪝 ${L('โหนสลิง', 'Grapple')} (E)</button>
+            <button class="btn" data-rn="L">${ic('chev-l')}${L('ซ้าย', 'Left')} (A/←)</button>
+            <button class="btn" data-rn="R">${ic('chev-r')}${L('ขวา', 'Right')} (D/→)</button>
+            <button class="btn" data-rn="J">${ic('up')}${L('โดดข้ามหนาม', 'Jump')} (W/↑)</button>
+            <button class="btn" data-rn="S">${ic('down')}${L('สไลด์ลอดคาน', 'Slide')} (S/↓)</button>
+            <button class="btn" data-rn="G">${ic('grapple')}${L('โหนสลิง', 'Grapple')} (E)</button>
           </div>
           <div class="m-foot" id="rnFoot"></div>
         </div>`;
@@ -1261,14 +1261,14 @@ const MG = {
       box.innerHTML = ''; $('#rnFoot').innerHTML = '';
       if (rn.mode === 'hazard') {
         const labels = {
-          jump: `⚠️ ${L('กับดักหนามเหล็ก! กด [⬆️ โดด] หรือแตะเพื่อตีลังกาข้าม', 'Iron Spikes! Tap or press [⬆️ Jump]')}`,
-          slide: `⚙️ ${L('คานใบมีดไฟต่ำ! กด [⬇️ สไลด์] หรือแตะเพื่อสไลด์ลอด', 'Low Blade Beam! Tap or press [⬇️ Slide]')}`,
-          rope: `🔥 ${L('เหวลาวาขาด! กด [🪝 โหนสลิง] หรือแตะเพื่อเหินข้ามเหว', 'Lava Chasm! Tap or press [🪝 Grapple]')}`
+          jump: `${ic('alert')} ${L('กับดักหนามเหล็ก! กด [↑ โดด] หรือแตะเพื่อตีลังกาข้าม', 'Iron Spikes! Tap or press [↑ Jump]')}`,
+          slide: `${ic('gear')} ${L('คานใบมีดไฟต่ำ! กด [↓ สไลด์] หรือแตะเพื่อสไลด์ลอด', 'Low Blade Beam! Tap or press [↓ Slide]')}`,
+          rope: `${ic('flame')} ${L('เหวลาวาขาด! กด [โหนสลิง] หรือแตะเพื่อเหินข้ามเหว', 'Lava Chasm! Tap or press [Grapple]')}`
         };
         $('#rnGoal').innerHTML = labels[rn.trap];
         const h = document.createElement('div');
         h.className = 'rn-hazard ' + rn.trap; h.dataset.kind = rn.trap;
-        h.textContent = labels[rn.trap];
+        h.innerHTML = labels[rn.trap];
         box.appendChild(h);
         rn.hzEl = h;
       } else {
@@ -1305,7 +1305,7 @@ const MG = {
             GX.burst(arena, hx, hy - 24, { n: 22, color: '#63e6be', dist: 80 });
             GX.text(arena, hx, hy - 48, rn.trap === 'jump' ? 'ตีลังกาข้ามหนาม!' : rn.trap === 'slide' ? 'สไลด์ลอดใบมีด!' : 'โหนสลิงข้ามเหว!', 'big');
           } else {
-            s.dist = Math.max(10, s.dist - 15); $('#rnDist').textContent = `🪨 ${s.dist}m`;
+            s.dist = Math.max(10, s.dist - 15); $('#rnDist').innerHTML = `${ic('boulder')} ${s.dist}m`;
             GX.flash(arena, 'rgba(255,50,35,.35)', 180); GX.quake(arena, 7);
           }
           rn.mode = 'fork'; rn.p = 0; this.spawnEnts(s);
@@ -1319,7 +1319,7 @@ const MG = {
       if (s.lane === rn.okLane) {
         rn.done = true;
         if (rn.els && rn.els[s.lane]) rn.els[s.lane].classList.add('ok');
-        s.dist = Math.min(120, s.dist + 12); $('#rnDist').textContent = `🪨 ${s.dist}m`;
+        s.dist = Math.min(120, s.dist + 12); $('#rnDist').innerHTML = `${ic('boulder')} ${s.dist}m`;
         GX.hitStop(arena, hx, hy - 18, { color: '#63e6be' });
         GX.burst(arena, hx, hy - 18, { n: 26, color: '#ffd27a', dist: 90 });
         GX.text(arena, hx, hy - 48, `${rn.w.zh} · ทะลุด่าน! +เร่งสปีด`, 'big');
@@ -1329,7 +1329,7 @@ const MG = {
       } else {
         rn.ok = false; rn.p = 0.08;
         if (rn.els && rn.els[s.lane]) rn.els[s.lane].classList.add('no');
-        s.dist = Math.max(10, s.dist - 20); $('#rnDist').textContent = `🪨 ${s.dist}m`;
+        s.dist = Math.max(10, s.dist - 20); $('#rnDist').innerHTML = `${ic('boulder')} ${s.dist}m`;
         GX.flash(arena, 'rgba(255,50,35,.38)', 220); GX.quake(arena, 8);
         GX.text(arena, hx, hy - 44, L('ผิดช่อง! ปัดเปลี่ยนเลนใหม่', 'Wrong lane!'), 'bad');
         Mini.slip();
@@ -1350,13 +1350,13 @@ const MG = {
     mount(s, el) {
       s.i = -1; s.alt = 10; s.wallPos = 0;
       el.innerHTML = `<div class="m-table pk-arena pk-tower" id="pkArena">
-          <div class="rn-top"><span class="rn-goal" id="pkGoal"></span><span class="rn-dist" id="pkAlt">🏯 10m</span></div>
+          <div class="rn-top"><span class="rn-goal" id="pkGoal"></span><span class="rn-dist" id="pkAlt">${ic('tower')} 10m</span></div>
           <div class="pk-wall L" id="pkWallL"></div>
           <div class="pk-wall R" id="pkWallR"></div>
           <div class="pk-beams" id="pkBeams"></div>
           <svg class="pk-rope-svg" id="pkSvg" viewBox="0 0 100 100" preserveAspectRatio="none"><line id="pkLine" x1="50" y1="74" x2="50" y2="74" stroke="#ffd27a" stroke-width="1.5" stroke-dasharray="3 1.5" opacity="0"/></svg>
           <div class="pk-hero" id="pkHero"><span class="hz">侠</span></div>
-          <div class="pk-lava-rise" id="pkLava">🔥 ${L('ทะเลเพลิงนรกกำลังไล่ขึ้นมา!', 'Rising Hellfire! Grapple up fast!')}</div>
+          <div class="pk-lava-rise" id="pkLava">${ic('flame')} ${L('ทะเลเพลิงนรกกำลังไล่ขึ้นมา!', 'Rising Hellfire! Grapple up fast!')}</div>
         </div>
         <div class="m-panel"><div class="m-foot" id="pkFoot"></div></div>`;
       el.onclick = e => { const b = e.target.closest('.pk-beam'); if (b) this.hook(s, +b.dataset.o, b); };
@@ -1376,7 +1376,7 @@ const MG = {
       if (hero) { hero.getAnimations().forEach(a => a.cancel()); hero.style.left = (s.lastHeroX || 50) + '%'; hero.style.bottom = '58px'; hero.style.transform = 'translate(-50%,0)'; }
       if (line) line.setAttribute('opacity', '0');
       if (lava) lava.style.height = '14%';
-      $('#pkBeams').innerHTML = opts.map((x, i) => `<button type="button" class="pk-beam" data-o="${i}"><i>🧗 <kbd>${i + 1}</kbd></i><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small></button>`).join('');
+      $('#pkBeams').innerHTML = opts.map((x, i) => `<button type="button" class="pk-beam" data-o="${i}"><i>${ic('grapple')}<kbd>${i + 1}</kbd></i><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small></button>`).join('');
     },
     step(s, now) {
       const dt = Math.min((now - (s.pkLast || now)) / 1000, 0.1); s.pkLast = now;
@@ -1404,7 +1404,7 @@ const MG = {
         pk.done = true; btn.classList.add('ok');
         const targetX = (bx / W * 100).toFixed(1);
         s.lastHeroX = targetX;
-        s.alt += 15; $('#pkAlt').textContent = `🏯 ${s.alt}m`;
+        s.alt += 15; $('#pkAlt').innerHTML = `${ic('tower')} ${s.alt}m`;
         s.wallPos = (s.wallPos || 0) + 120;
         $$('.pk-wall', arena).forEach(w => { w.style.backgroundPositionY = s.wallPos + 'px'; });
         GX.hitStop(arena, bx, by, { color: '#ffd27a' });
@@ -1437,7 +1437,7 @@ const MG = {
           <div class="pk-goal" id="knGoal"></div>
           <div class="kn-stage" id="knFoes"></div>
           <svg class="sl-svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path id="knSlash" vector-effect="non-scaling-stroke" d="M12 18 L 88 84" fill="none" stroke="#ff2b2b" stroke-width="7" stroke-linecap="round" opacity="0" style="filter:drop-shadow(0 0 14px #ff0000)"/></svg>
-          <div class="kn-hand">🗡️ ${L('ปามีดสกัดก่อนเกจดาบเต็ม! ถ้าเกจเต็มนักฆ่าจะพุ่งฟันสวนทันที', 'Throw kunai before their strike gauge fills up!')}</div>
+          <div class="kn-hand">${ic('g-kunai')} ${L('ปามีดสกัดก่อนเกจดาบเต็ม! ถ้าเกจเต็มนักฆ่าจะพุ่งฟันสวนทันที', 'Throw kunai before their strike gauge fills up!')}</div>
         </div>
         <div class="m-panel"><div class="m-foot" id="knFoot"></div></div>`;
       el.onclick = e => { const b = e.target.closest('.kn-foe'); if (b) this.throwKunai(s, +b.dataset.o, b); };
@@ -1541,7 +1541,7 @@ const MG = {
       $('#bmCore').className = 'bm-core';
       $('#bmSpark').hidden = false;
       $('#bmFuses').innerHTML = opts.map((_, i) => `<div class="bm-fuse-arc f${i}" data-o="${i}"></div>`).join('');
-      $('#bmWires').innerHTML = opts.map((x, i) => `<button type="button" class="bm-wire" data-o="${i}"><kbd>${i + 1}</kbd><span>✂️ ${esc(meaningText(x))}</span></button>`).join('');
+      $('#bmWires').innerHTML = opts.map((x, i) => `<button type="button" class="bm-wire" data-o="${i}"><kbd>${i + 1}</kbd><span>${ic('scissors')} ${esc(meaningText(x))}</span></button>`).join('');
     },
     step(s, now) {
       const dt = Math.min((now - (s.bmLast || now)) / 1000, 0.1); s.bmLast = now;
@@ -1590,7 +1590,7 @@ const MG = {
     mount(s, el) {
       s.i = -1;
       el.innerHTML = `<div class="m-table sg-arena" id="sgArena">
-          <div class="rn-top"><span class="rn-goal">${L('ฝูงผีดิบเจียงซีกำลังกระโดดบุกเข้ามา! ยิงยันต์ปราบตัวหน้าสุด (กรอบทอง)', 'Jiangshi horde advancing! Shoot talisman at the front zombie!')}</span><span class="rn-dist" id="sgDist">🧟 10.0m</span></div>
+          <div class="rn-top"><span class="rn-goal">${L('ฝูงผีดิบเจียงซีกำลังกระโดดบุกเข้ามา! ยิงยันต์ปราบตัวหน้าสุด (กรอบทอง)', 'Jiangshi horde advancing! Shoot talisman at the front zombie!')}</span><span class="rn-dist" id="sgDist">${ic('g-siege')} 10.0m</span></div>
           <div class="sg-lane" id="sgHorde"></div>
           <div class="bm-wires" id="sgOpts"></div>
         </div>
@@ -1613,16 +1613,16 @@ const MG = {
       const w = s.words[s.i], decoys = distractors(w, 2), opts = shuffle([w, ...decoys]);
       const mobs = [decoys[0] || w, w, decoys[1] || w];
       s.sg = { w, opts, march: 0, ok: true, t: performance.now(), done: false };
-      $('#sgFoot').innerHTML = ''; $('#sgDist').textContent = '🧟 10.0m';
+      $('#sgFoot').innerHTML = ''; $('#sgDist').innerHTML = `${ic('g-siege')} 10.0m`;
       $('#sgHorde').innerHTML = mobs.map((x, idx) => `<div class="sg-mob ${idx === 1 ? 'front' : ''}" id="sgM${idx}"><span class="sg-tal">敕</span><b class="hz">${esc(x.zh)}</b><small class="pyx">${esc(x.py)}</small></div>`).join('');
-      $('#sgOpts').innerHTML = opts.map((x, i) => `<button type="button" class="bm-wire sg-opt" data-o="${i}"><kbd>${i + 1}</kbd><span>🔥 敕 · ${esc(meaningText(x))}</span></button>`).join('');
+      $('#sgOpts').innerHTML = opts.map((x, i) => `<button type="button" class="bm-wire sg-opt" data-o="${i}"><kbd>${i + 1}</kbd><span>${ic('flame')} 敕 · ${esc(meaningText(x))}</span></button>`).join('');
     },
     step(s, now) {
       const dt = Math.min((now - (s.sgLast || now)) / 1000, 0.1); s.sgLast = now;
       const sg = s.sg; if (!sg || sg.done || s.paused || document.hidden) return;
       sg.march = Math.min(1, sg.march + dt / 6.8);
       const remM = Math.max(0, 10 * (1 - sg.march)).toFixed(1);
-      const dEl = $('#sgDist'); if (dEl) dEl.textContent = `🧟 ${remM}m`;
+      const dEl = $('#sgDist'); if (dEl) dEl.innerHTML = `${ic('g-siege')} ${remM}m`;
       const hop = Math.abs(Math.sin(now / 150)) * -18;
       [0, 1, 2].forEach(idx => {
         const m = $(`#sgM${idx}`); if (!m) return;
@@ -1674,7 +1674,7 @@ const MG = {
           <div class="pk-goal" id="fgGoal"></div>
           <div class="fg-anvil">
             <div class="fg-sword" id="fgBlade"></div>
-            <div class="fg-hammer" id="fgHam">🔨</div>
+            <div class="fg-hammer" id="fgHam">${ic('g-forge')}</div>
           </div>
           <div class="fg-ingots" id="fgIngots"></div>
         </div>
@@ -2033,7 +2033,7 @@ const MG = {
       for (const d of distractors(w, 5)) for (const c of Array.from(d.zh)) if (!chars.includes(c) && !extra.includes(c) && extra.length < 6 - chars.length) extra.push(c);
       const pool = shuffle([...chars, ...extra]).slice(0, 6);
       s.lf = { w, chars, pool, at: 0, ok: true, t: performance.now(), done: false };
-      $('#lfGoal').innerHTML = `🏮 ${L('ส่องตะเกียงค้นหาคำว่า:', 'Shine lantern to find:')} <b>${esc(meaningText(w))}</b> <small class="pyx">(${esc(w.py)})</small>`;
+      $('#lfGoal').innerHTML = `${ic('g-lanternfog')} ${L('ส่องตะเกียงค้นหาคำว่า:', 'Shine lantern to find:')} <b>${esc(meaningText(w))}</b> <small class="pyx">(${esc(w.py)})</small>`;
       $('#lfFoot').innerHTML = '';
       $('#lfGrid').innerHTML = pool.map((c, i) => `<button type="button" class="lf-cell hz" data-i="${i}"><kbd>${i + 1}</kbd>${esc(c)}</button>`).join('');
     },

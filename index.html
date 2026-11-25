@@ -97,17 +97,18 @@
 <link rel="preload" href="fonts/PinyinSans.woff" as="font" type="font/woff" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+Thai:wght@600;700&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-lite-webfont@1.1.0/style.css" rel="stylesheet">
-<link rel="stylesheet" href="css/app.css?v=5.1.0">
-<link rel="stylesheet" href="css/v4.css?v=5.0.0">
+<link rel="stylesheet" href="css/app.css?v=5.2.0">
+<link rel="stylesheet" href="css/v4.css?v=5.1.0">
 <link rel="stylesheet" href="css/five.css?v=7.0.0">
 <link rel="stylesheet" href="css/books5.css?v=9.1.0">
 <link rel="stylesheet" href="css/sbook.css?v=1.0.1">
-<link rel="stylesheet" href="css/refbooks.css?v=1.0.1">
-<link rel="stylesheet" href="css/cbook.css?v=1.0.1">
+<link rel="stylesheet" href="css/refbooks.css?v=1.0.2">
+<link rel="stylesheet" href="css/cbook.css?v=1.0.2">
 <link rel="stylesheet" href="css/ibooks.css?v=6.7.0">
 <link rel="stylesheet" href="css/tree.css?v=7.4.0">
-<link rel="stylesheet" href="css/digi.css?v=11.0.0">
-<link rel="stylesheet" href="css/compose.css?v=8.6.0">
+<link rel="stylesheet" href="css/digi.css?v=12.0.0">
+<link rel="stylesheet" href="css/compose.css?v=8.7.0">
+<link rel="stylesheet" href="css/ink.css?v=1.0.0">
 <script>
 /* apply the saved / system theme before first paint */
 (function () {
@@ -198,6 +199,28 @@
   <symbol id="i-shrink" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></symbol>
   <symbol id="i-hanzi" viewBox="0 0 24 24"><rect x="3.500" y="3.500" width="17" height="17" rx="4"/><path d="M7.500 9h9M12 6.500V17.500M8 17l4-4.500 4 4.500"/></symbol>
   <symbol id="i-books" viewBox="0 0 24 24"><rect x="4" y="4" width="4.500" height="16" rx="1"/><rect x="8.500" y="4" width="4.500" height="16" rx="1"/><path d="M4 8h4.500M8.500 16H13"/><path d="m13.900 5.200 2.300-.6a1 1 0 0 1 1.200.7l3.400 13a1 1 0 0 1-.7 1.200l-2.300.6a1 1 0 0 1-1.200-.7l-3.400-13a1 1 0 0 1 .7-1.200z"/><path d="m14.700 9.300 3.600-.9M16.600 16.300l3.300-.8"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19c2-7 8-13 15-14-1 7-6 13-13 14"/><path d="M5 19c1.5-2.5 4.5-5 8-7"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></symbol>
+  <symbol id="i-paw" viewBox="0 0 24 24"><circle cx="7.5" cy="9.5" r="1.5"/><circle cx="11" cy="6.8" r="1.5"/><circle cx="15" cy="7.5" r="1.5"/><circle cx="17.8" cy="11" r="1.5"/><path d="M7.5 16.5c0-2.4 2.2-4.2 4.7-4.2 2.4 0 4.3 1.7 4.3 4 0 1.4-1.2 2.4-2.7 2.4-1 0-1.5-.3-2.1-.3s-1.2.3-2 .3c-1.3 0-2.2-.9-2.2-2.2z"/></symbol>
+  <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3c.7 4.4 2.6 6.3 7 7-4.4.7-6.3 2.6-7 7-.7-4.4-2.6-6.3-7-7 4.4-.7 6.3-2.6 7-7z"/><path d="M18.5 15.5c.3 1.5.9 2.1 2.4 2.4-1.5.3-2.1.9-2.4 2.4-.3-1.5-.9-2.1-2.4-2.4 1.5-.3 2.1-.9 2.4-2.4z"/></symbol>
+  <symbol id="i-grad" viewBox="0 0 24 24"><path d="m2.5 9.5 9.5-4.5 9.5 4.5-9.5 4.5z"/><path d="M6.5 11.5v4.5c0 1.8 2.6 3 5.5 3s5.5-1.2 5.5-3v-4.5"/><path d="M21 10v6"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m15.5 8.5-2.1 5.1-5.1 2.1 2.1-5.1z"/></symbol>
+  <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18h10.5a4 4 0 0 0 .6-7.9A5.5 5.5 0 0 0 7.4 8.5 4.2 4.2 0 0 0 7 18z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.8 12h16.4M12 3.5a12.5 12.5 0 0 1 0 17M12 3.5a12.5 12.5 0 0 0 0 17"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4.2 4.2 0 0 0 6 0l3-3a4.2 4.2 0 0 0-6-6l-1.5 1.5"/><path d="M14 10a4.2 4.2 0 0 0-6 0l-3 3a4.2 4.2 0 0 0 6 6l1.5-1.5"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><rect x="6.5" y="3" width="11" height="18" rx="2.4"/><path d="M10.5 17.5h3"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8.5" cy="14.5" r="4"/><path d="m11.5 11.5 7.5-7.5M16 7l2.5 2.5M18.5 4.5 21 7"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="12" rx="2"/><path d="M15.5 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.5"/></symbol>
+  <symbol id="i-save" viewBox="0 0 24 24"><path d="M5 4h11l3 3v12a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19V4z"/><path d="M8.5 4v5.5h6V4M8 20.5V14h8v6.5"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 20.5s6-5.3 6-10.2a6 6 0 1 0-12 0c0 4.9 6 10.2 6 10.2z"/><circle cx="12" cy="10.2" r="2.2"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="m12 3.8 8.8 15.7H3.2z"/><path d="M12 9.5v4.8"/><circle cx="12" cy="17" r=".8" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-scissors" viewBox="0 0 24 24"><circle cx="6.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="16.5" r="2.5"/><path d="m8.8 8.7 11.2 7.8M8.8 15.3 20 7.5"/></symbol>
+  <symbol id="i-highlighter" viewBox="0 0 24 24"><path d="m14.5 4.5 5 5-9.5 9.5-5.5 1 1-5.5z"/><path d="M12.5 6.5 17.5 11.5M4 20.5h8"/></symbol>
+  <symbol id="i-eraser" viewBox="0 0 24 24"><path d="m7 19.5-3.5-3.5a2 2 0 0 1 0-2.8L12.7 4a2 2 0 0 1 2.8 0l5 5a2 2 0 0 1 0 2.8l-7.2 7.7z"/><path d="m9.5 7.5 7 7M7 19.5h13"/></symbol>
+  <symbol id="i-dock" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M13 11.5h5.5v6H13z"/><path d="M7.5 9.5h3M7.5 13h2"/></symbol>
+  <symbol id="i-tower" viewBox="0 0 24 24"><path d="M5 20h14M7 20l1-5h8l1 5M8.5 15l1-4.5h5l1 4.5M6 10.5h12M9.5 10.5 12 4.5l2.5 6M12 4.5V3"/></symbol>
+  <symbol id="i-grapple" viewBox="0 0 24 24"><path d="M12 4v11.5"/><path d="M6.5 13.5c0 3 2.5 5.5 5.5 5.5s5.5-2.5 5.5-5.5"/><path d="M4.5 15l2-1.5 1.5 2M19.5 15l-2-1.5-1.5 2"/><circle cx="12" cy="4" r="1.4"/></symbol>
+  <symbol id="i-boulder" viewBox="0 0 24 24"><path d="m6.5 19.5-3-4.5 1.5-6.5 5.5-4 6.5 1 3.5 5.5-1.5 6.5-5.5 2.5z"/><path d="m8 11.5 3.5-2 3 2.5M10.5 16l4-1"/></symbol>
   <!-- rough ink edge + speckle for the seals -->
   <filter id="rough" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G" result="d"/><feTurbulence type="fractalNoise" baseFrequency="1.6" numOctaves="1" seed="9" result="s"/><feColorMatrix in="s" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3.2 2.6" result="m"/><feComposite in="d" in2="m" operator="in"/></filter>
 </svg>
@@ -684,22 +707,23 @@
 <script src="data/books.js?v=5.0.0"></script>
 <script src="js/i18n-en.js?v=5.0.0"></script>
 <script src="js/core.js?v=8.3.0"></script>
-<script src="js/cloud.js?v=5.3.0"></script>
-<script src="js/play.js?v=5.1.0"></script>
-<script src="js/games.js?v=8.1.0"></script>
-<script src="js/app.js?v=7.9.1"></script>
+<script src="js/cloud.js?v=5.4.0"></script>
+<script src="js/play.js?v=5.2.0"></script>
+<script src="js/games.js?v=8.2.0"></script>
+<script src="js/app.js?v=8.0.0"></script>
 <script src="js/gami.js?v=5.0.0"></script>
 <script src="js/scene.js?v=5.0.0"></script>
 <script src="js/books5.js?v=9.0.0"></script>
 <script src="js/gbook.js?v=9.1.0"></script>
 <script src="js/sbook.js?v=1.0.0"></script>
-<script src="js/refbooks.js?v=1.0.0"></script>
-<script src="js/cbook.js?v=1.2.0"></script>
+<script src="js/refbooks.js?v=1.0.1"></script>
+<script src="js/cbook.js?v=1.3.0"></script>
 <script src="js/ibooks.js?v=7.0.0"></script>
+<script src="js/ink.js?v=1.0.0"></script>
 <script src="js/tree.js?v=7.9.0"></script>
-<script src="js/digi.js?v=11.1.0"></script>
+<script src="js/digi.js?v=12.0.0"></script>
 <script src="js/compose.js?v=7.7.0"></script>
-<script src="js/handpad.js?v=7.2.0"></script>
+<script src="js/handpad.js?v=7.3.0"></script>
 <script src="js/hanzi.js?v=7.8.0"></script>
 <script src="js/credits.js?v=7.8.0"></script>
 <script src="data/hsk.js?v=10.1.0"></script>

@@ -1,0 +1,46 @@
+/* Library of Limu · new offy v6 — Apple Pencil Book Highlighter & Notes (js/ink.js) */
+#v-book article.card.reader.ink-host { position: relative; }
+#v-book article.card.reader.ink-host.ink-finger { touch-action: none; user-select: none; -webkit-user-select: none; }
+.ink-cv { position: absolute; inset: 0; z-index: 12; pointer-events: none; border-radius: inherit; }
+#v-book article.card.reader.ink-host.ink-finger .ink-cv { pointer-events: auto; touch-action: none; cursor: crosshair; }
+#v-book.ink-active article.card.reader.ink-host { cursor: crosshair; }
+#v-book.ink-active article.card.reader.ink-host, #v-book.ink-active .prose { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+/* Header toggle button with subtle saved-note dot */
+.bk-ink-btn { position: relative; }
+.bk-ink-btn.on { color: var(--accent-ink); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.bk-ink-btn.has-ink::after { content: ""; position: absolute; right: 6px; top: 6px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 2px var(--surface); }
+
+/* Floating editorial ink toolbar */
+.ink-bar { position: fixed; z-index: 88; left: 50%; bottom: calc(var(--tab) + 26px + env(safe-area-inset-bottom));
+  transform: translateX(-50%) translateY(14px); opacity: 0; pointer-events: none;
+  display: inline-flex; align-items: center; gap: 6px; max-width: calc(100vw - 20px); padding: 6px 8px;
+  border-radius: 99px; border: 1px solid var(--line-2);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(16px) saturate(1.25); -webkit-backdrop-filter: blur(16px) saturate(1.25);
+  box-shadow: var(--sh-2), 0 12px 32px rgba(0, 0, 0, .16);
+  overflow-x: auto; scrollbar-width: none; transition: transform .22s var(--spring), opacity .18s; }
+.ink-bar::-webkit-scrollbar { display: none; }
+.ink-bar.on { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: auto; }
+@media (min-width: 900px) {
+  .ink-bar { bottom: max(18px, env(safe-area-inset-bottom)); left: calc(50% + var(--rail) / 2); }
+}
+
+.ink-grp { display: inline-flex; align-items: center; gap: 3px; flex: none; }
+.ink-b { width: 34px; height: 34px; border-radius: 99px; display: grid; place-items: center; color: var(--ink-2);
+  transition: background .14s, color .14s, transform .12s; flex: none; }
+.ink-b:hover { background: var(--surface-2); color: var(--ink); }
+.ink-b:active { transform: scale(.92); }
+.ink-b.on { background: var(--accent-soft); color: var(--accent-ink); }
+.ink-b .ic { width: 17px; height: 17px; }
+
+.ink-swatches { display: inline-flex; align-items: center; gap: 5px; padding: 0 4px; flex: none; }
+.ink-sw { width: 22px; height: 22px; border-radius: 50%; background: var(--sw, var(--ink)); border: 2px solid transparent;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .14); transition: transform .14s, box-shadow .14s; flex: none; }
+.ink-sw.is-auto { background: var(--ink); }
+.ink-sw.on { transform: scale(1.16); box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.8px var(--accent); }
+
+.ink-sep { width: 1px; height: 20px; background: var(--line-2); flex: none; margin: 0 2px; }
+.ink-pill { height: 28px; padding: 0 9px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface-2);
+  color: var(--muted); font: 700 11.5px var(--ui); white-space: nowrap; flex: none; transition: border-color .14s, background .14s, color .14s; }
+.ink-pill.on { border-color: color-mix(in srgb, var(--accent) 48%, var(--line)); background: var(--accent-soft); color: var(--accent-ink); }

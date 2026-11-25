@@ -587,17 +587,17 @@ const Cloud = {
           <div class="cp-head">
             <div class="cp-ava hz">${esc(this.user.username.slice(0, 1).toUpperCase())}</div>
             <div class="cp-info">
-              <b>${esc(this.user.username)} <span class="cp-badge">🟢 ${L('ซิงค์อัตโนมัติ', 'Auto-Sync ON')}</span></b>
+              <b>${esc(this.user.username)} <span class="cp-badge"><i class="cp-dot" aria-hidden="true"></i>${L('ซิงค์อัตโนมัติ', 'Auto-Sync ON')}</span></b>
               <small>${L('รหัสซิงค์ด่วน:', 'Sync Code:')} <code class="cp-code">${esc(this.user.syncCode)}</code> · ${L('อัปเดตล่าสุด:', 'Last sync:')} ${syncTime}</small>
               <small>${L(`ข้อมูลในบัญชี: ${stageCnt} ด่าน · ${wordCnt} คำศัพท์ · ${fmtNum(Store.d.xp || 0)} XP`, `Synced: ${stageCnt} stages · ${wordCnt} words · ${fmtNum(Store.d.xp || 0)} XP`)}</small>
             </div>
           </div>
           <div class="grid2" style="margin-top:12px">
             <button class="btn primary" data-cloud="sync-now">${ic('repeat')}${L('ซิงค์ข้อมูลเดี๋ยวนี้', 'Sync Now')}</button>
-            <button class="btn" data-cloud="qr">📱 ${L('แสดง QR / รหัสเชื่อมเครื่องอื่น', 'Show QR / Link Device')}</button>
+            <button class="btn" data-cloud="qr">${ic('phone')}${L('แสดง QR / รหัสเชื่อมเครื่องอื่น', 'Show QR / Link Device')}</button>
           </div>
           <div class="grid2" style="margin-top:8px">
-            <button class="btn sm" data-cloud="supa-cfg">⚙️ ${L('ตั้งค่าเซิร์ฟเวอร์ Cloud (Supabase)', 'Cloud Server Setup')}</button>
+            <button class="btn sm" data-cloud="supa-cfg">${ic('gear')}${L('ตั้งค่าเซิร์ฟเวอร์ Cloud (Supabase)', 'Cloud Server Setup')}</button>
             <button class="btn sm danger" data-cloud="logout">${L('ออกจากระบบ', 'Sign Out')}</button>
           </div>
         </div>`;
@@ -610,16 +610,16 @@ const Cloud = {
           <input class="input" id="clPass" type="password" placeholder="${L('รหัสผ่าน (4 ตัวขึ้นไป)', 'Password (min 4 chars)')}" autocomplete="current-password">
         </div>
         <div class="grid2" style="margin-top:8px">
-          <button class="btn primary" data-cloud="login-pw">🔑 ${L('เข้าสู่ระบบ / สมัครอัตโนมัติ', 'Sign In / Auto-Register')}</button>
-          <button class="btn" data-cloud="login-google">🌐 ${L('เข้าสู่ระบบด้วย Google', 'Continue with Google')}</button>
+          <button class="btn primary" data-cloud="login-pw">${ic('key')}${L('เข้าสู่ระบบ / สมัครอัตโนมัติ', 'Sign In / Auto-Register')}</button>
+          <button class="btn" data-cloud="login-google">${ic('globe')}${L('เข้าสู่ระบบด้วย Google', 'Continue with Google')}</button>
         </div>
         <div class="cloud-divider"><span>${L('หรือเชื่อมอุปกรณ์ด่วนด้วยรหัสซิงค์ / QR Code', 'Or link quickly via Sync Code / QR')}</span></div>
         <div class="row" style="gap:8px">
           <input class="input" id="clCode" placeholder="${L('กรอกรหัสซิงค์ 6 หลัก เช่น LM-8F4K', 'Enter 6-digit Sync Code e.g. LM-8F4K')}" style="text-transform:uppercase">
-          <button class="btn" data-cloud="login-code">🔗 ${L('เชื่อมบัญชี', 'Link')}</button>
+          <button class="btn" data-cloud="login-code">${ic('link')}${L('เชื่อมบัญชี', 'Link')}</button>
         </div>
         <div class="row wrap" style="margin-top:8px;justify-content:space-between">
-          <button class="btn sm ghost" data-cloud="supa-cfg">⚙️ ${L('เชื่อมต่อฐานข้อมูล Supabase ของคุณเอง (ฟรี)', 'Connect your own Supabase DB')}</button>
+          <button class="btn sm ghost" data-cloud="supa-cfg">${ic('gear')}${L('เชื่อมต่อฐานข้อมูล Supabase ของคุณเอง (ฟรี)', 'Connect your own Supabase DB')}</button>
         </div>
       </div>`;
   },
@@ -629,7 +629,7 @@ const Cloud = {
     Sheet.open(`
       <div class="sheet-h">
         <div>
-          <h3>☁️ ${L('บัญชี & ซิงค์ข้ามอุปกรณ์ (v5 Cloud)', 'Account & Cross-Device Sync (v5 Cloud)')}</h3>
+          <h3>${ic('cloud')} ${L('บัญชี & ซิงค์ข้ามอุปกรณ์ (v5 Cloud)', 'Account & Cross-Device Sync (v5 Cloud)')}</h3>
           <p>${L('ใช้ข้อมูลร่วมกันระหว่างคอม มือถือ และ iPad แบบอัตโนมัติ (ไม่กินทรัพยากรเครื่อง)', 'Share your progress seamlessly across PC, Phone & Tablet')}</p>
         </div>
       </div>
@@ -646,7 +646,7 @@ const Cloud = {
     Sheet.open(`
       <div class="sheet-h">
         <div>
-          <h3>📱 ${L('เชื่อมอุปกรณ์ด้วย QR Code หรือรหัสซิงค์', 'Link Another Device via QR or Sync Code')}</h3>
+          <h3>${ic('phone')} ${L('เชื่อมอุปกรณ์ด้วย QR Code หรือรหัสซิงค์', 'Link Another Device via QR or Sync Code')}</h3>
           <p>${L('สร้างด้วย SVG ขนาดเพียง 2 KB (วาดเฉพาะตอนเปิดหน้านี้ ไม่กินแรมหรือแบตเตอรี่)', 'Rendered as a 2 KB inline SVG only while open — zero background RAM/CPU load')}</p>
         </div>
       </div>
@@ -658,8 +658,8 @@ const Cloud = {
         </div>
         <p class="note" style="text-align:center;margin:8px 0">${L('วิธีเชื่อมเครื่องอื่น: เปิดหน้าเว็บนี้บนมือถือ/iPad แล้วกรอกรหัสซิงค์ด้านบน หรือกดปุ่มคัดลอกลิงก์ซิงค์ด่วนด้านล่างส่งเข้าแชทตัวเองได้เลย!', 'Enter the 6-digit Sync Code on your other device, or copy the Magic Sync Link below to open on your phone/iPad!')}</p>
         <div class="grid2" style="width:100%">
-          <button class="btn primary" id="qrCopyLink">🔗 ${L('คัดลอกลิงก์ล็อกอินด่วน', 'Copy Magic Sync Link')}</button>
-          <button class="btn" id="qrCopyCode">📋 ${L('คัดลอกรหัส ' + this.user.syncCode, 'Copy Code ' + this.user.syncCode)}</button>
+          <button class="btn primary" id="qrCopyLink">${ic('link')}${L('คัดลอกลิงก์ล็อกอินด่วน', 'Copy Magic Sync Link')}</button>
+          <button class="btn" id="qrCopyCode">${ic('copy')}${L('คัดลอกรหัส ' + this.user.syncCode, 'Copy Code ' + this.user.syncCode)}</button>
         </div>
       </div>
     `);
@@ -685,19 +685,19 @@ create policy "Public sync access" on public.offy_profiles for all using (true) 
     Sheet.open(`
       <div class="sheet-h">
         <div>
-          <h3>⚙️ ${L('ตั้งค่าฐานข้อมูล Cloud (Supabase PostgreSQL)', 'Supabase Cloud Database Setup')}</h3>
+          <h3>${ic('gear')} ${L('ตั้งค่าฐานข้อมูล Cloud (Supabase PostgreSQL)', 'Supabase Cloud Database Setup')}</h3>
           <p>${L('รองรับคำศัพท์ 10,000+ คำ และซิงค์ข้ามเครือข่ายทั่วโลกฟรี 100%', 'Supports 10,000+ words and global cross-network sync for free')}</p>
         </div>
       </div>
       <div class="rows" style="display:flex;flex-direction:column;gap:10px">
-        <p class="note">${L('1. สร้างโปรเจกต์ฟรีที่ supabase.com ➔ ไปที่เมนู SQL Editor แล้วกดปุ่มคัดลอกคำสั่ง SQL ด้านล่างไปกด Run:', '1. Create a free project at supabase.com ➔ open SQL Editor and run this SQL:')}</p>
+        <p class="note">${L('1. สร้างโปรเจกต์ฟรีที่ supabase.com → ไปที่เมนู SQL Editor แล้วกดปุ่มคัดลอกคำสั่ง SQL ด้านล่างไปกด Run:', '1. Create a free project at supabase.com → open SQL Editor and run this SQL:')}</p>
         <pre class="sql-box">${esc(sql)}</pre>
-        <button class="btn sm" id="supaCopySql">📋 ${L('คัดลอกคำสั่ง SQL สร้างตาราง', 'Copy SQL Schema')}</button>
-        <p class="note" style="margin-top:6px">${L('2. ไปที่ Project Settings ➔ API แล้ววาง Project URL และ anon public key ด้านล่าง:', '2. Paste your Supabase Project URL and anon public key below:')}</p>
+        <button class="btn sm" id="supaCopySql">${ic('copy')}${L('คัดลอกคำสั่ง SQL สร้างตาราง', 'Copy SQL Schema')}</button>
+        <p class="note" style="margin-top:6px">${L('2. ไปที่ Project Settings → API แล้ววาง Project URL และ anon public key ด้านล่าง:', '2. Paste your Supabase Project URL and anon public key below:')}</p>
         <input class="input" id="supaUrl" placeholder="https://xxxx.supabase.co" value="${esc(cfg.url)}">
         <input class="input" id="supaKey" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6..." value="${esc(cfg.key)}">
         <div class="grid2" style="margin-top:6px">
-          <button class="btn primary" id="supaSave">💾 ${L('บันทึกและเชื่อมต่อ Cloud', 'Save & Connect')}</button>
+          <button class="btn primary" id="supaSave">${ic('save')}${L('บันทึกและเชื่อมต่อ Cloud', 'Save & Connect')}</button>
           <button class="btn" id="supaBack">${L('กลับหน้าบัญชี', 'Back')}</button>
         </div>
       </div>

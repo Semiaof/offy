@@ -81,8 +81,8 @@ const Game = {
       else delete st.dataset.comboTier;
     }
     if (n >= 2) {
-      const prefix = tier === 3 ? '🐉 ' : tier === 2 ? '🔥🔥 ' : tier === 1 ? '🔥 ' : '';
-      el.textContent = `${prefix}${T('ต่อเนื่อง')} ×${n}`;
+      const iconHtml = tier === 3 ? ic('star') : tier >= 1 ? ic('flame') : '';
+      el.innerHTML = `${iconHtml}${T('ต่อเนื่อง')} ×${n}`;
       el.className = `combo show bump${tier ? ' combo-t' + tier : ''}`;
       void el.offsetWidth;
     } else {
@@ -689,6 +689,7 @@ const Pad = {
       cv.addEventListener('pointerdown', e => {
         if (e.pointerType === 'pen') this.pen = true;
         if (this.pen && e.pointerType === 'touch') return;
+        if (e.pointerType === 'touch' && ((e.width || 0) > 36 || (e.height || 0) > 36)) return; // ignore resting palm
         if (this.cur) return;
         e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (er) { }
         if (cv.getAnimations) cv.getAnimations().forEach(a => a.finish());
@@ -723,7 +724,10 @@ const Pad = {
   pt(c, e, prev) {
     const r = c.cv.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * c.size, y = (e.clientY - r.top) / r.height * c.size, base = c.size * 0.052, t = e.timeStamp || performance.now();
     let w;
-    if (e.pointerType === 'pen' && e.pressure > 0) w = base * (0.38 + e.pressure * 1.5);
+    if (e.pointerType === 'pen' && e.pressure > 0) {
+      const tilt = 1 + Math.min(0.32, (Math.abs(e.tiltX || 0) + Math.abs(e.tiltY || 0)) / 220);
+      w = base * (0.36 + e.pressure * 1.52) * tilt;
+    }
     else if (!prev) w = base * 1.05;
     else { const v = Math.hypot(x - prev[0], y - prev[1]) / Math.max(1, t - prev[3]) / (c.size / 200); w = base * clamp(1.5 - v * 0.75, 0.5, 1.5); }
     if (prev) w = prev[2] * 0.72 + w * 0.28;

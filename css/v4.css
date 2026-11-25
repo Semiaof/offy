@@ -1055,7 +1055,10 @@ html { overscroll-behavior-y: none; }
 .fg-sword.complete { filter: drop-shadow(0 0 28px #ffd27a) brightness(1.18); transform: scale(1.06); }
 .fg-ch { width: 42px; height: 42px; border-radius: 9px; background: rgba(0,0,0,.38); border: 1.5px dashed #ffd27a; color: #fff; font-size: 26px; display: grid; place-items: center; transition: transform .2s, background .2s; }
 .fg-ch.lit, .fg-ch.forged { background: #ffd27a; color: #2a1205; border-style: solid; transform: scale(1.08); }
-.fg-hammer { font-size: 36px; margin-left: 8px; transition: transform .15s; }
+.fg-hammer { font-size: 36px; margin-left: 8px; transition: transform .15s; display: inline-grid; place-items: center; color: #ffd27a; }
+.fg-hammer .ic { width: 34px; height: 34px; }
+.rn-dist, .rn-boulder, .pk-lava-rise, .kn-hand { display: inline-flex; align-items: center; gap: 5px; }
+.rn-dist .ic, .rn-boulder .ic, .pk-lava-rise .ic, .kn-hand .ic, .bm-wire .ic, .pk-beam .ic, #lfGoal .ic { width: 15px; height: 15px; vertical-align: -2px; flex: none; }
 .fg-ingots, .cp-keys { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 520px; padding: 0 12px; z-index: 18; }
 .fg-ingot, .cp-key { min-width: 68px; height: 50px; padding: 0 14px; border-radius: 12px; background: linear-gradient(180deg, #523022, #2b1710); border: 2px solid #ff922b; color: #fff; font-size: 24px; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .fg-ingot.used, .cp-key.used { opacity: .32; transform: scale(.92); }
@@ -1185,7 +1188,8 @@ html[data-vt="scroll"]::view-transition-new(root) { animation: vtScrollIn .46s c
 .cp-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .cp-info b { font-size: 15.5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .cp-info small { font-size: 12.5px; color: var(--muted); }
-.cp-badge { font-size: 11.5px; font-weight: 600; color: var(--good); background: var(--good-soft); padding: 2px 8px; border-radius: 99px; }
+.cp-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; color: var(--good); background: var(--good-soft); padding: 2px 8px; border-radius: 99px; }
+.cp-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--good); display: inline-block; flex: none; }
 .cp-code { font: 700 12.5px monospace; color: var(--ink); background: var(--surface-3); padding: 1px 6px; border-radius: 6px; }
 .cloud-divider { display: flex; align-items: center; gap: 10px; margin: 12px 0 8px; color: var(--muted); font-size: 12px; }
 .cloud-divider::before, .cloud-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }

@@ -809,14 +809,41 @@ function boot() {
   });
 
   // edge swipe from the left = back (for home-screen apps without a browser back gesture)
+  // Ignore multi-touch pinches, Apple Pencil strokes, and interactive canvases/constellations!
   let ex = null;
-  document.addEventListener('touchstart', e => { const t = e.touches[0]; ex = t.clientX < 22 ? { x: t.clientX, y: t.clientY } : null; }, { passive: true });
-  document.addEventListener('touchmove', e => { if (!ex) return; const t = e.touches[0], dx = t.clientX - ex.x; const el = $('#edgeL'); el.style.opacity = String(clamp(dx / 80, 0, 1)); el.style.transform = `translateX(${clamp(dx * .7, 0, 58)}px)`; }, { passive: true });
+  document.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) { ex = null; return; }
+    const t = e.touches[0];
+    if (t.touchType === 'stylus') { ex = null; return; }
+    if (e.target && e.target.closest && e.target.closest('.dg-view, .hp-pad, .hp-dpad, .pad-cell, .t-pad, .ink-host, .fu-orb, .rn-arena, .ch-scroll')) { ex = null; return; }
+    ex = t.clientX < 22 ? { x: t.clientX, y: t.clientY } : null;
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (!ex) return;
+    if (e.touches.length !== 1) { ex = null; const el = $('#edgeL'); if (el) { el.style.opacity = '0'; el.style.transform = ''; } return; }
+    const t = e.touches[0], dx = t.clientX - ex.x;
+    const el = $('#edgeL'); el.style.opacity = String(clamp(dx / 80, 0, 1)); el.style.transform = `translateX(${clamp(dx * .7, 0, 58)}px)`;
+  }, { passive: true });
   document.addEventListener('touchend', e => {
     if (!ex) return; const t = e.changedTouches[0], dx = t.clientX - ex.x, dy = Math.abs(t.clientY - ex.y); ex = null;
     const el = $('#edgeL'); el.style.opacity = '0'; el.style.transform = '';
     if (dx > 80 && dy < 60) { if (modalOpen()) return; if (Sheet.isOpen()) { Sheet.close(); return; } const b = $('.view.active [data-up]'); if (b) b.click(); else if (currentView === 'v-game') Game.pause(); else if (currentView === 'v-mini') Mini.quitAsk(); else if (currentView === 'v-dictation') Dicta.quitAsk(); else if (currentView !== 'v-home' && currentView !== 'v-dsheet') history.back(); }
   }, { passive: true });
+
+  // Mobile / tablet soft-keyboard detection via visualViewport (hides floating bottom nav while typing)
+  if (window.visualViewport) {
+    const syncKbd = () => {
+      const vv = window.visualViewport;
+      const kbdH = Math.max(0, Math.round(window.innerHeight - vv.height - vv.offsetTop));
+      const open = kbdH > 130 && document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+      document.body.classList.toggle('kbd-open', !!open);
+      document.documentElement.style.setProperty('--kbd', open ? kbdH + 'px' : '0px');
+    };
+    window.visualViewport.addEventListener('resize', syncKbd);
+    window.visualViewport.addEventListener('scroll', syncKbd);
+    document.addEventListener('focusin', () => setTimeout(syncKbd, 120));
+    document.addEventListener('focusout', () => setTimeout(syncKbd, 120));
+  }
 
   Router.start();
   if (Store.migrated) setTimeout(() => toast(/^v\d$/.test(Store.migrated) ? `${T('นำความคืบหน้าจาก')} new offy ${Store.migrated} ${T('มาให้แล้ว')}` : `${T('นำความคืบหน้าจากเวอร์ชันเก่ามาให้แล้ว')}`, { icon: 'check', ms: 3600 }), 700);

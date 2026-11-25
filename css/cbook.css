@@ -246,7 +246,10 @@
 .cb-aud.compact .cb-aud-play { width: 28px; height: 28px; }
 .cb-aud-play:active { transform: scale(.92); }
 .cb-aud-play .ic { width: 15px; height: 15px; }
-.cb-aud-tag { font-size: 12px; font-weight: 800; color: var(--cb-deep); white-space: nowrap; }
+.cb-aud-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 800; color: var(--cb-deep); white-space: nowrap; }
+.cb-aud-tag .ic, .cb-stat-pill .ic, .cb-peek-hint .ic, .cb-reveal-btn .ic, .cb-tip-btn .ic, .cb-pd-ans .ic { width: 14px; height: 14px; vertical-align: -2px; flex: none; }
+.cb-toc-head h3 .ic, .cb-obj-h .ic, .cb-rib-zh .ic, .cb-dock h3 .ic { width: 17px; height: 17px; vertical-align: -3px; flex: none; margin-right: 3px; }
+.cb-nw-star .ic { width: 12px; height: 12px; vertical-align: -1px; }
 .cb-aud-seek {
   flex: 1; min-width: 70px; accent-color: var(--cb); cursor: pointer; height: 5px;
 }

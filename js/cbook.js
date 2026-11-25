@@ -144,7 +144,7 @@
   function renderAudioBar(src, label, compact) {
     return `<div class="cb-aud${compact ? ' compact' : ''}" data-cba-src="${esc(src)}">
       <button type="button" class="cb-aud-play" data-cba-play aria-label="เล่น/หยุดเสียง">${ic('play')}</button>
-      <span class="cb-aud-tag">🔊 ${esc(label)}</span>
+      <span class="cb-aud-tag">${ic('vol')} ${esc(label)}</span>
       <input type="range" class="cb-aud-seek" data-cba-seek min="0" max="1000" value="0" aria-label="ตำแหน่งเสียง">
       <span class="cb-aud-time" data-cba-time>0:00 / 0:00</span>
       <button type="button" class="cb-aud-btn" data-cba-spd title="ปรับความเร็วเสียง">1x</button>
@@ -331,9 +331,9 @@
           <h2><span class="hz" lang="zh-Hans">${esc(cat.zh)}</span></h2>
           <p>${esc(cat.en)} · สำนักพิมพ์ FLTRP (2026)</p>
           <div class="cb-ov-stats">
-            <span class="cb-stat-pill">📚 <b>${cat.lessons}</b> บทเรียน</span>
-            <span class="cb-stat-pill">🎧 เสียงแท้: <b>${esc(cat.audio)}</b></span>
-            <span class="cb-stat-pill">📌 สถานะ: รอยืนยันขยายต่อหลังดูต้นแบบ HSK 3</span>
+            <span class="cb-stat-pill">${ic('books')} <b>${cat.lessons}</b> บทเรียน</span>
+            <span class="cb-stat-pill">${ic('ear')} เสียงแท้: <b>${esc(cat.audio)}</b></span>
+            <span class="cb-stat-pill">${ic('pin')} สถานะ: รอยืนยันขยายต่อหลังดูต้นแบบ HSK 3</span>
           </div>
         </div>
         <div class="cb-card" style="text-align:center;padding:28px 18px">
@@ -381,14 +381,14 @@
           <button type="button" class="btn primary" data-cbgo-l="${cat.lv}:1">${ic('play')} เปิดบทที่ 1 (พร้อมเสียงจริง)</button>
         </div>
         <div class="cb-ov-stats">
-          <span class="cb-stat-pill">📚 ทั้งเล่ม <b>${book.totalLessons}</b> บท</span>
-          <span class="cb-stat-pill">✅ ต้นแบบพร้อมเรียน <b>${readyCount}</b> บท</span>
-          <span class="cb-stat-pill">🎧 เสียงแท้ FLTRP <b>${book.audioTracks}</b> แทร็ก</span>
-          <span class="cb-stat-pill">🔗 เชื่อมศัพท์ 5 ภาษา + Grammar Book</span>
+          <span class="cb-stat-pill">${ic('books')} ทั้งเล่ม <b>${book.totalLessons}</b> บท</span>
+          <span class="cb-stat-pill">${ic('check')} ต้นแบบพร้อมเรียน <b>${readyCount}</b> บท</span>
+          <span class="cb-stat-pill">${ic('ear')} เสียงแท้ FLTRP <b>${book.audioTracks}</b> แทร็ก</span>
+          <span class="cb-stat-pill">${ic('link')} เชื่อมศัพท์ 5 ภาษา + Grammar Book</span>
         </div>
       </div>
       <div class="cb-toc-head">
-        <h3>📖 สารบัญ <span class="hz" lang="zh-Hans">目录</span> (${book.totalLessons} บท)</h3>
+        <h3>${ic('book')} สารบัญ <span class="hz" lang="zh-Hans">目录</span> (${book.totalLessons} บท)</h3>
         <span class="muted" style="font-size:12.5px">แตะบทที่ 1 เพื่อทดลองเรียนเต็มระบบ</span>
       </div>
       <div class="cb-toc-grid">${cards}</div>
@@ -420,8 +420,8 @@
         <button type="button" class="cb-bar-back" data-cb-toc="${cat.lv}">${ic('chev-l')} สารบัญ</button>
         <button type="button" class="cb-ctrl${st.py ? ' on' : ''}" data-cb-toggle="py">${ic(st.py ? 'eye' : 'eye-off')} พินอิน</button>
         <button type="button" class="cb-ctrl${st.tr !== 'off' ? ' on' : ''}" data-cb-toggle="tr">${esc(trLabel(st.tr))}</button>
-        <button type="button" class="cb-ctrl${st.listen ? ' on' : ''}" data-cb-toggle="listen">🎧 ฝึกฟังเปล่า</button>
-        <button type="button" class="cb-ctrl${st.hlNw ? ' on' : ''}" data-cb-toggle="hlNw">✨ ไฮไลต์คำใหม่</button>
+        <button type="button" class="cb-ctrl${st.listen ? ' on' : ''}" data-cb-toggle="listen">${ic('ear')} ฝึกฟังเปล่า</button>
+        <button type="button" class="cb-ctrl${st.hlNw ? ' on' : ''}" data-cb-toggle="hlNw">${ic('sparkle')} ไฮไลต์คำใหม่</button>
         <button type="button" class="cb-ctrl cb-ctrl-cta" data-cb-practice="flash">${ic('play')} ฝึกศัพท์บทนี้ (${lWords.length} คำ)</button>
       </div>
 
@@ -443,7 +443,7 @@
           <span class="cb-hero-page">p.${esc(lesson.pageRange)}</span>
         </div>
         <div class="cb-obj">
-          <h3 class="cb-obj-h">🎯 <span class="hz" lang="zh-Hans">目标</span> Objectives · เป้าหมายของบทนี้</h3>
+          <h3 class="cb-obj-h">${ic('target')} <span class="hz" lang="zh-Hans">目标</span> Objectives · เป้าหมายของบทนี้</h3>
           <ul class="cb-obj-list">
             ${lesson.objectives.map(o => `<li class="cb-obj-item">
               <input type="checkbox" data-cb-obj="${esc(o.id)}" ${pr.obj && pr.obj[o.id] ? 'checked' : ''} aria-label="${esc(o.zh)}">
@@ -513,7 +513,7 @@
             <div class="cb-bub-py" style="margin-top:2px">${esc(it.py)}</div>
             <span class="cb-disc-th">${esc(it.th)}</span>
             <span class="cb-disc-en">${esc(it.en)}</span>
-            <button type="button" class="cb-reveal-btn" data-cb-reveal="wu-d-${idx}">💡 ดูแนวทางการตอบ</button>
+            <button type="button" class="cb-reveal-btn" data-cb-reveal="wu-d-${idx}">${ic('bulb')} ดูแนวทางการตอบ</button>
             <div class="cb-sample-box" id="wu-d-${idx}" hidden>
               <div class="hz" lang="zh-Hans">${matcher.tokenize(it.sampleZh)}</div>
               <div class="muted" style="font-size:12.5px;margin-top:3px">${esc(it.sampleTh)}</div>
@@ -533,7 +533,7 @@
       <ul class="cb-nw-list">
         ${sec.newWords.map(nw => `<li class="cb-nw-row" data-cbw="${esc(nw.zh)}" ${nw.app ? `data-cbapp="${esc(nw.app)}"` : ''} role="button" tabindex="0" title="แตะเพื่อเปิดพจนานุกรม 5 ภาษา">
           <span class="cb-nw-no">${nw.num}</span>
-          <span class="cb-nw-zh hz" lang="zh-Hans">${nw.star ? '<span class="cb-nw-star" title="คำเสริมนอกหลักสูตร">★</span>' : ''}${esc(nw.zh)}</span>
+          <span class="cb-nw-zh hz" lang="zh-Hans">${nw.star ? `<span class="cb-nw-star" title="คำเสริมนอกหลักสูตร">${ic('star')}</span>` : ''}${esc(nw.zh)}</span>
           <div class="cb-nw-meta">
             <span class="cb-nw-py">${esc(nw.py)}</span><span class="cb-nw-pos">${esc(nw.pos)}</span>
             <span class="cb-nw-gl">${esc(nw.th)}<small>${esc(nw.en)}</small></span>
@@ -561,7 +561,7 @@
     if (isDiary) {
       const sentencesHtml = sec.lines.map((ln, li) => `
         <div class="cb-diary-s" data-cb-peek>
-          <span class="cb-peek-hint">🎧 แตะเพื่อเปิดดูประโยคที่ ${li + 1}</span>
+          <span class="cb-peek-hint">${ic('ear')} แตะเพื่อเปิดดูประโยคที่ ${li + 1}</span>
           <div class="cb-bub-top">
             <div class="cb-bub-body">
               <div class="cb-bub-py">${esc(ln.py)}</div>
@@ -584,7 +584,7 @@
       const turnsHtml = sec.lines.map((ln, li) => {
         const sp = (book.cast && book.cast[ln.sp]) || { zh: ln.sp || '', bg: '#666', ch: '?' };
         const tipHtml = ln.tip ? `<div class="cb-tip-wrap">
-          <button type="button" class="cb-tip-btn" data-cb-reveal="tip-${si}-${li}">💡 小语助力 · ${esc(ln.tip.zh)}</button>
+          <button type="button" class="cb-tip-btn" data-cb-reveal="tip-${si}-${li}">${ic('bulb')} 小语助力 · ${esc(ln.tip.zh)}</button>
           <div class="cb-tip-box" id="tip-${si}-${li}" hidden>${esc(ln.tip.th)}</div>
         </div>` : '';
         return `<div class="cb-turn">
@@ -593,7 +593,7 @@
             <span class="cb-ava-name hz" lang="zh-Hans">${esc(sp.zh)}</span>
           </div>
           <div class="cb-bub" data-cb-peek>
-            <span class="cb-peek-hint">🎧 โหมดฝึกฟัง — แตะเพื่อเปิดดูบรรทัดนี้</span>
+            <span class="cb-peek-hint">${ic('ear')} โหมดฝึกฟัง — แตะเพื่อเปิดดูบรรทัดนี้</span>
             <div class="cb-bub-top">
               <div class="cb-bub-body">
                 <div class="cb-bub-py">${esc(ln.py)}</div>
@@ -636,7 +636,7 @@
         <span class="cb-rib-pg">p.${esc(sec.page)}</span>
       </div>
       <div class="cb-setting">
-        <span class="cb-pin">📍</span>
+        <span class="cb-pin">${ic('pin')}</span>
         <div>
           <span class="cb-setting-zh hz" lang="zh-Hans">${matcher.tokenize(sec.settingZh)}</span>
           <span class="cb-setting-py cb-bub-py">${esc(sec.settingPy)}</span>
@@ -678,7 +678,7 @@
 
     return `<section class="cb-sec" id="cb-gram-${sec.num}">
       <div class="cb-ribbon">
-        <span class="cb-rib-zh hz" lang="zh-Hans">👩‍🏫 小语讲堂</span>
+        <span class="cb-rib-zh hz" lang="zh-Hans">${ic('grad')} 小语讲堂</span>
         <span class="cb-rib-en">Xiaoyu's Classroom · จุดไวยากรณ์ที่ ${sec.num}</span>
         <span class="cb-rib-pg">p.${esc(sec.page)}</span>
       </div>
@@ -740,7 +740,7 @@
       <div class="cb-pd-grid">
         ${ex.pictureDialogues.map(pd => `<div class="cb-pd-card">
           <div class="cb-pd-scene">${esc(pd.scene)}</div>
-          ${pd.lines.map(l => `<div class="cb-pd-line"><b>${l.sp}:</b><span class="hz" lang="zh-Hans">${esc(l.text)}</span>${l.ans ? `<span class="cb-pd-ans" data-pd-ans hidden>💡 ${esc(l.ans)}</span>` : ''}</div>`).join('')}
+          ${pd.lines.map(l => `<div class="cb-pd-line"><b>${l.sp}:</b><span class="hz" lang="zh-Hans">${esc(l.text)}</span>${l.ans ? `<span class="cb-pd-ans" data-pd-ans hidden>${ic('bulb')} ${esc(l.ans)}</span>` : ''}</div>`).join('')}
           <button type="button" class="cb-reveal-btn" data-cb-pdtog>ดูแนวคำตอบบทสนทนานี้</button>
         </div>`).join('')}
       </div>
@@ -802,19 +802,19 @@
             </tr>`).join('')}
           </tbody>
         </table>
-        <label style="display:block;margin-top:12px;font-size:13px;font-weight:600;color:var(--ink-2)">📝 <span class="hz" lang="zh-Hans">我需要努力的</span> · จุดที่อยากฝึกเพิ่มในบทนี้:</label>
+        <label style="display:block;margin-top:12px;font-size:13px;font-weight:600;color:var(--ink-2)">${ic('pen')} <span class="hz" lang="zh-Hans">我需要努力的</span> · จุดที่อยากฝึกเพิ่มในบทนี้:</label>
         <textarea class="cb-sc-note" data-cb-note placeholder="จดคำศัพท์ที่ยังจำไม่ได้ หรือโครงสร้างที่อยากทบทวนเพิ่ม…">${esc(pr.note || '')}</textarea>
       </div>
 
       <!-- Practice Handoff Dock (Course → App Flashcards / Dictation / Games!) -->
       <div class="cb-dock">
-        <h3>🎮 ส่งคำศัพท์บทที่ ${lesson.n} ไปฝึกต่อในแอป (${lWords.length} คำในคลัง 5 ภาษา)</h3>
+        <h3>${ic('pad')} ส่งคำศัพท์บทที่ ${lesson.n} ไปฝึกต่อในแอป (${lWords.length} คำในคลัง 5 ภาษา)</h3>
         <p>ฝึกจำคำศัพท์ใหม่ของบทนี้ผ่านแฟลชการ์ด เขียนตามคำบอก หรือมินิเกม — เล่นจบแล้วกลับมาหน้าบทเรียนนี้ทันที</p>
         <div class="cb-dock-btns">
           <button type="button" class="btn primary" data-cb-practice="flash">${ic('play')} แฟลชการ์ด</button>
           <button type="button" class="btn" data-cb-practice="tingxie">${ic('pen')} 听写 เขียนตามคำบอก</button>
           <button type="button" class="btn" data-cb-practice="match">${ic('target')} หน้าต่างความจำ</button>
-          <button type="button" class="btn" data-cb-practice="tone">🎵 ล่าวรรณยุกต์</button>
+          <button type="button" class="btn" data-cb-practice="tone">${ic('g-tone')} ล่าวรรณยุกต์</button>
         </div>
       </div>
     </section>`;
@@ -1051,7 +1051,7 @@
         if (right) ok++;
       });
       const sc = box.querySelector('[data-cb-wuscore]');
-      if (sc) sc.textContent = `ได้ ${ok} / ${total} ข้อ${ok === total ? ' 🎉 ยอดเยี่ยม!' : ''}`;
+      if (sc) sc.textContent = `ได้ ${ok} / ${total} ข้อ${ok === total ? ' · ยอดเยี่ยม!' : ''}`;
       sfx(ok === total ? 'complete' : 'tap');
       return;
     }
@@ -1081,7 +1081,7 @@
         if (right) ok++;
       });
       const sc = grp.querySelector('[data-cb-clscore]');
-      if (sc) sc.textContent = `คะแนน ${ok} / ${total}${ok === total ? ' 🎉 ครบหมด!' : ''}`;
+      if (sc) sc.textContent = `คะแนน ${ok} / ${total}${ok === total ? ' · ครบหมด!' : ''}`;
       sfx(ok === total ? 'complete' : 'tap');
       return;
     }

@@ -41,7 +41,7 @@
   --pinyin: 'Pinyin Sans', 'IBM Plex Sans', 'Noto Sans', 'Segoe UI', -apple-system, sans-serif;
   --hz: 'KaiTi Web', 'LXGW WenKai Lite', 'LXGW WenKai', 'KaiTi', '楷体', 'Kaiti SC', 'STKaiti', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', serif;
   --s-hz: 1; --s-mean: 1; --s-ex: 1; --s-dict: 1;
-  --rail: 0px; --tab: 76px;
+  --rail: 0px; --tab: 92px; --kbd: 0px;
   --pad: 16px;
 }
 :root[data-theme="dark"] {
@@ -120,9 +120,12 @@ body.hide-th .lang-th { display: none !important; }
 .nav-items a.on { color: var(--accent-ink); background: var(--accent-soft); }
 .nav-items a.on .ic { transform: translateY(-1px) scale(1.06); }
 .nav-items a:active { transform: scale(.94); }
-body.immersive .nav { transform: translateX(-50%) translateY(140%); opacity: 0; pointer-events: none; }
+body.immersive .nav, body.kbd-open .nav { transform: translateX(-50%) translateY(145%); opacity: 0; pointer-events: none; }
 html:has(body.immersive) { overscroll-behavior: none; }
 body.immersive .view { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
+body.kbd-open .view { padding-bottom: calc(20px + var(--kbd) + env(safe-area-inset-bottom)); }
+.combo .ic { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
+.sheet-h h3 .ic { width: 19px; height: 19px; vertical-align: -3px; margin-right: 4px; color: var(--accent-ink); }
 
 /* rail (iPad landscape, desktop, short landscape phones) */
 @media (min-width: 900px), (min-width: 640px) and (max-height: 520px) {

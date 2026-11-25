@@ -614,7 +614,7 @@
         ${p.slots.map(([lbl, role], i) => `${i ? '<span class="rb-plus">+</span>' : ''}<span class="rb-slot-b r-${role}" lang="zh-Hans">${esc(lbl)}</span>`).join('')}
       </div>
       <p class="rb-srule">${en ? p.rule[1] : p.rule[0]}</p>
-      <div class="rb-strap"><span>⚠️ ${esc(en ? p.trap[1] : p.trap[0])}</span></div>
+      <div class="rb-strap"><span>${ic('alert')} ${esc(en ? p.trap[1] : p.trap[0])}</span></div>
       <div class="rb-sex">
         <div class="rb-sex-z"><b lang="zh-Hans">${esc(p.ex[0])}</b><button type="button" class="gx-say sm" data-rbsay="${esc(p.ex[0])}" aria-label="${esc(T('ฟังเสียง'))}">${icn('vol')}</button></div>
         <div class="pyx">${esc(p.ex[1])}</div>

@@ -70,17 +70,21 @@ const OffyDigi = (() => {
     '見': '见', '戶': '户', '靑': '青'
   };
 
+  /* Helper: monochrome SVG icon or CSS phonetic dot (zero emojis) */
+  const phDot = acc => `<i class="ph-dot ph-${acc}" aria-hidden="true"></i>`;
+  const zoneIc = z => z.dot ? phDot(z.dot) : ic(z.icon);
+
   /* 5 Semantic Sky Nebulae for Realm 1 (Char Radicals) */
   const ZONES = [
-    { id: 'nature', icon: '🌿', th: 'ธรรมชาติ',        en: 'Nature',
+    { id: 'nature', icon: 'leaf',    th: 'ธรรมชาติ',        en: 'Nature',
       rads: [75, 85, 86, 32, 72, 74, 46, 112, 167, 96, 140, 115, 118, 119, 102, 173, 15, 36, 116, 27, 174, 84, 182, 150, 97, 151, 199, 200, 161, 170, 163, 47, 99, 100, 139, 180, 186, 201, 203, 155] },
-    { id: 'human',  icon: '🧍', th: 'คน & ร่างกาย',    en: 'People & Body',
+    { id: 'human',  icon: 'user',    th: 'คน & ร่างกาย',    en: 'People & Body',
       rads: [9, 61, 64, 30, 149, 38, 109, 157, 29, 37, 181, 44, 104, 41, 76, 39, 117, 128, 19, 49, 10, 135, 147, 107, 82, 87, 125, 88, 33, 158, 130, 132, 176, 185, 188, 143, 209, 211, 131, 78, 80, 83, 92, 190, 194] },
-    { id: 'life',   icon: '🏠', th: 'สิ่งของ & ชีวิต', en: 'Home & Life',
+    { id: 'life',   icon: 'home',    th: 'สิ่งของ & ชีวิต', en: 'Home & Life',
       rads: [40, 169, 63, 53, 159, 137, 18, 120, 154, 145, 184, 50, 108, 164, 57, 69, 62, 111, 122, 48, 70, 113, 16, 31, 166, 21, 22, 98, 121, 206, 207, 68, 56, 110, 178, 177, 165, 127, 134, 146, 210] },
-    { id: 'animal', icon: '🐾', th: 'สัตว์',            en: 'Animals',
+    { id: 'animal', icon: 'paw',     th: 'สัตว์',            en: 'Animals',
       rads: [187, 94, 93, 123, 196, 172, 195, 142, 212, 124, 141, 198, 208, 213, 148, 152, 153, 183, 205] },
-    { id: 'form',   icon: '✨', th: 'กิริยา & รูปทรง', en: 'Motion & Forms',
+    { id: 'form',   icon: 'sparkle', th: 'กิริยา & รูปทรง', en: 'Motion & Forms',
       rads: [162, 60, 156, 77, 66, 79, 1, 7, 24, 12, 42, 106, 67, 25, 51, 138, 160, 175, 81, 8, 14, 20, 28, 26, 59, 55] }
   ];
   const ZONE_OF_NO = new Map();
@@ -89,15 +93,15 @@ const OffyDigi = (() => {
 
   /* 5 Semantic Sky Nebulae for Realm 2 (Word Morpheme Hubs) */
   const WORD_ZONES = [
-    { id: 'study',  icon: '🎓', th: 'การเรียน & จิตใจ',   en: 'Study & Mind',
+    { id: 'study',  icon: 'grad',    th: 'การเรียน & จิตใจ',   en: 'Study & Mind',
       chars: ['学', '心', '意', '思', '感', '情', '书', '话', '语', '文', '教', '理'] },
-    { id: 'daily',  icon: '⚡', th: 'เทคโนโลยี & ชีวิต',  en: 'Tech & Life',
+    { id: 'daily',  icon: 'bolt',    th: 'เทคโนโลยี & ชีวิต',  en: 'Tech & Life',
       chars: ['电', '机', '车', '家', '房', '衣', '饭', '菜', '钱', '店', '工', '场'] },
-    { id: 'nature', icon: '🌿', th: 'ธรรมชาติ & เวลา',    en: 'Nature & Time',
+    { id: 'nature', icon: 'leaf',    th: 'ธรรมชาติ & เวลา',    en: 'Nature & Time',
       chars: ['水', '火', '天', '气', '风', '日', '年', '月', '时', '山', '花', '光'] },
-    { id: 'people', icon: '🧍', th: 'คน & ร่างกาย',       en: 'People & Body',
+    { id: 'people', icon: 'user',    th: 'คน & ร่างกาย',       en: 'People & Body',
       chars: ['人', '手', '口', '头', '面', '身', '生', '老', '友', '女', '子', '民'] },
-    { id: 'core',   icon: '🚀', th: 'กิริยา & คำหลักฮิต', en: 'Core Verbs & Hubs',
+    { id: 'core',   icon: 'compass', th: 'กิริยา & คำหลักฮิต', en: 'Core Verbs & Hubs',
       chars: ['大', '小', '高', '好', '新', '动', '发', '出', '行', '力', '用', '成', '公', '自', '无'] }
   ];
   const QUICK_WORD_HUBS = ['学', '电', '心', '水', '生', '手', '大', '高', '气', '机'];
@@ -105,11 +109,11 @@ const OffyDigi = (() => {
   /* Phonetic Sound Family (声旁) fallback Pinyin & 3 Predictability Nebulae */
   const PHON_PY = { '尧': 'yáo', '佥': 'qiān', '圭': 'guī', '甬': 'yǒng', '亥': 'hài', '咅': 'pǒu', '曷': 'hé', '屯': 'tún' };
   const PHON_ZONES = [
-    { id: 'exact', icon: '🟢', th: 'เดาเสียงแม่นมาก', en: 'High Accuracy',
+    { id: 'exact', dot: 'exact', th: 'เดาเสียงแม่นมาก', en: 'High Accuracy',
       chars: ['方', '马', '令', '巴', '丁', '交', '青', '包', '羊', '半', '非', '龙', '干', '支', '由', '中', '生', '分'] },
-    { id: 'near',  icon: '🟡', th: 'เสียงคล้ายเป็นชุด', en: 'Close Rime Family',
+    { id: 'near',  dot: 'near',  th: 'เสียงคล้ายเป็นชุด', en: 'Close Rime Family',
       chars: ['尚', '肖', '占', '艮', '少', '尧', '佥', '甬', '且', '隹', '京', '亥', '屯', '丬', '合', '加'] },
-    { id: 'diff',  icon: '🔴', th: 'เสียงเปลี่ยนบ่อย ต้องระวัง', en: 'Watch Out (Shifted)',
+    { id: 'diff',  dot: 'diff',  th: 'เสียงเปลี่ยนบ่อย ต้องระวัง', en: 'Watch Out (Shifted)',
       chars: ['者', '工', '白', '莫', '皮', '圭', '各', '欠', '古', '咅', '区', '曷'] }
   ];
   const QUICK_PHON = ['青', '方', '艮', '令', '尚', '肖', '占', '工', '莫', '皮'];
@@ -540,7 +544,7 @@ const OffyDigi = (() => {
         links.push({ from: cl.nodes[bestU], to: cl.nodes[bestV], zone: z.id });
         conn.push(bestV); rem.delete(bestV);
       }
-      labels.push({ id: z.id, icon: z.icon, title: LANG === 'en' ? z.en : z.th, count: cl.nodes.length, x: (minX + maxX) / 2, y: minY - 30 });
+      labels.push({ id: z.id, icon: zoneIc(z), title: LANG === 'en' ? z.en : z.th, count: cl.nodes.length, x: (minX + maxX) / 2, y: minY - 30 });
       zoneBoxes[z.id] = { minX: minX - 24, maxX: maxX + 24, minY: minY - 68, maxY: maxY + 24 };
     }
 
@@ -778,7 +782,7 @@ const OffyDigi = (() => {
   }
 
   /* =====================================================================
-     REALM 3 · PHONETIC SOUND FAMILIES (声旁 · 🟢 เสียงตรง / 🟡 คล้าย / 🔴 เปลี่ยน)
+     REALM 3 · PHONETIC SOUND FAMILIES (声旁 · เสียงตรง / คล้าย / เปลี่ยน)
      HSK level colored borders on every box remain 100% UNTOUCHED!
      ===================================================================== */
   function phonKidsOf(f) {
@@ -824,7 +828,7 @@ const OffyDigi = (() => {
     const links = [];
     const activeGroups = PH_ORDER.filter(k => byAcc[k].length > 0);
 
-    // Place 🟢 exact at TOP, 🟡 near at BOTTOM-RIGHT, 🔴 diff at BOTTOM-LEFT — labels sit OUTWARD (0 collisions!)
+    // Place exact at TOP, near at BOTTOM-RIGHT, diff at BOTTOM-LEFT — labels sit OUTWARD (0 collisions!)
     const sectorPlan = activeGroups.length === 1
       ? [[activeGroups[0], -Math.PI / 2, Math.PI * 1.9]]
       : activeGroups.length === 2
@@ -853,7 +857,6 @@ const OffyDigi = (() => {
     relaxOverlap(nodes, true, 108, 118, 128, 136, 26);
 
     const groupLabels = [];
-    const iconOf = { exact: '🟢', near: '🟡', diff: '🔴' };
     for (const acc of activeGroups) {
       const grp = nodes.filter(n => n.acc === acc);
       if (!grp.length) continue;
@@ -865,7 +868,7 @@ const OffyDigi = (() => {
       });
       const avgY = sumY / grp.length;
       const ly = avgY <= 10 ? minY - 32 : maxY + 26;
-      const lbl = acc === 'diff' ? `${iconOf[acc]} ${T('เสียงเปลี่ยน')} (${grp.length})` : `${iconOf[acc]} ${T(PH_META[acc].th)} (${grp.length})`;
+      const lbl = acc === 'diff' ? `${T('เสียงเปลี่ยน')} (${grp.length})` : `${T(PH_META[acc].th)} (${grp.length})`;
       groupLabels.push({ acc, text: lbl, x: (minX + maxX) / 2, y: ly });
     }
 
@@ -1196,9 +1199,9 @@ const OffyDigi = (() => {
         ? 'Tap any phonetic component to see which HSK characters keep the exact sound vs shift. Character box borders stay 100% HSK level colors!'
         : 'แตะแกนเสียง (声旁) เพื่อเทียบความแม่นของเสียงอ่าน ช่วยเดาเสียงศัพท์ใหม่ในข้อสอบ HSK — โดยคงสีกรอบตามระดับ HSK ไว้เหมือนเดิมทุกตัว'}</p>
       <ul class="dg-sky-key">
-        <li><i class="k-phexact"></i><span><b>🟢 ${T('เสียงตรง')}</b> · ${LANG === 'en' ? 'Same syllable (tone may shift): 方 → 房/防/访' : 'พยัญชนะ+สระตรงเป๊ะ เปลี่ยนแค่วรรณยุกต์ เช่น 方→房/防/访'}</span></li>
-        <li><i class="k-phnear"></i><span><b>🟡 ${T('เสียงคล้าย')}</b> · ${LANG === 'en' ? 'Close rime or initial: 艮 → 眼/限 · 青 → 睛/精' : 'สระหรือพยัญชนะใกล้เคียง เช่น 艮→眼/限 · 青→睛/精'}</span></li>
-        <li><i class="k-phdiff"></i><span><b>🔴 ${T('เสียงเปลี่ยนต้องระวัง')}</b> · ${LANG === 'en' ? 'Diverged sound — memorize separately: 青 → 猜 cāi' : 'เสียงเปลี่ยนไปเลย ต้องจำแยก เช่น 青→猜 (cāi) · 占→贴 (tiē)'}</span></li>
+        <li><i class="k-phexact"></i><span><b>${phDot('exact')}${T('เสียงตรง')}</b> · ${LANG === 'en' ? 'Same syllable (tone may shift): 方 → 房/防/访' : 'พยัญชนะ+สระตรงเป๊ะ เปลี่ยนแค่วรรณยุกต์ เช่น 方→房/防/访'}</span></li>
+        <li><i class="k-phnear"></i><span><b>${phDot('near')}${T('เสียงคล้าย')}</b> · ${LANG === 'en' ? 'Close rime or initial: 艮 → 眼/限 · 青 → 睛/精' : 'สระหรือพยัญชนะใกล้เคียง เช่น 艮→眼/限 · 青→睛/精'}</span></li>
+        <li><i class="k-phdiff"></i><span><b>${phDot('diff')}${T('เสียงเปลี่ยนต้องระวัง')}</b> · ${LANG === 'en' ? 'Diverged sound — memorize separately: 青 → 猜 cāi' : 'เสียงเปลี่ยนไปเลย ต้องจำแยก เช่น 青→猜 (cāi) · 占→贴 (tiē)'}</span></li>
       </ul>
       <p class="dg-wt">${T('แกนเสียงยอดฮิต')}</p>
       <div class="dg-qchains">${items}</div>
@@ -1213,7 +1216,7 @@ const OffyDigi = (() => {
     const hit = selChar ? kids.find(k => k.c === selChar) : null;
     if (hit) {
       const c = hit.c, x = hit.x, acc = hit.acc;
-      const mo = meanOf(c), icon = acc === 'exact' ? '🟢' : acc === 'near' ? '🟡' : '🔴';
+      const mo = meanOf(c), icon = phDot(acc);
       const parts = partsRaw(c).map(q => {
         const rv = typeof HzKit !== 'undefined' && HzKit.radVar ? HzKit.radVar(q) : null;
         const sub = side(q) || (rv ? `${rv.zh} ${rv.py}` : '');
@@ -1251,9 +1254,9 @@ const OffyDigi = (() => {
         <div><p class="dg-py"><span class="pyx">${esc2(basePy)}</span><button class="dg-say" data-say="${esc2(f)}" aria-label="${T('ฟังเสียง')}">${ic('vol')}</button></p>
           ${mo.t ? `<p class="dg-mean">${esc2(mo.t)}</p>` : ''}<p class="dg-sd">${LANG === 'en' ? 'Tap any star to hear & compare its sound with ' + show(f) : 'แตะอักษรรอบ ๆ เพื่อฟังเสียงและเทียบความแม่นกับ ' + show(f)}</p></div></div>
       <dl class="dg-stats dg-pstats">
-        <div class="pe"><dt>🟢 ${T('ตรง')}</dt><dd>${cE}</dd></div>
-        <div class="pn"><dt>🟡 ${T('คล้าย')}</dt><dd>${cN}</dd></div>
-        <div class="pd"><dt>🔴 ${T('เปลี่ยน')}</dt><dd>${cD}</dd></div>
+        <div class="pe"><dt>${phDot('exact')}${T('ตรง')}</dt><dd>${cE}</dd></div>
+        <div class="pn"><dt>${phDot('near')}${T('คล้าย')}</dt><dd>${cN}</dd></div>
+        <div class="pd"><dt>${phDot('diff')}${T('เปลี่ยน')}</dt><dd>${cD}</dd></div>
         <div><dt>${T('ทั้งหมด')}</dt><dd>${kids.length}</dd></div>
       </dl>
       <div class="hz-xbar">
@@ -1407,8 +1410,8 @@ const OffyDigi = (() => {
       const zList = wordMode ? WORD_ZONES : phonMode ? PHON_ZONES : ZONES;
       const curZ = wordMode ? st.wSkyZone : phonMode ? st.pSkyZone : st.skyZone;
       subArea = `<div class="dg-zones">
-        <button type="button" class="${curZ === 'all' ? 'on' : ''}" data-zone="all">✦ ${T('ทั้งหมด')}</button>
-        ${zList.map(z => `<button type="button" class="${curZ === z.id ? 'on' : ''}" data-zone="${z.id}">${z.icon} ${LANG === 'en' ? z.en : z.th}</button>`).join('')}
+        <button type="button" class="${curZ === 'all' ? 'on' : ''}" data-zone="all">${ic('sparkle')} ${T('ทั้งหมด')}</button>
+        ${zList.map(z => `<button type="button" class="${curZ === z.id ? 'on' : ''}" data-zone="${z.id}">${zoneIc(z)} ${LANG === 'en' ? z.en : z.th}</button>`).join('')}
       </div>`;
     } else if (wordMode) {
       subArea = `<div class="dg-subbar">
@@ -1420,13 +1423,12 @@ const OffyDigi = (() => {
       </div>
       <nav class="dg-trail" aria-label="trail">${trailHTML()}</nav>`;
     } else if (phonMode) {
-      const pIcon = { exact: '🟢', near: '🟡', diff: '🔴' };
       subArea = `<div class="dg-subbar">
         <div class="dg-tg dg-vw" role="tablist">
           <span class="${vm === 'radial' ? 'on' : ''}" data-view="radial">${T('กลุ่มดาว')}</span>
           <span class="${vm === 'grid' ? 'on' : ''}" data-view="grid">${T('กริด')}</span>
         </div>
-        <div class="dg-legend">${PH_ORDER.map(k => `<button type="button" class="ph-${k}" data-pacc="${k}" aria-pressed="false"><span>${pIcon[k]} ${T(PH_META[k].sh)}</span><em class="dg-cnt"></em></button>`).join('')}</div>
+        <div class="dg-legend">${PH_ORDER.map(k => `<button type="button" class="ph-${k}" data-pacc="${k}" aria-pressed="false"><span>${phDot(k)}${T(PH_META[k].sh)}</span><em class="dg-cnt"></em></button>`).join('')}</div>
       </div>
       <nav class="dg-trail" aria-label="trail">${trailHTML()}</nav>`;
     } else {
@@ -1449,9 +1451,9 @@ const OffyDigi = (() => {
       : vm === 'radial' ? T('แตะตัวไหนก็ได้เพื่อย้ายมาไว้ตรงกลาง')
       : T('ลากเพื่อเลื่อน · หมุนล้อหรือบีบเพื่อซูม');
 
-    const qPh = wordMode ? T('ค้นหาแม่คำ หรือคำศัพท์ เช่น 学, 电, 心, 电影…')
-      : phonMode ? T('ค้นหาแกนเสียง เช่น 青, 方, 艮, 令, 占…')
-      : T('ค้นหาอักษรหรือราก เช่น 木, 森, 想, 叒…');
+    const qPh = wordMode ? (LANG === 'en' ? 'Search char, word, pinyin, Thai/EN…' : 'ค้นหาจีน พินอิน ไทย อังกฤษ เช่น 学, dianying, น้ำ…')
+      : phonMode ? (LANG === 'en' ? 'Search phonetic, pinyin, Thai/EN…' : 'ค้นหาแกนเสียง พินอิน หรือไทย เช่น 青, qing, ฟ้า…')
+      : (LANG === 'en' ? 'Search char, traditional, pinyin, meaning…' : 'ค้นหาจีนย่อ/เต็ม พินอิน ไทย อังกฤษ เช่น 木, shui, น้ำ…');
 
     host.innerHTML = `<div class="dg${wordMode ? ' is-word' : ''}${phonMode ? ' is-phon' : ''}${sky ? ' is-sky is-radial' : (vm === 'radial' ? ' is-radial' : '')}${!sky && vm === 'grid' ? ' is-grid' : ''}">
       <div class="dg-top">
@@ -1460,7 +1462,10 @@ const OffyDigi = (() => {
           <span class="${phonMode ? 'on' : ''}" data-realm="phon"><b lang="zh-Hans">声</b>${T('เสียงพ้อง')}</span>
           <span class="${wordMode ? 'on' : ''}" data-realm="word"><b lang="zh-Hans">词</b>${T('คำศัพท์')}</span>
         </div>
-        <label class="dg-q">${ic('search')}<input maxlength="6" placeholder="${qPh}" value=""><button class="q-pen" data-handpad=".dg-q input" aria-label="${T('เขียนค้นหา')}">${ic('pen')}</button></label>
+        <div class="dg-q-wrap">
+          <label class="dg-q">${ic('search')}<input maxlength="32" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="${qPh}" value=""><button type="button" class="q-pen" data-handpad=".dg-q input" aria-label="${T('เขียนค้นหา')}" title="${T('เขียนค้นหา')}">${ic('pen')}</button><button type="button" class="q-pen q-dock" data-qpad aria-label="${LANG === 'en' ? 'Floating Quick-Write' : 'กระดานเขียนลอย'}" title="${LANG === 'en' ? 'Floating Quick-Write' : 'กระดานเขียนลอย (Apple Pencil)'}">${ic('dock')}</button></label>
+          <div class="dg-q-dd" hidden role="listbox"></div>
+        </div>
       </div>
       ${subArea}
       <div class="dg-body">
@@ -1468,7 +1473,8 @@ const OffyDigi = (() => {
           ? `<div class="dg-grid-wrap"></div>`
           : `<div class="dg-view" tabindex="0" aria-label="${T('ลากเพื่อเลื่อน · หมุนล้อหรือบีบเพื่อซูม')}">
               <div class="dg-world"></div>
-              <div class="dg-zoom"><button data-zoom="1" aria-label="zoom in">+</button><button data-zoom="-1" aria-label="zoom out">−</button><button data-zoom="0" aria-label="fit">${ic('repeat')}</button></div>
+              <div class="dg-hover-tip" hidden aria-live="polite"></div>
+              <div class="dg-zoom"><button data-zoom="1" aria-label="zoom in">+</button><button data-zoom="-1" aria-label="zoom out">−</button><button data-zoom="0" aria-label="fit">${ic('repeat')}</button><button data-qpad aria-label="${LANG === 'en' ? 'Floating Quick-Write' : 'กระดานเขียนลอย'}" title="${LANG === 'en' ? 'Floating Quick-Write' : 'กระดานเขียนลอย'}">${ic('pen')}</button></div>
               <div class="dg-more-bar"></div>
               <p class="dg-hint">${hintTxt}</p>
             </div>`}
@@ -1568,7 +1574,7 @@ const OffyDigi = (() => {
     }).join('')}</svg>`;
 
     const labels = pLay.groupLabels.map(lb =>
-      `<span class="dg-wing-lbl ph-${lb.acc}" style="transform:translate(${lb.x.toFixed(1)}px,${lb.y.toFixed(1)}px) translate(-50%,-50%)">${esc2(lb.text)}</span>`
+      `<span class="dg-wing-lbl ph-${lb.acc}" style="transform:translate(${lb.x.toFixed(1)}px,${lb.y.toFixed(1)}px) translate(-50%,-50%)">${phDot(lb.acc)}${esc2(lb.text)}</span>`
     ).join('');
 
     const nodesHtml = pLay.nodes.map(n => {
@@ -1608,12 +1614,11 @@ const OffyDigi = (() => {
     });
     const tr = host.querySelector('.dg-trail');
     if (tr) tr.innerHTML = trailHTML();
-    const icons = { exact: '🟢', near: '🟡', diff: '🔴' };
     const secs = PH_ORDER.map(acc => {
       const arr = groups[acc];
       if (!arr.length || (st.pFilter && st.pFilter !== acc)) return '';
       return `<section class="dg-gsec ph-${acc}">
-        <h4 class="dg-gsh"><span>${icons[acc]} ${T(PH_META[acc].th)}</span><small>${arr.length}</small></h4>
+        <h4 class="dg-gsh"><span>${phDot(acc)}${T(PH_META[acc].th)}</span><small>${arr.length}</small></h4>
         <div class="dg-glist">${arr.map(it => {
           const c = it.c, m = meanOf(c), dot = typeof HzKit !== 'undefined' ? HzKit.dotHtml(c) : '';
           return `<button type="button" class="dg-gtile${st.pSel === c ? ' on' : ''}"${lvC(c)} data-pn="${esc2(c)}">
@@ -1911,17 +1916,69 @@ const OffyDigi = (() => {
     r.style.cssText = `transform:translate(${p.x}px,${p.y}px) translate(-50%,-50%);--lc:${el ? getComputedStyle(el).getPropertyValue('--lc') || 'var(--ink)' : 'var(--ink)'}`;
     world.appendChild(r); setTimeout(() => r.remove(), 750);
   }
-  function hover(key) {
-    const world = host.querySelector('.dg-world'); if (!world || !lay) return;
+  function showHoverTip(html) {
+    const tip = host && host.querySelector('.dg-hover-tip');
+    if (!tip) return;
+    if (!html) { tip.hidden = true; tip.innerHTML = ''; return; }
+    tip.innerHTML = html;
+    tip.hidden = false;
+  }
+  function hover(key, isPen = false) {
+    const world = host && host.querySelector('.dg-world'); if (!world) return;
     world.querySelectorAll('.hl').forEach(x => x.classList.remove('hl'));
-    if (!key || (lay.nodes[0] && lay.nodes[0].key === key)) { world.classList.remove('hov'); return; }
-    const near = new Set([key]);
-    lay.links.forEach(l => { if (l.from === key || l.to === key) { near.add(l.from); near.add(l.to); } });
-    world.querySelectorAll('.dg-l').forEach(p => { if (p.dataset.a === key || p.dataset.b === key) p.classList.add('hl'); });
-    world.querySelectorAll('.dg-n').forEach(n => { if (near.has(n.dataset.n)) n.classList.add('hl'); });
-    const el = world.querySelector(`.dg-n[data-n="${CSS.escape(key)}"] .dg-hex`);
-    world.style.setProperty('--hlc', el ? getComputedStyle(el).getPropertyValue('--lc') || 'var(--ink)' : 'var(--ink)');
-    world.classList.add('hov');
+    if (!key) { world.classList.remove('hov'); showHoverTip(''); return; }
+    // Mode 1: Char evolution constellation
+    if (lay && !isSky() && !isWord() && !isPhon() && radial()) {
+      if (lay.nodes[0] && lay.nodes[0].key === key) { world.classList.remove('hov'); showHoverTip(''); return; }
+      const near = new Set([key]);
+      lay.links.forEach(l => { if (l.from === key || l.to === key) { near.add(l.from); near.add(l.to); } });
+      world.querySelectorAll('.dg-l').forEach(p => { if (p.dataset.a === key || p.dataset.b === key) p.classList.add('hl'); });
+      world.querySelectorAll('.dg-n').forEach(n => { if (near.has(n.dataset.n)) n.classList.add('hl'); });
+      const el = world.querySelector(`.dg-n[data-n="${CSS.escape(key)}"] .dg-hex`);
+      world.style.setProperty('--hlc', el ? getComputedStyle(el).getPropertyValue('--lc') || 'var(--ink)' : 'var(--ink)');
+      world.classList.add('hov');
+      if (isPen) {
+        const b = base(key), x = D.c[b], mo = meanOf(key), stg = lay.nodes.find(n => n.key === key)?.stage;
+        showHoverTip(`<b class="ht-ch"${lvC(key)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(key))}</b><div class="ht-t"><span class="pyx">${esc2(pyOf(key))}</span><em>${esc2(shortM(mo.t, 18))}</em>${stg && STAGES[stg] ? `<small>${esc2(T(STAGES[stg].sh))}${x ? ` · HSK ${x[1] === 7 ? '7–9' : x[1]}` : ''}</small>` : ''}</div>`);
+      }
+      return;
+    }
+    // Mode 2: Phonetic constellation
+    if (pLay && isPhon() && !isSky()) {
+      const node = pLay.nodes.find(n => n.c === key);
+      if (!node || node.ring === 0) { world.classList.remove('hov'); showHoverTip(''); return; }
+      world.querySelectorAll('.dg-l').forEach(p => { if (p.dataset.a === key || p.dataset.b === key) p.classList.add('hl'); });
+      world.querySelectorAll('.dg-n').forEach(n => { if (n.dataset.pn === key || n.dataset.proot) n.classList.add('hl'); });
+      world.classList.add('hov');
+      const mo = meanOf(key), x = D.c[key];
+      showHoverTip(`<b class="ht-ch"${lvC(key)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(key))}</b><div class="ht-t">${phDot(node.acc)}<span class="pyx">${esc2(pyOf(key))}</span><em>${esc2(shortM(mo.t, 16))}</em><small>${esc2(T(PH_META[node.acc].sh))}${x ? ` · HSK ${x[1] === 7 ? '7–9' : x[1]}` : ''}</small></div>`);
+      return;
+    }
+    // Mode 3: Word constellation
+    if (wLay && isWord() && !isSky()) {
+      const node = wLay.nodes.find(n => n.key === key);
+      if (!node || node.ring === 0) { world.classList.remove('hov'); showHoverTip(''); return; }
+      const near = new Set([key, wLay.f]);
+      wLay.links.forEach(l => { if (l.from === key || l.to === key) { near.add(l.from); near.add(l.to); } });
+      world.querySelectorAll('.dg-l').forEach(p => { if (p.dataset.a === key || p.dataset.b === key) p.classList.add('hl'); });
+      world.querySelectorAll('.dg-n').forEach(n => { if (near.has(n.dataset.wn || n.dataset.wroot)) n.classList.add('hl'); });
+      world.classList.add('hov');
+      const w = node.w;
+      if (w) {
+        const gl = typeof HzKit !== 'undefined' ? HzKit.wordGloss(w[0], w[3], !!w[4]) : { t: w[3] };
+        showHoverTip(`<b class="ht-w"${lvWordC(w[2])} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(showWord(w[0]))}</b><div class="ht-t"><span class="pyx">${esc2(w[1])}</span><em>${esc2(shortM(gl.t, 20))}</em><small>HSK ${w[2] === 7 ? '7–9' : w[2]}</small></div>`);
+      }
+      return;
+    }
+    // Mode 4: Sky map (Apple Pencil Hover & mouse preview)
+    if (isSky()) {
+      const curSky = isWord() ? wSkyLay : isPhon() ? pSkyLay : skyLay;
+      const node = curSky && curSky.nodes.find(n => n.key === key);
+      if (!node) { showHoverTip(''); return; }
+      const mo = meanOf(key);
+      const sub = isWord() ? `${node.cnt} ${T('คำ')}` : isPhon() ? `${node.cnt} ${T('ตัว')}` : `${node.cnt} ${T('ตัว')}${node.preview ? ` · ${node.preview}` : ''}`;
+      showHoverTip(`<b class="ht-ch"${lvC(key)} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(show(key))}</b><div class="ht-t"><span class="pyx">${esc2(pyOf(key))}</span><em>${esc2(shortM(mo.t, 16))}</em><small>${esc2(sub)}</small></div>`);
+    }
   }
 
   let hwTok = 0;
@@ -1969,9 +2026,10 @@ const OffyDigi = (() => {
     ro.observe(v);
   }
 
-  let camAnim = 0;
+  let camAnim = 0, curBox = null;
   function fitBox(box, animate, padBottom) {
     const v = host && host.querySelector('.dg-view'); if (!v || !box) return;
+    curBox = box;
     const vw = v.clientWidth || 600, vh = v.clientHeight || 480;
     const pb = padBottom ? 44 : 12;
     const bw = Math.max(180, box.maxX - box.minX), bh = Math.max(180, box.maxY - box.minY);
@@ -2105,13 +2163,34 @@ const OffyDigi = (() => {
     host.querySelector('.dg-side').innerHTML = cardHTML(sel.c, sel.stage, sel.p);
     if (!tree.root.kids.length) world.insertAdjacentHTML('beforeend', `<p class="dg-none">${T('ยังไม่มีอักษร HSK ที่ต่อยอดจากตัวนี้')}</p>`);
     const v = host.querySelector('.dg-view'), vw = v.clientWidth || 600, vh = v.clientHeight || 480;
+    curBox = { minX: 0, maxX: tree.w, minY: 0, maxY: tree.h };
     st.k = Math.max(.35, Math.min(1.1, vw / tree.w, vh / tree.h * 1.6));
     st.tx = Math.max(8, (vw - tree.w * st.k) / 2); st.ty = Math.max(8, Math.min(20, (vh - tree.h * st.k) / 2));
     if (tree.h * st.k > vh) st.ty = vh / 2 - (tree.root.y + NODE / 2) * st.k;
     apply();
   }
-  function apply() { const w = host && host.querySelector('.dg-world'); if (w) w.style.transform = `translate(${st.tx}px,${st.ty}px) scale(${st.k})`; }
-  function zoomAt(f, cx, cy) { const k = Math.max(.14, Math.min(2.6, st.k * f)); st.tx = cx - (cx - st.tx) * (k / st.k); st.ty = cy - (cy - st.ty) * (k / st.k); st.k = k; apply(); }
+  function clampCam() {
+    const v = host && host.querySelector('.dg-view');
+    if (!v || !curBox) return;
+    const vw = v.clientWidth || 600, vh = v.clientHeight || 480;
+    const keepX = Math.min(120, vw * 0.24), keepY = Math.min(110, vh * 0.24);
+    const minTx = keepX - curBox.maxX * st.k, maxTx = vw - keepX - curBox.minX * st.k;
+    const minTy = keepY - curBox.maxY * st.k, maxTy = vh - keepY - curBox.minY * st.k;
+    if (minTx <= maxTx) st.tx = Math.max(minTx, Math.min(maxTx, st.tx));
+    else st.tx = (minTx + maxTx) / 2;
+    if (minTy <= maxTy) st.ty = Math.max(minTy, Math.min(maxTy, st.ty));
+    else st.ty = (minTy + maxTy) / 2;
+  }
+  function apply() { const w = host && host.querySelector('.dg-world'); if (w) w.style.transform = `translate(${st.tx.toFixed(2)}px,${st.ty.toFixed(2)}px) scale(${st.k.toFixed(4)})`; }
+  function zoomAt(f, cx, cy) {
+    if (!Number.isFinite(f) || f <= 0) return;
+    const k = Math.max(.14, Math.min(2.6, st.k * f));
+    st.tx = cx - (cx - st.tx) * (k / st.k);
+    st.ty = cy - (cy - st.ty) * (k / st.k);
+    st.k = k;
+    clampCam();
+    apply();
+  }
 
   /* ---------- sound ---------- */
   let ac = null;
@@ -2228,19 +2307,211 @@ const OffyDigi = (() => {
     return true;
   }
 
+  /* ---------- Smart Search (Simplified, Traditional, Pinyin, Thai, English + Live Dropdown) ---------- */
+  let sIdx = null;
+  const normPy = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ü/gi, 'v').replace(/[^a-z0-9]/gi, '').toLowerCase();
+  function buildSearchIdx() {
+    if (sIdx) return sIdx;
+    const tw2s = new Map(), chars = [];
+    Object.entries(RAD_SIMP).forEach(([t, s]) => tw2s.set(t, s));
+    for (const [c, x] of Object.entries(D.c)) {
+      if (c.includes('@')) continue;
+      const tw = x[8] || '';
+      if (tw && tw !== c && !tw2s.has(tw)) tw2s.set(tw, c);
+      const mo = meanOf(c);
+      const py = x[0] || '';
+      const th = (mo.t || x[9] || '').toLowerCase();
+      const en = (x[10] || '').toLowerCase();
+      chars.push({
+        c, tw, py, pyN: normPy(py),
+        lvl: x[1] || 0,
+        th, en,
+        disp: mo.t || x[10] || '',
+        hasChar: !!(D.cc[c] || radOfGlyph.get(c)),
+        hasWord: !!(D.cw[c] && D.cw[c].length),
+        hasPhon: phonKidsOf(c).length > 0
+      });
+    }
+    for (const [c, b] of Object.entries(BONUS)) {
+      chars.push({
+        c, tw: c, py: b.py, pyN: normPy(b.py), lvl: 0,
+        th: (b.th || '').toLowerCase(), en: (b.en || '').toLowerCase(),
+        disp: LANG === 'en' ? b.en : b.th,
+        hasChar: true, hasWord: false, hasPhon: false
+      });
+    }
+    for (const r of D.r) {
+      const g = radG(r);
+      if (r[1] && r[1] !== g && !tw2s.has(r[1])) tw2s.set(r[1], g);
+      if (!D.c[g] && !BONUS[g]) {
+        const py = r[3] || '';
+        chars.push({
+          c: g, tw: r[1] || g, py, pyN: normPy(py), lvl: 0,
+          th: (r[4] || '').toLowerCase(), en: (r[5] || '').toLowerCase(),
+          disp: LANG === 'en' ? r[5] : r[4],
+          hasChar: true, hasWord: !!(D.cw[g] && D.cw[g].length), hasPhon: phonKidsOf(g).length > 0
+        });
+      }
+    }
+    sIdx = { tw2s, chars };
+    return sIdx;
+  }
+  function toSimpStr(str) {
+    const { tw2s } = buildSearchIdx();
+    return [...String(str || '')].map(ch => tw2s.get(ch) || ch).join('');
+  }
+  function querySearch(rawVal, limit = 10) {
+    const q0 = String(rawVal || '').trim();
+    if (!q0) return [];
+    const { chars } = buildSearchIdx();
+    const qSimp = toSimpStr(q0);
+    const qLow = q0.toLowerCase();
+    const qPy = normPy(q0);
+    const isAscii = /^[a-zA-Z0-9\s]+$/.test(q0);
+    const hasHan = /[\u3400-\u9fff]/.test(qSimp);
+    const curRealm = realm();
+    const out = [];
+
+    // 1. Word matches (prioritized in Word realm, also shown for multi-char or pinyin/meaning queries)
+    if (curRealm === 'word' || [...qSimp].length >= 2 || !hasHan) {
+      for (const w of D.w) {
+        let sc = 0;
+        if (w[0] === qSimp || showWord(w[0]) === q0) sc = 120;
+        else if (hasHan && w[0].includes(qSimp)) sc = 78 - w[0].length * 2;
+        else if (isAscii && qPy.length >= 2) {
+          const wp = normPy(w[1]);
+          if (wp === qPy) sc = 95;
+          else if (wp.startsWith(qPy)) sc = 62;
+        }
+        if (!sc && qLow.length >= 2) {
+          const gl = typeof HzKit !== 'undefined' ? HzKit.wordGloss(w[0], w[3], !!w[4]).t.toLowerCase() : (w[3] || '').toLowerCase();
+          if (gl === qLow) sc = 88;
+          else if (gl.startsWith(qLow)) sc = 68;
+          else if (gl.includes(qLow)) sc = 50;
+          else if ((w[3] || '').toLowerCase().includes(qLow)) sc = 44;
+        }
+        if (sc > 0) {
+          const glObj = typeof HzKit !== 'undefined' ? HzKit.wordGloss(w[0], w[3], !!w[4]) : { t: w[3] };
+          out.push({
+            kind: 'word', key: w[0], hub: [...w[0]][0], py: w[1],
+            disp: glObj.t || w[3] || '', lvl: w[2],
+            score: sc + (curRealm === 'word' ? 18 : -10) - (w[2] || 7) * 0.5
+          });
+        }
+      }
+    }
+
+    // 2. Character / Radical / Phonetic base matches
+    for (const it of chars) {
+      let sc = 0;
+      if (it.c === qSimp || it.tw === q0) sc = 130;
+      else if (hasHan && [...qSimp].length === 1 && it.c === qSimp) sc = 130;
+      else if (isAscii && qPy) {
+        if (it.pyN === qPy) sc = 100;
+        else if (it.pyN.startsWith(qPy) && qPy.length >= 2) sc = 66;
+      }
+      if (!sc && !hasHan && qLow.length >= 1) {
+        if (it.th === qLow || it.en === qLow) sc = 96;
+        else if (it.th.startsWith(qLow) || it.en.startsWith(qLow)) sc = 76;
+        else if (qLow.length >= 2 && (it.th.includes(qLow) || it.en.includes(qLow))) sc = 58;
+      }
+      if (sc > 0) {
+        if (curRealm === 'phon' && it.hasPhon) sc += 16;
+        else if (curRealm === 'word' && it.hasWord) sc += 12;
+        else if (curRealm === 'char' && it.hasChar) sc += 12;
+        out.push({
+          kind: 'char', key: it.c, py: it.py, disp: it.disp, lvl: it.lvl,
+          hasPhon: it.hasPhon, hasWord: it.hasWord,
+          score: sc - (it.lvl || 8) * 0.4
+        });
+      }
+    }
+
+    out.sort((a, b) => b.score - a.score);
+    const seen = new Set(), res = [];
+    for (const it of out) {
+      const id = it.kind + ':' + it.key;
+      if (seen.has(id)) continue;
+      seen.add(id);
+      res.push(it);
+      if (res.length >= limit) break;
+    }
+    return res;
+  }
+
+  let ddItems = [], ddIdx = -1;
+  function closeSearchDD() {
+    const dd = host && host.querySelector('.dg-q-dd');
+    if (dd) { dd.hidden = true; dd.innerHTML = ''; }
+    ddItems = []; ddIdx = -1;
+  }
+  function pickSearchItem(it) {
+    closeSearchDD();
+    const inp = host && host.querySelector('.dg-q input');
+    if (inp) { inp.value = ''; inp.blur(); }
+    if (!it) return;
+    if (it.kind === 'word') {
+      if (!setWordBase(it.hub, it.key)) toast(T('ยังไม่มีคำศัพท์ HSK ที่ใช้ตัวอักษรนี้'), { icon: 'info' });
+      return;
+    }
+    const ch = it.key;
+    if (isWord()) {
+      if (!setWordBase(ch)) {
+        if (!setBase(ch)) toast(T('ยังไม่มีคำศัพท์ HSK ที่ใช้ตัวอักษรนี้'), { icon: 'info' });
+      }
+    } else if (isPhon()) {
+      if (!setPhonBase(ch)) {
+        const ph = D.c[ch] && D.c[ch][12];
+        if (!ph || !setPhonBase(ph, ch)) {
+          if (!setBase(ch)) toast(T('ยังไม่มีอักษร HSK ที่ใช้แกนเสียงนี้'), { icon: 'info' });
+        }
+      }
+    } else {
+      if (!setBase(ch)) toast(T('ยังไม่มีอักษร HSK ที่ต่อยอดจากตัวนี้'), { icon: 'info' });
+    }
+  }
+  function renderSearchDD(rawVal) {
+    const dd = host && host.querySelector('.dg-q-dd');
+    if (!dd) return;
+    const q = String(rawVal || '').trim();
+    if (!q) { closeSearchDD(); return; }
+    ddItems = querySearch(q, 9);
+    ddIdx = ddItems.length ? 0 : -1;
+    if (!ddItems.length) {
+      dd.innerHTML = `<div class="dg-q-empty">${LANG === 'en' ? 'No matching character or word' : 'ไม่พบอักษรหรือคำที่ตรงกัน'}</div>`;
+      dd.hidden = false;
+      return;
+    }
+    dd.innerHTML = ddItems.map((it, i) => {
+      const lvSty = it.lvl ? ` style="--lc:var(--hsk${it.lvl})"` : '';
+      const badge = it.kind === 'word'
+        ? `<span class="dq-tag">${T('คำศัพท์')}</span>`
+        : (isPhon() && it.hasPhon ? `<span class="dq-tag">声旁</span>` : (it.lvl ? `<span class="dq-tag">HSK ${it.lvl === 7 ? '7–9' : it.lvl}</span>` : ''));
+      const glyph = it.kind === 'word' ? showWord(it.key) : show(it.key);
+      return `<button type="button" class="dg-q-item${i === ddIdx ? ' on' : ''}" data-qidx="${i}" role="option">
+        <b class="dq-ch${it.kind === 'word' ? ' is-w' : ''}"${lvSty} lang="${trad() ? 'zh-Hant' : 'zh-Hans'}">${esc2(glyph)}</b>
+        <span class="dq-mid"><span class="pyx">${esc2(it.py)}</span><em>${esc2(shortM(it.disp, 26))}</em></span>
+        ${badge}
+      </button>`;
+    }).join('');
+    dd.hidden = false;
+  }
+
   function handleSearch(rawVal) {
     const val = String(rawVal || '').trim();
-    if (!val) return;
-    const chars = [...val];
+    if (!val) { closeSearchDD(); return; }
+    const hits = querySearch(val, 4);
+    if (hits.length) { pickSearchItem(hits[0]); return; }
+    const simp = toSimpStr(val), chars = [...simp];
+    closeSearchDD();
     if (isWord()) {
       if (chars.length >= 2) {
-        const hit = D.w.find(w => w[0] === val || showWord(w[0]) === val);
+        const hit = D.w.find(w => w[0] === simp || showWord(w[0]) === val);
         if (hit) { setWordBase([...hit[0]][0], hit[0]); return; }
       }
       if (!setWordBase(chars[0])) toast(T('ยังไม่มีคำศัพท์ HSK ที่ใช้ตัวอักษรนี้'), { icon: 'info' });
     } else if (isPhon()) {
       const ch = chars[0];
-      // If user searches a compound char like 请 or 猜, jump straight to its phonetic base (青) with 请/猜 preselected!
       if (!setPhonBase(ch)) {
         const ph = D.c[ch] && D.c[ch][12];
         if (!ph || !setPhonBase(ph, ch)) toast(T('ยังไม่มีอักษร HSK ที่ใช้แกนเสียงนี้'), { icon: 'info' });
@@ -2256,11 +2527,26 @@ const OffyDigi = (() => {
     paint();
   }
 
+  let winBound = false;
+  const gState = { pts: new Map(), mode: 'none', pan: null, pinch: null, suppressClickUntil: 0, pinchCooldownUntil: 0 };
+
   function bind() {
-    let drag = null; const pts = new Map(); let pinch = 0;
     host.addEventListener('click', e => {
-      const b = e.target.closest('button, [data-view], [data-realm]'); if (!b || (drag && drag.moved)) return;
+      const qi = e.target.closest('[data-qidx]');
+      if (qi) { e.preventDefault(); pickSearchItem(ddItems[+qi.dataset.qidx]); return; }
+      if (!e.target.closest('.dg-q-wrap')) closeSearchDD();
+      const b = e.target.closest('button, [data-view], [data-realm]');
+      if (!b) return;
+      if (b.closest('.dg-world') && performance.now() < gState.suppressClickUntil) return;
       const d = b.dataset;
+      if (d.qpad !== undefined) {
+        if (typeof HandPad !== 'undefined' && HandPad.toggleDock) {
+          HandPad.toggleDock({
+            onPick: ch => { handleSearch(ch); }
+          });
+        }
+        return;
+      }
       if (d.close !== undefined) { const fx = host.querySelector('.dg-fx'); fx.hidden = true; fx.innerHTML = ''; return; }
       if (d.realm) { switchRealm(d.realm); return; }
       if (d.skyback !== undefined) { backToSky(); return; }
@@ -2399,35 +2685,182 @@ const OffyDigi = (() => {
       if (d.say) { TTS.speak(d.say); return; }
       if (d.evolve) evolve(d.evolve);
     });
-    host.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { const fx = host.querySelector('.dg-fx'); if (fx && !fx.hidden) { fx.hidden = true; fx.innerHTML = ''; } }
-      if (e.key === 'Enter' && e.target.matches('.dg-q input')) { handleSearch(e.target.value); e.target.value = ''; }
+    host.addEventListener('input', e => {
+      if (e.target.matches('.dg-q input')) renderSearchDD(e.target.value);
     });
+    host.addEventListener('focusin', e => {
+      if (e.target.matches('.dg-q input') && e.target.value.trim()) renderSearchDD(e.target.value);
+    });
+    host.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeSearchDD();
+        const fx = host.querySelector('.dg-fx'); if (fx && !fx.hidden) { fx.hidden = true; fx.innerHTML = ''; }
+        return;
+      }
+      if (!e.target.matches('.dg-q input')) return;
+      if (e.key === 'ArrowDown' && ddItems.length) {
+        e.preventDefault(); ddIdx = (ddIdx + 1) % ddItems.length;
+        host.querySelectorAll('.dg-q-item').forEach((el, i) => el.classList.toggle('on', i === ddIdx));
+      } else if (e.key === 'ArrowUp' && ddItems.length) {
+        e.preventDefault(); ddIdx = (ddIdx - 1 + ddItems.length) % ddItems.length;
+        host.querySelectorAll('.dg-q-item').forEach((el, i) => el.classList.toggle('on', i === ddIdx));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (ddItems.length && ddIdx >= 0) pickSearchItem(ddItems[ddIdx]);
+        else { handleSearch(e.target.value); e.target.value = ''; }
+      }
+    });
+    // Handle programmatic change fired by HandPad full modal pick
     host.addEventListener('change', e => {
       if (!e.target.matches('.dg-q input')) return;
+      if (!e.target.value.trim()) return;
       handleSearch(e.target.value); e.target.value = '';
     });
+
+    /* ---------- Bulletproof Touch Pinch-Zoom, Pan, Soft Bounds & Safari Gesture Guard ---------- */
     host.addEventListener('pointerdown', e => {
-      const v = e.target.closest('.dg-view'); if (!v || e.target.closest('.dg-zoom, .dg-more-bar')) return;
-      pts.set(e.pointerId, [e.clientX, e.clientY]);
-      if (pts.size === 1) drag = { x: e.clientX, y: e.clientY, tx: st.tx, ty: st.ty, moved: false };
-      if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch = Math.hypot(a[0] - b[0], a[1] - b[1]); }
+      const v = e.target.closest('.dg-view');
+      if (!v || e.target.closest('.dg-zoom, .dg-more-bar, .dg-hover-tip')) return;
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      cancelAnimationFrame(camAnim);
+      hover(null);
+      gState.pts.set(e.pointerId, { x: e.clientX, y: e.clientY, type: e.pointerType });
+      if (gState.pts.size === 1) {
+        gState.mode = 'pan';
+        gState.pinch = null;
+        gState.pan = { id: e.pointerId, startX: e.clientX, startY: e.clientY, startTx: st.tx, startTy: st.ty, moved: false };
+      } else if (gState.pts.size >= 2) {
+        const [a, b] = [...gState.pts.values()];
+        gState.mode = 'pinch';
+        gState.pan = null; // Kill stale pre-pinch pan anchor completely
+        gState.pinch = {
+          dist: Math.max(12, Math.hypot(a.x - b.x, a.y - b.y)),
+          midX: (a.x + b.x) / 2,
+          midY: (a.y + b.y) / 2
+        };
+        gState.suppressClickUntil = performance.now() + 340;
+      }
     });
-    host.addEventListener('pointermove', e => {
-      if (!pts.has(e.pointerId)) return;
-      pts.set(e.pointerId, [e.clientX, e.clientY]);
-      const v = host.querySelector('.dg-view'), r = v.getBoundingClientRect();
-      if (pts.size === 2 && pinch) { const [a, b] = [...pts.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]); zoomAt(d / pinch, (a[0] + b[0]) / 2 - r.left, (a[1] + b[1]) / 2 - r.top); pinch = d; if (drag) drag.moved = true; return; }
-      if (!drag) return;
-      const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
-      if (Math.abs(dx) + Math.abs(dy) > 6) { drag.moved = true; v.setPointerCapture && v.setPointerCapture(e.pointerId); }
-      if (drag.moved) { st.tx = drag.tx + dx; st.ty = drag.ty + dy; apply(); }
+
+    const onMove = e => {
+      if (!gState.pts.has(e.pointerId)) return;
+      const v = host && host.querySelector('.dg-view');
+      if (!v) return;
+      const pObj = gState.pts.get(e.pointerId);
+      pObj.x = e.clientX; pObj.y = e.clientY;
+      const r = v.getBoundingClientRect();
+
+      if (gState.mode === 'pinch' && gState.pts.size >= 2 && gState.pinch) {
+        const [a, b] = [...gState.pts.values()];
+        const d = Math.max(12, Math.hypot(a.x - b.x, a.y - b.y));
+        const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+        // Simultaneously pan with midpoint shift + scale smoothly around midpoint
+        st.tx += mx - gState.pinch.midX;
+        st.ty += my - gState.pinch.midY;
+        const rawRatio = d / gState.pinch.dist;
+        const ratio = Math.max(0.72, Math.min(1.4, rawRatio));
+        zoomAt(ratio, mx - r.left, my - r.top);
+        gState.pinch.dist = d;
+        gState.pinch.midX = mx;
+        gState.pinch.midY = my;
+        gState.suppressClickUntil = performance.now() + 300;
+        return;
+      }
+
+      if (gState.mode === 'pan' && gState.pan && gState.pan.id === e.pointerId) {
+        // Post-pinch finger-lift cooldown: continuously re-anchor to prevent ANY single-finger jump!
+        if (performance.now() < gState.pinchCooldownUntil) {
+          gState.pan.startX = e.clientX;
+          gState.pan.startY = e.clientY;
+          gState.pan.startTx = st.tx;
+          gState.pan.startTy = st.ty;
+          return;
+        }
+        const dx = e.clientX - gState.pan.startX, dy = e.clientY - gState.pan.startY;
+        const thresh = e.pointerType === 'pen' ? 8 : 7;
+        if (!gState.pan.moved && Math.hypot(dx, dy) > thresh) {
+          gState.pan.moved = true;
+          try { v.setPointerCapture && v.setPointerCapture(e.pointerId); } catch (err) {}
+        }
+        if (gState.pan.moved) {
+          st.tx = gState.pan.startTx + dx;
+          st.ty = gState.pan.startTy + dy;
+          clampCam();
+          apply();
+          gState.suppressClickUntil = performance.now() + 240;
+        }
+      }
+    };
+
+    const onUp = e => {
+      if (!gState.pts.has(e.pointerId)) return;
+      gState.pts.delete(e.pointerId);
+      if (gState.mode === 'pinch') {
+        gState.suppressClickUntil = performance.now() + 300;
+        if (gState.pts.size === 1) {
+          // Smoothly hand off to remaining finger anchored at CURRENT camera position + 160ms anti-jump lock
+          const [[remId, rem]] = [...gState.pts.entries()];
+          gState.mode = 'pan';
+          gState.pinch = null;
+          gState.pinchCooldownUntil = performance.now() + 160;
+          gState.pan = { id: remId, startX: rem.x, startY: rem.y, startTx: st.tx, startTy: st.ty, moved: true };
+          return;
+        }
+        if (gState.pts.size >= 2) {
+          const [a, b] = [...gState.pts.values()];
+          gState.pinch = { dist: Math.max(12, Math.hypot(a.x - b.x, a.y - b.y)), midX: (a.x + b.x) / 2, midY: (a.y + b.y) / 2 };
+          return;
+        }
+      }
+      if (gState.pts.size === 0) {
+        if (gState.pan && gState.pan.moved) gState.suppressClickUntil = performance.now() + 240;
+        gState.mode = 'none'; gState.pan = null; gState.pinch = null;
+      }
+    };
+
+    if (!winBound) {
+      winBound = true;
+      const resetGestures = () => { gState.pts.clear(); gState.mode = 'none'; gState.pan = null; gState.pinch = null; };
+      window.addEventListener('pointermove', onMove, { passive: true });
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+      window.addEventListener('blur', resetGestures);
+      document.addEventListener('visibilitychange', () => { if (document.hidden) resetGestures(); });
+    }
+
+    // Prevent iOS Safari native page pinch-zoom inside constellation view
+    const stopSafariGesture = e => { if (e.target.closest && e.target.closest('.dg-view')) e.preventDefault(); };
+    host.addEventListener('gesturestart', stopSafariGesture, { passive: false });
+    host.addEventListener('gesturechange', stopSafariGesture, { passive: false });
+    host.addEventListener('gestureend', stopSafariGesture, { passive: false });
+
+    // Apple Pencil Hover & Mouse Hover preview across ALL 3 realms + Sky Map
+    host.addEventListener('pointerover', e => {
+      if (e.pointerType === 'touch' || gState.pts.size > 0) return;
+      const n = e.target.closest('.dg-n');
+      if (!n) return;
+      const key = n.dataset.n || n.dataset.pn || n.dataset.wn || n.dataset.sky || n.dataset.whub || n.dataset.phub;
+      hover(key || null, e.pointerType === 'pen');
     });
-    const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch = 0; if (!pts.size) setTimeout(() => { drag = null; }, 0); };
-    host.addEventListener('pointerup', up); host.addEventListener('pointercancel', up);
-    host.addEventListener('pointerover', e => { if (e.pointerType === 'touch' || isSky() || isWord() || isPhon() || !radial()) return; const n = e.target.closest('.dg-n'); hover(n ? n.dataset.n : null); });
+    host.addEventListener('pointerout', e => {
+      if (e.pointerType === 'touch') return;
+      const fromN = e.target.closest('.dg-n');
+      const toN = e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('.dg-n') : null;
+      if (fromN && fromN !== toN && !toN) hover(null);
+    });
     host.addEventListener('pointerleave', () => hover(null));
-    host.addEventListener('wheel', e => { const v = e.target.closest('.dg-view'); if (!v) return; e.preventDefault(); const r = v.getBoundingClientRect(); zoomAt(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+
+    // Smooth Mouse Wheel + Mac/Windows Trackpad Pinch-to-Zoom (e.ctrlKey)
+    host.addEventListener('wheel', e => {
+      const v = e.target.closest('.dg-view'); if (!v) return;
+      e.preventDefault();
+      cancelAnimationFrame(camAnim);
+      const r = v.getBoundingClientRect();
+      const factor = e.ctrlKey
+        ? Math.max(0.82, Math.min(1.22, Math.exp(-e.deltaY * 0.01)))
+        : (e.deltaY < 0 ? 1.13 : 1 / 1.13);
+      zoomAt(factor, e.clientX - r.left, e.clientY - r.top);
+    }, { passive: false });
   }
 
   return {

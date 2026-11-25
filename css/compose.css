@@ -196,8 +196,14 @@ button.cp-sq:active { transform: scale(.96); }
   transform: translateY(24px); opacity: 0; transition: transform .32s var(--spring), opacity .2s; }
 .hp.on .hp-card { transform: none; opacity: 1; }
 @media (min-width: 900px) { .hp { align-items: center; } }
-.hp-h { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.hp-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .hp-h b { display: flex; align-items: center; gap: 8px; font-size: 14px; } .hp-h b .ic { width: 17px; height: 17px; color: var(--accent-ink); }
+.hp-ha { display: flex; align-items: center; gap: 6px; }
+.hp-palm { height: 30px; padding: 0 9px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface-2); color: var(--muted);
+  display: inline-flex; align-items: center; gap: 5px; font: 600 11.5px var(--ui); white-space: nowrap; transition: border-color .15s, background .15s, color .15s; }
+.hp-palm .ic { width: 13px; height: 13px; flex: none; }
+.hp-palm.on { border-color: color-mix(in srgb, var(--accent) 48%, var(--line)); background: var(--accent-soft); color: var(--accent-ink); }
+.hp-palm.sm { height: 26px; padding: 0 7px; font-size: 10.5px; }
 .hp-x { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; color: var(--muted); background: var(--surface-2); }
 .hp-x .ic { width: 17px; height: 17px; }
 .hp-cands { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; min-height: 52px; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 6px; margin-bottom: 8px; }
@@ -215,6 +221,43 @@ button.cp-sq:active { transform: scale(.96); }
 .hp-f button .ic { width: 16px; height: 16px; }
 .hp-f small { margin-left: auto; font-size: 10.5px; color: var(--muted); text-align: right; }
 @media (max-width: 380px) { .hp-f small { display: none; } }
+
+/* ---------- Floating Quick-Write Scratchpad (non-modal corner dock for Apple Pencil) ---------- */
+.hp-dock { --hp-ink: var(--ink); --hp-last: var(--accent-ink); --hp-grid: var(--line-2);
+  position: fixed; z-index: 95; right: max(16px, env(safe-area-inset-right)); bottom: calc(var(--tab) + 28px + env(safe-area-inset-bottom));
+  width: min(268px, calc(100vw - 24px)); padding: 10px; border-radius: 20px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border: 1px solid var(--line-2); box-shadow: var(--sh-2), 0 14px 40px rgba(0, 0, 0, .18);
+  transform: translateY(14px) scale(.96); opacity: 0; pointer-events: none; transition: transform .22s var(--spring), opacity .18s; }
+:root[data-theme="dark"] .hp-dock { --hp-ink: #f0f3f7; --hp-last: var(--accent-ink); --hp-grid: rgba(255, 255, 255, .18); }
+.hp-dock.on { transform: none; opacity: 1; pointer-events: auto; }
+.hp-dock.left { right: auto; left: max(16px, env(safe-area-inset-left)); }
+@media (min-width: 900px) {
+  .hp-dock { bottom: max(18px, env(safe-area-inset-bottom)); width: 274px; }
+  .hp-dock.left { left: calc(var(--rail) + 18px); }
+}
+.hp-dh { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 6px; cursor: grab; touch-action: none; user-select: none; }
+.hp-dh:active { cursor: grabbing; }
+.hp-dt { display: inline-flex; align-items: center; gap: 5px; font-size: 12.5px; color: var(--ink); }
+.hp-dt .ic { width: 14px; height: 14px; color: var(--accent-ink); }
+.hp-da { display: inline-flex; align-items: center; gap: 4px; }
+.hp-db { width: 28px; height: 28px; border-radius: 8px; display: grid; place-items: center; color: var(--muted); background: var(--surface-2); }
+.hp-db:hover { color: var(--ink); }
+.hp-db .ic { width: 14px; height: 14px; }
+.hp-dock.left [data-dk="swap"] .ic { transform: scaleX(-1); }
+.hp-dcands { display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; min-height: 40px; align-items: center; padding-bottom: 5px; margin-bottom: 6px; border-bottom: 1px solid var(--line); }
+.hp-dcands::-webkit-scrollbar { display: none; }
+.hp-dcands button { flex: none; min-width: 38px; height: 38px; padding: 0 5px; border-radius: 10px; font: 25px/1 var(--hz); color: var(--ink); border: 1px solid transparent; transition: background .14s, border-color .14s; }
+.hp-dcands button:first-child { border-color: var(--accent); background: var(--accent-soft); }
+.hp-dcands button:hover { background: var(--surface-2); }
+.hp-dpad { position: relative; aspect-ratio: 1; width: 100%; max-height: 220px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; }
+.hp-dpad canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+.hp-dhint { position: absolute; inset: auto 0 10px; margin: 0; text-align: center; font-size: 11.5px; color: var(--muted); pointer-events: none; transition: opacity .2s; }
+.hp-dock:not(.empty) .hp-dhint { opacity: 0; }
+.hp-df { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 7px; }
+.hp-df button { height: 34px; padding: 0 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px; font: 600 12px var(--ui); }
+.hp-df button .ic { width: 14px; height: 14px; }
 
 /* ---------- HSK level squares (every tab of #/hanzi) ---------- */
 #v-hanzi .hz-bar { flex-wrap: wrap; }
