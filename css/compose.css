@@ -21,6 +21,15 @@
 .hz-langs button b { font-size: 11px; color: var(--muted); }
 .hz-langs button.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
 .hz-langs button.on b { color: var(--accent-ink); }
+.hz-langs .hz-py-tog { margin-left: auto; }
+.hz-langs .hz-py-tog .ic { width: 15px; height: 15px; }
+/* #/hanzi keeps Pinyin visible even if user hid Pinyin for flashcard tests, controlled independently by .hz-no-py */
+body.hide-pinyin #v-hanzi:not(.hz-no-py) .pyx { display: inline !important; }
+body.hide-pinyin #v-hanzi:not(.hz-no-py) .dg-n .pyx,
+body.hide-pinyin #v-hanzi:not(.hz-no-py) .dg-gtile .pyx,
+body.hide-pinyin #v-hanzi:not(.hz-no-py) .tr-c .pyx,
+body.hide-pinyin #v-hanzi:not(.hz-no-py) .cp-c .pyx { display: block !important; }
+#v-hanzi.hz-no-py .pyx { display: none !important; }
 .hz-trad { display: inline-flex; padding: 3px; border-radius: 11px; border: 1px solid var(--line); background: var(--surface-2); height: 36px; align-items: center; }
 .hz-trad span { min-width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; font-family: var(--hz); font-size: 15px; color: var(--muted); transition: background .18s, color .18s; }
 .hz-trad span.on { background: var(--surface); color: var(--ink); box-shadow: var(--sh-1); }

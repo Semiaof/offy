@@ -269,6 +269,9 @@ const HzLv = (() => {
   function paintLang() {
     const cur = HzKit.lang();
     const opt = LANG_OPTS.find(o => o[0] === cur) || LANG_OPTS[0];
+    const pyOn = !S().hzHidePy;
+    const v = document.getElementById('v-hanzi');
+    if (v) v.classList.toggle('hz-no-py', !pyOn);
     const btn = document.getElementById('hzLangBtn');
     if (btn) {
       btn.innerHTML = `<span class="hz-lg-short">${opt[1]}</span><span class="hz-lg-full">${opt[2]}</span>${ic('chev-d')}`;
@@ -276,7 +279,8 @@ const HzLv = (() => {
     const list = document.getElementById('hzLangs');
     if (list) {
       list.innerHTML = `<span class="hz-lv-t">${T('ภาษา')}</span>` + LANG_OPTS.map(([code, sh, full]) =>
-        `<button type="button" data-hzlang="${code}" class="${code === cur ? 'on' : ''}" role="radio" aria-checked="${code === cur}"><b>${sh}</b><span>${full}</span></button>`).join('');
+        `<button type="button" data-hzlang="${code}" class="${code === cur ? 'on' : ''}" role="radio" aria-checked="${code === cur}"><b>${sh}</b><span>${full}</span></button>`).join('')
+        + `<button type="button" class="hz-py-tog${pyOn ? ' on' : ''}" data-hzpytog aria-pressed="${pyOn}">${ic(pyOn ? 'eye' : 'eye-off')}<span>${T('พินอิน')}</span></button>`;
     }
   }
   function closePops(exceptId) {
@@ -330,6 +334,14 @@ const HzLv = (() => {
         langBtn.classList.toggle('open', open);
         if (typeof HanziView !== 'undefined' && HanziView.fit) setTimeout(HanziView.fit, 40);
       }
+      return;
+    }
+    const pyTog = e.target.closest('[data-hzpytog]');
+    if (pyTog) {
+      try { sfx('tap'); } catch (err) {}
+      S().hzHidePy = !S().hzHidePy;
+      try { Store.save(); } catch (err) {}
+      paintLang();
       return;
     }
     const pickLang = e.target.closest('#hzLangs [data-hzlang]');

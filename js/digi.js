@@ -86,65 +86,152 @@ const OffyDigi = (() => {
     const sAt = t => { const u = ((t % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI) / (2 * Math.PI) * M, i = Math.floor(u); return ss[i] + (ss[Math.min(M, i + 1)] - ss[i]) * (u - i); };
     return { A, B, P, tAt, sAt, pt: t => [A * Math.cos(t), B * Math.sin(t)] };
   }
-  // the shape of the graph area: a wide screen gets a wide oval, a tall phone a tall one (small families stay round)
+  // the shape of the graph area: gently match screen proportions so stars fill the sky evenly
   const viewAspect = () => { const v = host && host.querySelector('.dg-view'); return v && v.clientWidth && v.clientHeight ? v.clientWidth / v.clientHeight : 1; };
+  // deterministic [0..1) hash so organic star offsets stay steady across redraws
+  const hash01 = s => { let h = 2166136261; for (const ch of String(s)) { h ^= ch.codePointAt(0); h = Math.imul(h, 16777619); } return ((h >>> 0) % 1000) / 1000; };
+
   function layoutRadial(f) {
-    const nodes = [{ key: f, c: f, x: 0, y: 0, ring: 0, stage: stageForFocus(f) }], links = [];
+    const nodes = [{ key: f, c: f, x: 0, y: 0, ring: 0, layer: 0, stage: stageForFocus(f) }], links = [];
     const parts = partsOf(f).map(q => ({ c: q, stage: 'PART' }));
     const except = new Set([f, ...parts.map(p => p.c)]);
     let kids = kidsOf(f, except).map(c => ({ c, stage: stageOf(c, f) }));
     const mobile = innerWidth < 700;
-    const defaultCap = mobile ? Math.max(8, 12 - parts.length) : innerWidth < 1100 ? 24 : 30;
-    // On mobile/tablet big clans, pick the lowest-HSK (most useful) characters first so the radial graph stays crisp & readable
-    if (!st.open[f] && kids.length > defaultCap) {
-      kids = kids.slice().sort((a, b) => ((D.c[a.c] || [])[1] || 9) - ((D.c[b.c] || [])[1] || 9) || ORDER.indexOf(a.stage) - ORDER.indexOf(b.stage));
-    }
+    const defaultCap = mobile ? Math.max(10, 14 - parts.length) : innerWidth < 1100 ? 28 : 36;
+    // Sort by HSK level ascending (HSK 1–2 brightest stars closest to the center, radiating outward)
+    kids = kids.slice().sort((a, b) => ((D.c[a.c] || [])[1] || 9) - ((D.c[b.c] || [])[1] || 9) || ORDER.indexOf(a.stage) - ORDER.indexOf(b.stage));
     const cap = st.open[f] ? 999 : defaultCap, more = Math.max(0, kids.length - cap);
-    kids = kids.slice(0, cap).sort((a, b) => ORDER.indexOf(a.stage) - ORDER.indexOf(b.stage) || ((D.c[a.c] || [])[1] || 9) - ((D.c[b.c] || [])[1] || 9));
-    const ring1 = parts.concat(kids), n1 = Math.max(ring1.length, 1);
-    // Multi-ring radial layout: 1 ring (<=14), 2 staggered rings (15..40), 3 staggered rings (>40) — no crushing radius cap so boxes NEVER overlap!
-    const layers = n1 > 40 ? 3 : n1 > 14 ? 2 : 1;
-    const SG = layers === 3 ? 146 : 150;
-    const GAP = layers === 3 ? 56 : layers === 2 ? 80 : 140;
-    const asp = Math.max(.84, Math.min(2.2, viewAspect() * .94)), k = 1 + (asp - 1) * Math.max(0, Math.min(1, (n1 - 6) / 14));
-    const unit = oval(Math.max(k, 1), Math.max(1 / k, 1)).P;
-    const minShort = layers === 3 ? 250 : layers === 2 ? 215 : 172;
-    const short = Math.max(minShort, n1 * GAP / unit);
-    const A1 = short * Math.max(k, 1), B1 = short * Math.max(1 / k, 1), E1 = oval(A1, B1);
-    const ds = E1.P / n1, top = E1.sAt(-Math.PI / 2), s0 = top - (parts.length ? parts.length * ds / 2 : 0) + ds / 2;
+    kids = kids.slice(0, cap);
+    const ring1 = parts.concat(kids), n1 = ring1.length;
     kids.forEach(k2 => except.add(k2.c));
-    const g2cap = layers > 1 ? 0 : kids.length <= 8 ? 4 : 2;
-    const A2 = A1 + 150, B2 = B1 + 150, E2 = g2cap ? oval(A2, B2) : null;
-    const tOf = [];
-    ring1.forEach((it, i) => {
-      const t = E1.tAt(s0 + i * ds); tOf.push(t);
-      let [x, y] = E1.pt(t);
-      let off = 0;
-      if (layers === 2) off = i % 2 ? SG : (n1 % 2 && i === n1 - 1 ? SG * .5 : 0);
-      else if (layers === 3) off = (i % 3) * SG;
-      if (off) { const d = Math.hypot(x, y) || 1; x += x / d * off; y += y / d * off; }
-      nodes.push({ key: it.c, c: it.c, x, y, ring: 1, stage: it.stage, a: Math.atan2(y, x) });
-      links.push({ from: it.stage === 'PART' ? it.c : f, to: it.stage === 'PART' ? f : it.c, stage: it.stage });
-      if (it.stage === 'PART' || !g2cap) return;
-      const g = kidsOf(it.c, except).slice(0, g2cap); g.forEach(c => except.add(c));
-      const mid = E2.sAt(t), span = Math.min(E2.P / n1 * .92, g.length * .34 * (A2 + B2) / 2);
-      g.forEach((c, j) => {
-        const [gx, gy] = E2.pt(E2.tAt(mid - span / 2 + (g.length > 1 ? j * span / (g.length - 1) : span / 2)));
-        nodes.push({ key: c, c, x: gx, y: gy, ring: 2, stage: stageOf(c, it.c) });
-        links.push({ from: it.c, to: c, stage: stageOf(c, it.c) });
+
+    // Gently match viewport aspect ratio so the starfield is balanced (never empty void, never cramped)
+    const asp = Math.max(.78, Math.min(1.55, viewAspect()));
+    const sx = Math.sqrt(asp), sy = 1 / Math.sqrt(asp);
+
+    // Fill concentric organic star layers from the INSIDE OUT (like stars in the night sky)
+    const R0 = 152, DR = 134, STEP = 132;
+    const layersArr = [[]]; // layersArr[0] = [center], layersArr[L] = nodes in layer L
+    layersArr[0].push(nodes[0]);
+
+    let idx = 0, L = 1;
+    while (idx < n1) {
+      const r = R0 + (L - 1) * DR;
+      const aL = r * sx, bL = r * sy, E = oval(aL, bL);
+      const capL = Math.max(L === 1 ? 6 : 10, Math.floor(E.P / STEP));
+      const rem = n1 - idx;
+      // Avoid leaving 1–2 lonely stragglers on an extra outer ring if they fit cleanly here
+      const take = rem <= capL + 2 && rem <= Math.floor(E.P / 116) ? rem : Math.min(rem, capL);
+      const batch = ring1.slice(idx, idx + take);
+      const ds = E.P / Math.max(1, take);
+      const basePhase = E.sAt(-Math.PI / 2) + (L - 1) * ds * 0.42;
+      const curLayer = [];
+
+      batch.forEach((it, j) => {
+        const sPos = basePhase + (j + (take > 1 ? (hash01(it.c + 'a') - 0.5) * 0.28 : 0)) * ds;
+        const t = E.tAt(sPos);
+        let [x, y] = E.pt(t);
+        // Subtle organic starfield wave so it feels like constellations rather than a rigid oval
+        if (n1 >= 4) {
+          const d = Math.hypot(x, y) || 1;
+          const jit = (hash01(it.c) - 0.5) * (n1 > 10 ? 28 : 22);
+          x += (x / d) * jit;
+          y += (y / d) * jit;
+        }
+        const nd = { key: it.c, c: it.c, x, y, ring: 1, layer: L, stage: it.stage, a: Math.atan2(y, x) };
+        nodes.push(nd);
+        curLayer.push(nd);
       });
+      layersArr.push(curLayer);
+      idx += take;
+      L++;
+    }
+
+    // For tiny clans (<= 10 stars), also show a few 2nd-generation outer stars
+    const g2cap = n1 <= 10 && L <= 2 ? 2 : 0;
+    if (g2cap) {
+      const outerLayer = [];
+      layersArr[1].forEach(nd => {
+        if (nd.stage === 'PART') return;
+        const g = kidsOf(nd.c, except).slice(0, g2cap);
+        g.forEach(c => except.add(c));
+        g.forEach((c, j) => {
+          const ang = nd.a + (g.length > 1 ? (j - (g.length - 1) / 2) * 0.42 : 0);
+          const rr = 136 + (hash01(c) - 0.5) * 14;
+          const gn = { key: c, c, x: nd.x + Math.cos(ang) * rr, y: nd.y + Math.sin(ang) * rr, ring: 2, layer: 2, stage: stageOf(c, nd.c), parentKey: nd.key };
+          nodes.push(gn);
+          outerLayer.push(gn);
+        });
+      });
+      if (outerLayer.length) layersArr.push(outerLayer);
+    }
+
+    // Guaranteed Zero-Overlap Relaxation Pass (18 fast AABB iterations: pinyin above + box + meaning below NEVER touch)
+    const minW = 104, minH = 114, minW0 = 122, minH0 = 130;
+    for (let pass = 0; pass < 18; pass++) {
+      let moved = false;
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        for (let j = i + 1; j < nodes.length; j++) {
+          const b = nodes[j];
+          const rw = (i === 0 ? minW0 : minW), rh = (i === 0 ? minH0 : minH);
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const ox = rw - Math.abs(dx), oy = rh - Math.abs(dy);
+          if (ox > 0 && oy > 0) {
+            moved = true;
+            const sgnX = dx >= 0 ? 1 : -1, sgnY = dy >= 0 ? 1 : -1;
+            if (ox < oy) {
+              const push = ox * 0.52 + 0.5;
+              if (i === 0) b.x += sgnX * push * 2;
+              else { a.x -= sgnX * push; b.x += sgnX * push; }
+            } else {
+              const push = oy * 0.52 + 0.5;
+              if (i === 0) b.y += sgnY * push * 2;
+              else { a.y -= sgnY * push; b.y += sgnY * push; }
+            }
+          }
+        }
+      }
+      if (!moved) break;
+    }
+
+    // Build delicate Constellation lines:
+    // - Layer 1 stars connect directly to center star f
+    // - Outer stars (Layer >= 2) connect cleanly to their parent (ring 2) or nearest inner star (constellation web!)
+    for (let li = 1; li < layersArr.length; li++) {
+      const prevLayer = layersArr[li - 1];
+      for (const nd of layersArr[li]) {
+        if (nd.ring === 2 && nd.parentKey) {
+          links.push({ from: nd.parentKey, to: nd.key, stage: nd.stage, outer: true });
+        } else if (li === 1) {
+          links.push({ from: nd.stage === 'PART' ? nd.key : f, to: nd.stage === 'PART' ? f : nd.key, stage: nd.stage, outer: false });
+        } else {
+          // Pick nearest inner-layer star (slight preference for matching stage) to form clean constellation branches
+          let best = prevLayer[0], bestD = Infinity;
+          for (const p of prevLayer) {
+            const d = Math.hypot(nd.x - p.x, nd.y - p.y) * (p.stage === nd.stage ? 0.85 : 1);
+            if (d < bestD) { bestD = d; best = p; }
+          }
+          links.push({ from: best.key, to: nd.key, stage: nd.stage, outer: true });
+        }
+      }
+    }
+
+    // Exact outer bounds from final star positions so the whole constellation frames cleanly
+    let maxX = 160, maxY = 160;
+    nodes.forEach(n => {
+      maxX = Math.max(maxX, Math.abs(n.x) + 64);
+      maxY = Math.max(maxY, Math.abs(n.y) + 68);
     });
-    const has2 = nodes.some(n => n.ring === 2);
-    const maxOff = (layers - 1) * SG;
-    const lab = layers > 1 ? maxOff + 114 : has2 ? 244 : 114;
-    const edge = layers > 1 ? maxOff + 106 : has2 ? 150 + 106 : 106;
-    const sectors = ORDER.map(s2 => { const idx = ring1.map((it, i) => it.stage === s2 ? i : -1).filter(i => i >= 0); if (!idx.length) return null;
-      const t = E1.tAt(s0 + (idx[0] + idx[idx.length - 1]) / 2 * ds);
-      return { s: s2, n: idx.length, x: (A1 + lab) * Math.cos(t), y: (B1 + lab) * Math.sin(t) + (Math.sin(t) > .3 ? 18 : 0) }; }).filter(Boolean);
-    return { nodes, links, A1, B1, A2: layers > 1 ? A1 + SG : A2, B2: layers > 1 ? B1 + SG : B2,
-      A3: layers === 3 ? A1 + SG * 2 : 0, B3: layers === 3 ? B1 + SG * 2 : 0,
-      sectors, more, has2: has2 || layers > 1, layers,
-      outerX: A1 + edge, outerY: B1 + edge, labelY: B1 + lab, asp: viewAspect() };
+
+    const sectors = ORDER.map(s2 => {
+      const n = ring1.filter(it => it.stage === s2).length;
+      return n ? { s: s2, n } : null;
+    }).filter(Boolean);
+
+    return { nodes, links, A1: R0 * sx, B1: R0 * sy, A2: 0, B2: 0, A3: 0, B3: 0,
+      sectors, more, has2: false, layers: layersArr.length - 1,
+      outerX: maxX, outerY: maxY, labelY: maxY, asp: viewAspect() };
   }
   function stageForFocus(f) {
     const prev = st.trail[st.trail.length - 2];
@@ -376,13 +463,11 @@ const OffyDigi = (() => {
         el.style.transform = `translate(${p.x}px,${p.y}px) translate(-50%, var(--hy)) scale(${s.toFixed(3)})`;   // the square's centre sits on the point
         el.style.opacity = isNew && t < 1 ? Math.min(1, t * 2.2).toFixed(2) : '';
       });
-      const rr = .82 + .18 * out3(g);
-      svg.innerHTML = `<ellipse class="dg-ring1" rx="${(next.A1 * rr).toFixed(1)}" ry="${(next.B1 * rr).toFixed(1)}" style="opacity:${g.toFixed(2)}"/>${next.has2 ? `<ellipse class="dg-ring2" rx="${(next.A2 * rr).toFixed(1)}" ry="${(next.B2 * rr).toFixed(1)}" style="opacity:${g.toFixed(2)}"/>` : ''}${next.A3 ? `<ellipse class="dg-ring2" rx="${(next.A3 * rr).toFixed(1)}" ry="${(next.B3 * rr).toFixed(1)}" style="opacity:${g.toFixed(2)}"/>` : ''}`
-        + next.links.map(l => { const a = pos.get(l.from), b = pos.get(l.to); if (!a || !b) return '';
-          const mx = (a.x + b.x) / 2 * .92, my = (a.y + b.y) / 2 * .92, far = l.stage === 'PART' ? l.from : l.to;
+      svg.innerHTML = next.links.map(l => { const a = pos.get(l.from), b = pos.get(l.to); if (!a || !b) return '';
+          const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, far = l.stage === 'PART' ? l.from : l.to;
           const p = born.has(far) ? out3(prog.get(far) || 0) : 1, part = l.stage === 'PART';
           const draw = p < 1 && !part ? ` pathLength="1" stroke-dasharray="1" stroke-dashoffset="${(1 - p).toFixed(3)}"` : part && p < 1 ? ` style="opacity:${p.toFixed(2)}"` : '';
-          return `<path class="dg-l s-${l.stage}${part ? ' part' : ''}" data-a="${esc2(l.from)}" data-b="${esc2(l.to)}" d="M${a.x},${a.y} Q${mx},${my} ${b.x},${b.y}"${draw}/>`; }).join('');
+          return `<path class="dg-l s-${l.stage}${part ? ' part' : ''}${l.outer ? ' outer' : ''}" data-a="${esc2(l.from)}" data-b="${esc2(l.to)}" d="M${a.x.toFixed(1)},${a.y.toFixed(1)} Q${mx.toFixed(1)},${my.toFixed(1)} ${b.x.toFixed(1)},${b.y.toFixed(1)}"${draw}/>`; }).join('');
       cur = pos;
     };
     const card = host.querySelector('.dg-side'); card.innerHTML = cardHTML(f, next.nodes[0].stage, st.trail[st.trail.length - 2]);
@@ -452,18 +537,21 @@ const OffyDigi = (() => {
     }, 160); });
     ro.observe(v);
   }
-  // zoom so the whole multi-ring oval (including top pinyin & bottom meanings) fits cleanly inside the viewport
-  const fitK = (vw, vh) => Math.max(.14, Math.min(1.12, vw / (2 * (lay.outerX + 36)), vh / (2 * (lay.outerY + 44))));
+  // zoom so the whole constellation (including top pinyin & bottom meanings) fits cleanly above the +more pill
+  const fitK = (vw, vh) => {
+    const padB = lay.more ? 44 : 0;
+    return Math.max(.14, Math.min(1.12, vw / (2 * (lay.outerX + 26)), (vh - padB) / (2 * (lay.outerY + 26))));
+  };
   function fitRadial() {
     const v = host.querySelector('.dg-view'); if (!v || !lay) return;
     const vw = v.clientWidth || 600, vh = v.clientHeight || 480;
     st.k = fitK(vw, vh);
-    st.tx = vw / 2; st.ty = vh / 2; apply(); st.fitted = true;
+    st.tx = vw / 2; st.ty = (vh - (lay.more ? 36 : 0)) / 2; apply(); st.fitted = true;
   }
   function glideTo() {                                         // pan smoothly back to the middle (and refit) on every recentre
     const v = host.querySelector('.dg-view'); if (!v || !lay) return;
     const vw = v.clientWidth, vh = v.clientHeight;
-    const k1 = fitK(vw, vh), a = { tx: st.tx, ty: st.ty, k: st.k }, b = { tx: vw / 2, ty: vh / 2, k: k1 };
+    const k1 = fitK(vw, vh), a = { tx: st.tx, ty: st.ty, k: st.k }, b = { tx: vw / 2, ty: (vh - (lay.more ? 36 : 0)) / 2, k: k1 };
     const t0 = performance.now();
     const step = now => { const t = Math.min(1, (now - t0) / 560), e = 1 - Math.pow(1 - t, 3);
       st.tx = a.tx + (b.tx - a.tx) * e; st.ty = a.ty + (b.ty - a.ty) * e; st.k = a.k + (b.k - a.k) * e; apply(); if (t < 1) requestAnimationFrame(step); };
