@@ -132,13 +132,15 @@ const HandPad = (() => {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0); redraw();
   }
   function redraw() {
-    const w = cv.clientWidth, h = cv.clientHeight, cs = getComputedStyle(el);
+    const w = cv.clientWidth, h = cv.clientHeight, cs = getComputedStyle(cv);
+    const dark = document.documentElement.dataset.theme === 'dark';
     ctx.clearRect(0, 0, w, h);
     // 米字格 practice grid
-    ctx.save(); ctx.strokeStyle = cs.getPropertyValue('--hp-grid').trim() || '#ccc'; ctx.lineWidth = 1; ctx.setLineDash([5, 6]);
+    ctx.save(); ctx.strokeStyle = cs.getPropertyValue('--hp-grid').trim() || (dark ? 'rgba(255,255,255,.16)' : '#ccc'); ctx.lineWidth = 1; ctx.setLineDash([5, 6]);
     ctx.beginPath(); ctx.moveTo(w / 2, 0); ctx.lineTo(w / 2, h); ctx.moveTo(0, h / 2); ctx.lineTo(w, h / 2); ctx.moveTo(0, 0); ctx.lineTo(w, h); ctx.moveTo(w, 0); ctx.lineTo(0, h); ctx.stroke(); ctx.restore();
     ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = Math.max(5, w / 42);
-    const ink = cs.getPropertyValue('--hp-ink').trim() || '#222', last = cs.getPropertyValue('--hp-last').trim() || ink;
+    const ink = cs.getPropertyValue('--hp-ink').trim() || (dark ? '#f0f3f7' : '#1b1d1a');
+    const last = cs.getPropertyValue('--hp-last').trim() || ink;
     strokes.forEach((s, i) => {
       ctx.strokeStyle = i === strokes.length - 1 ? last : ink;
       ctx.beginPath(); ctx.moveTo(s[0][0], s[0][1]);

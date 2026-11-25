@@ -186,11 +186,12 @@ button.cp-sq:active { transform: scale(.96); }
 }
 
 /* ---------- handwriting pad ---------- */
-.hp { position: fixed; inset: 0; z-index: 120; display: grid; align-items: end; justify-items: center; pointer-events: none; }
+.hp { --hp-ink: var(--ink); --hp-last: var(--accent-ink); --hp-grid: var(--line-2);
+  position: fixed; inset: 0; z-index: 120; display: grid; align-items: end; justify-items: center; pointer-events: none; }
+:root[data-theme="dark"] .hp { --hp-ink: #f0f3f7; --hp-last: var(--accent-ink); --hp-grid: rgba(255, 255, 255, .18); }
 .hp::before { content: ""; position: absolute; inset: 0; background: rgba(20, 18, 14, .18); opacity: 0; transition: opacity .2s; }
 .hp.on::before { opacity: 1; pointer-events: auto; }
-.hp-card { --hp-ink: var(--ink); --hp-last: var(--accent); --hp-grid: var(--line-2);
-  position: relative; pointer-events: auto; width: min(440px, calc(100% - 16px)); margin-bottom: max(10px, env(safe-area-inset-bottom));
+.hp-card { position: relative; pointer-events: auto; width: min(440px, calc(100% - 16px)); margin-bottom: max(10px, env(safe-area-inset-bottom));
   padding: 12px; border-radius: 24px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--sh-2), 0 20px 60px rgba(0, 0, 0, .18);
   transform: translateY(24px); opacity: 0; transition: transform .32s var(--spring), opacity .2s; }
 .hp.on .hp-card { transform: none; opacity: 1; }
