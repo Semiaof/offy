@@ -57,7 +57,7 @@ Object.assign(window.OFFY_EN || {}, {
   'ภาษาเสริม': 'Also show', 'แสดงบรรทัดเล็กใต้ความหมาย · เลือกได้หลายภาษา หรือไม่เลือกเลยก็ได้': 'Small lines under the meaning · any number, or none',
   'คำอธิบายเป็น': 'Explain in', 'ชนิดคำ หมายเหตุ และเกร็ดข้ามภาษา': 'Word classes, notes and cross-language tips', 'ตามภาษาหลัก': 'Main language',
   'ความหมาย': 'Meaning', 'ตัวอักษร': 'Characters', 'ข้ามภาษา': 'Across languages', 'ตัวเต็ม (ไต้หวัน)': 'Traditional (Taiwan)',
-  'ประโยคหลักของคำ': 'Main sentence of the word', 'แปลภาษาอื่น': 'Other languages', 'ชนิดคำทั้ง 5 ภาษา': 'Word class in all 5 languages',
+  'ประโยคหลักของคำ': 'Main sentence of the word', 'แปลภาษาอื่น': 'Other languages', 'ชนิดคำทั้ง 5 ภาษา': 'Word class in all 5 languages', 'ชนิดคำทั้ง 3 ภาษา': 'Word class in all 3 languages',
   'แหล่งอ้างอิงเห็นไม่ตรงกัน': 'Sources disagree', 'จำนวนขีด': 'Strokes', 'หมวดอักษร (部首)': 'Radical (部首)', 'ลำดับคังซีที่': 'Kangxi no.',
   'โครงสร้าง': 'Structure', 'ประเภทการสร้างอักษร (六书)': 'Formation (六书)', 'ส่วนประกอบ': 'Components', 'ส่วนบอกความหมาย / เสียง': 'Meaning / sound parts',
   'บอกความหมาย': 'meaning', 'บอกเสียง': 'sound', 'ตัวเต็ม': 'Traditional', 'เหมือนตัวย่อ': 'same as simplified', 'อ่านแบบ Hán Việt': 'Hán Việt reading',
@@ -136,7 +136,7 @@ function fold5(s) { return String(s || '').toLowerCase().normalize('NFD').replac
     indexWord(w);
     const all = isSlim
       ? [f.m.th, f.m.en, f.m.vi, f.m.ja, f.x].filter(Boolean).join(' ').toLowerCase()
-      : f.senses.map(m => [m.th, m.en, m.vi, m.ja.w, m.ja.k, m.ja.r].join(' ')).join(' ').toLowerCase();
+      : f.senses.map(m => [m.th, m.en, m.vi, m.ja ? [m.ja.w, m.ja.k, m.ja.r].join(' ') : ''].join(' ')).join(' ').toLowerCase();
     w._x = all; w._xf = fold5(all);
     const tIds = f.t || f.topics || [];
     const tDict = FIVE.D.topics || {};
@@ -160,6 +160,11 @@ const f5main = () => fiveS().lMain;
 const f5extra = () => fiveS().lExtra;
 const f5shown = () => [f5main(), ...f5extra()];
 const f5explain = () => { const s = fiveS(); return s.explain === 'main' ? s.lMain : s.explain; };
+/* HSK 4+ words are core-3 for now (th en zh): vi / ja are null there, so a language counts only where the item has text in it,
+   and a main language the item lacks falls back to Thai (English when the menu is English) */
+const f5has = (x, l) => !!(x && (l === 'ja' ? x.ja && (typeof x.ja === 'string' || x.ja.w) : x[l]));
+const f5fall = () => (fiveS().lang === 'en' ? 'en' : 'th');
+const f5mainFor = x => { const l = f5main(); return f5has(x, l) ? l : f5fall(); };
 
 /* ---------- text helpers ---------- */
 const f5L = l => `lang="${FIVE.HL[l]}"`;
@@ -227,7 +232,7 @@ const F5UI = { tab: 'mean', panelOpen: false };
 
 function f5sentence(sn, tag) {
   if (!sn) return '';
-  const main = f5main(), extra = f5extra().filter(l => sn[l]);
+  const main = f5mainFor(sn), extra = f5extra().filter(l => l !== main && f5has(sn, l));
   const mainText = main === 'ja' ? sn.ja && sn.ja.w : sn[main];
   const tw = sn.tw && sn.tw !== sn.zh;
   return `<figure class="f-ex">${tag ? `<figcaption>${tag}</figcaption>` : ''}
@@ -249,14 +254,14 @@ function f5measure(f) {
 }
 function f5coll(f) {
   const list = f.coll || []; if (!list.length) return '';
-  const main = f5main(), ex = f5extra()[0];
+  const main = f5main(), ex = f5extra()[0], cm = c => (c[main] ? main : f5fall());
   return `<section class="f-sec"><h4 class="f-sec-h"><span>${T('คำที่ใช้คู่กัน (搭配)')}</span><small>${list.length}</small></h4>
     <div class="f-colls">${list.map(c => `<div class="f-coll">
       <div class="f-coll-b">
         <div class="f-coll-zh" lang="zh-Hans">${esc(c.zh)}</div>
         ${c.pinyin ? `<div class="f-coll-py">${esc(c.pinyin)}</div>` : ''}
-        ${c[main] ? `<div class="f-coll-m" ${f5L(main)}>${esc(c[main])}</div>` : ''}
-        ${ex && c[ex] ? `<div class="f-coll-x" ${f5L(ex)}>${esc(c[ex])}</div>` : ''}
+        ${c[cm(c)] ? `<div class="f-coll-m" ${f5L(cm(c))}>${esc(c[cm(c)])}</div>` : ''}
+        ${ex && ex !== cm(c) && c[ex] ? `<div class="f-coll-x" ${f5L(ex)}>${esc(c[ex])}</div>` : ''}
       </div>
       ${f5say('zh', c.zh)}
     </div>`).join('')}</div></section>`;
@@ -312,16 +317,17 @@ function f5meaning(f) {
   const s = fiveS(), many = f.senses.length > 1, ex = f5explain();
   return `<div class="f-senses">${f.senses.map((m, i) => {
     const sn = m.sent === 'word' ? f.sent : m.sent;
-    const alts = s.lExtra.map(l => `<div><dt>${FIVE.SHORT[l]}</dt><dd ${f5L(l)}>${f5text(m, l)}</dd></div>`).join('');
+    const mainL = f5mainFor(m), rows = FIVE.L5.filter(l => l === 'zh' || f5has(m, l));
+    const alts = s.lExtra.filter(l => l !== mainL && f5has(m, l)).map(l => `<div><dt>${FIVE.SHORT[l]}</dt><dd ${f5L(l)}>${f5text(m, l)}</dd></div>`).join('');
     return `<article class="f-sense" style="--i:${i}">
       <div class="f-sh">${many ? `<span class="f-n">${i + 1}</span>` : ''}<span class="f-pos">${f5cls(m.cls.zh)}</span>${m.lvl !== f.lvl ? `<span class="f-lv">HSK ${esc(m.lvl)}</span>` : ''}</div>
-      <p class="f-main" ${f5L(s.lMain)}>${f5text(m, s.lMain)}</p>
+      <p class="f-main" ${f5L(mainL)}>${f5text(m, mainL)}</p>
       ${ex === 'zh' ? `<p class="f-def" lang="zh-Hans">${esc(m.zh)}</p>` : ''}
       ${alts ? `<dl class="f-alt">${alts}</dl>` : ''}
       ${i === f5noun(f) ? f5measure(f) : ''}
       ${f5sentence(sn, m.sent === 'word' && many ? T('ประโยคหลักของคำ') : '')}
-      <details class="f-fold f-more"><summary>${T('ชนิดคำทั้ง 5 ภาษา')}</summary>
-        <table class="f-ct">${FIVE.L5.map(l => `<tr><th>${FIVE.NAME[l]}</th><td>${f5cls(m.cls[l])}</td></tr>`).join('')}</table>
+      <details class="f-fold f-more"><summary>${T(rows.length === 5 ? 'ชนิดคำทั้ง 5 ภาษา' : 'ชนิดคำทั้ง 3 ภาษา')}</summary>
+        <table class="f-ct">${rows.map(l => `<tr><th>${FIVE.NAME[l]}</th><td>${f5cls(m.cls[l])}</td></tr>`).join('')}</table>
         ${ex !== 'zh' ? `<p class="f-def"><b lang="zh-Hans">释义</b> <span lang="zh-Hans">${esc(m.zh)}</span></p>` : ''}
         ${m.clsNote ? `<p class="f-note">${esc(f5tx(m.clsNote))}</p>` : ''}
       </details>
@@ -460,9 +466,10 @@ async function f5strokes(box, c, quiz) {
 /** list rows of the 5-language words: the main language, then the first extra language, quieter (used by core meanHTML) */
 function f5rowMean(w) {
   const f = FIVE.meta(w.id); if (!f) return '';
-  const main = f5main(), x = f5extra()[0];
-  const pick = l => f.m ? (f.m[l] || '') : f.senses.slice(0, 2).map(m => l === 'ja' ? m.ja.w : m[l]).join(' · ');
-  return `<span class="f-rm" ${f5L(main)}>${esc(pick(main))}</span>${x ? `<span class="f-rx" ${f5L(x)}> · ${esc(pick(x))}</span>` : ''}`;
+  const main = f5main();
+  const pick = l => f.m ? (f.m[l] || '') : f.senses.slice(0, 2).map(m => l === 'ja' ? (m.ja ? m.ja.w : '') : m[l]).filter(Boolean).join(' · ');
+  const ml = pick(main) ? main : f5fall(), xl = f5extra().find(l => l !== ml && pick(l)), xt = xl ? pick(xl) : '';
+  return `<span class="f-rm" ${f5L(ml)}>${esc(pick(ml))}</span>${xt ? `<span class="f-rx" ${f5L(xl)}> · ${esc(xt)}</span>` : ''}`;
 }
 (function patchDict() {
   const show = Dict.show, render = Dict.render, search = Dict.search;
