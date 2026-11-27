@@ -117,7 +117,7 @@
     svg.addEventListener('pointerdown', e => {
       e.stopPropagation();                        // keep BookInk (Pencil notes) from treating this as ink
       const { a, d } = angleAt(svg, e), k = nearest(a, d); if (!k) return;
-      e.preventDefault(); st.grab = k; try { svg.setPointerCapture(e.pointerId); } catch (x) {} setFromAngle(k, a); refresh(body);
+      e.preventDefault(); live.stop(); st.grab = k; try { svg.setPointerCapture(e.pointerId); } catch (x) {} setFromAngle(k, a); refresh(body);
       if (typeof sfx === 'function') sfx('tap');
     });
     svg.addEventListener('pointermove', e => {
@@ -130,6 +130,21 @@
     svg.addEventListener('pointerleave', () => { if (st.hover) { st.hover = null; refresh(body, true); } });
     svg.addEventListener('pointerup', end); svg.addEventListener('pointercancel', end);
   }
+
+  /* ---------- live mode: the "Now" button makes the clock follow real time; touching a hand / step / preset stops it ---------- */
+  const live = {
+    on: false, id: 0,
+    tick() {
+      const body = $('#bkBody');
+      if (Book.id !== ID || st.tab !== 'clock' || !body || !$('#tbClock', body)) return live.stop();
+      const n = new Date(); st.h = n.getHours(); st.m = n.getMinutes(); st.s = n.getSeconds(); refresh(body);
+    },
+    start() { live.on = true; live.tick(); clearInterval(live.id); live.id = setInterval(live.tick, 1000); live.mark(); },
+    stop() { if (!live.on) return; live.on = false; clearInterval(live.id); live.mark(); },
+    mark() { const b = document.querySelector('#bkBody [data-tbset="now"]'); if (!b) return;
+      b.classList.toggle('on', live.on); b.setAttribute('aria-pressed', String(live.on));
+      b.innerHTML = `${icn('clock')}${live.on ? L('เดินตามเวลาจริง · แตะเพื่อหยุด', 'Live · tap to stop') : L('เวลาตอนนี้ (เดินตามจริง)', 'Now (live)')}`; }
+  };
 
   /* ---------- views ---------- */
   const pad = n => String(n).padStart(2, '0');
@@ -317,12 +332,13 @@
         <nav class="rb-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" class="rb-tab${st.tab === k ? ' on' : ''}" data-tbtab="${k}">${esc(l)}</button>`).join('')}</nav></header>
       <div class="rb-body">${st.tab === 'clock' ? clockTab() : st.tab === 'date' ? dateTab() : st.tab === 'dur' ? durTab() : quizTab()}</div></div>`;
     const v = $('#bkVol'); if (v) v.textContent = `VOL. 07 · Time · ${L('เวลาและวันที่', 'Time & Dates')}`;
-    bindClock(body);
+    bindClock(body); live.mark();
     const di = $('#tbDate', body); if (di) di.onchange = () => { const p = di.value.split('-'); if (p.length === 3) { st.date = new Date(+p[0], +p[1] - 1, +p[2]); draw(); } };
   }
 
   /* ---------- hook into the reader (after refbooks.js, which owns the shelf entry) ---------- */
   if (typeof BOOK_META !== 'undefined' && BOOK_META[ID]) BOOK_META[ID].title = `时间与日期 ${T('เวลาและวันที่')}`;
+  if (typeof SHELF !== 'undefined') { const sb = SHELF.find(b => b.id === ID); if (sb) { sb.hz = '时间与日期'; sb.th = `${T('เวลาและวันที่')}`; } }
   const render0 = Book.render, show0 = Book.show;
   Book.show = function (id) {
     if (id === ID) { const n = new Date(); st.h = n.getHours(); st.m = n.getMinutes(); st.s = n.getSeconds(); }
@@ -341,8 +357,11 @@
     if (ds.tbtab) { st.tab = ds.tbtab; return draw(); }
     if (ds.tb24) { S().tb24 = ds.tb24 === '1'; save(); return draw(); }
     if (ds.tblang) { S().rbLang = ds.tblang; save(); return draw(); }
-    if (ds.tbstep) { const [k, by] = ds.tbstep.split(':'); if (k === 's') { st.s += +by; if (st.s > 59) { st.s = 0; bump('m', 1); } if (st.s < 0) { st.s = 59; bump('m', -1); } } else bump(k, +by); return refresh(body); }
-    if (ds.tbset) { if (ds.tbset === 'now') { const n = new Date(); st.h = n.getHours(); st.m = n.getMinutes(); st.s = n.getSeconds(); } else { const [h, m, s] = ds.tbset.split(':').map(Number); st.h = h; st.m = m; st.s = s; } return refresh(body); }
+    if (ds.tbstep) { live.stop(); const [k, by] = ds.tbstep.split(':'); if (k === 's') { st.s += +by; if (st.s > 59) { st.s = 0; bump('m', 1); } if (st.s < 0) { st.s = 59; bump('m', -1); } } else bump(k, +by); return refresh(body); }
+    if (ds.tbset) {
+      if (ds.tbset === 'now') { live.on ? live.stop() : live.start(); return; }
+      live.stop(); const [h, m, s] = ds.tbset.split(':').map(Number); st.h = h; st.m = m; st.s = s; return refresh(body);
+    }
     if (ds.tbnum) return Router.go('/book/numbers');
     if (ds.tbqopt) return checkQuiz(body, ds.tbqopt);
     if (ds.tbqcheck) return checkQuiz(body);

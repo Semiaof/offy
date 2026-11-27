@@ -30,6 +30,10 @@
 .tb-step div { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--muted); }
 .tb-step span { margin-right: 2px; }
 .tb-step button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); font: 700 20px var(--ui) !important; text-align: center !important; }
+.tb .rb-pre.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink) !important; }
+.tb .rb-pre.on .ic { animation: tbPulse 1s steps(2) infinite; }
+@keyframes tbPulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { .tb .rb-pre.on .ic { animation: none; } }
 .tb-hint, .tb-note { font-size: 13px; color: var(--muted); margin: 0; line-height: 1.55; }
 .tb-reads { display: grid; gap: 8px; }
 .tb-words, .tb-periods, .tb-week { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
