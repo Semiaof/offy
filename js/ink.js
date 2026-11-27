@@ -325,6 +325,8 @@ const BookInk = (() => {
 
     /* ---------- iPadOS WebKit stylus guard: stops Safari text-selection/scroll ONLY for Apple Pencil, keeping finger scroll 100% native ---------- */
     const blockStylusScroll = e => {
+      if (!active) return;                 // ink mode off → Apple Pencil scrolls the page like a finger
+      if (e.target.closest && e.target.closest('.tb-clock')) return;   // VOL. 07 clock handles its own Pencil drag
       if (!e.touches || !e.touches.length) return;
       if (e.target.closest && e.target.closest('button, a, input, select, textarea, audio')) return;
       for (let i = 0; i < e.touches.length; i++) {
@@ -344,8 +346,8 @@ const BookInk = (() => {
       if (!isPen && e.target.closest('button, a, input, select, textarea, summary, audio')) return;
       if (isPen && e.target.closest('button, a, input, select, textarea, audio')) return;
 
-      // Auto-wake ink mode when Apple Pencil touches the book page!
-      if (isPen && !active) openBar();
+      // Ink only while the user has switched it on with the pencil button (top right). No auto-wake:
+      // the user scrolls with the Pencil and stray ink appeared (2026-11-28).
 
       // Decide if this pointer should ink vs pass through to native scroll/click
       const shouldDraw = active && (isPen || isMouse || (isTouch && fingerDraw));
