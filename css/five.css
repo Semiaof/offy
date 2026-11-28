@@ -202,3 +202,15 @@
 @keyframes f-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes f-pop { 0% { transform: scale(.5); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .f-sense, .f-char, .f-x, .f-lp-b, .f-chk.on i .ic { animation: none !important; } }
+
+/* skeleton words (HSK 5+ not translated yet): CC-CEDICT shown as reference, never as our translation */
+.f-refm { color: var(--muted); font-style: italic; }
+.f-reft { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 99px; font-size: 11px; font-weight: 700;
+  color: var(--muted); border: 1px dashed var(--line-2); vertical-align: 1px; }
+.f-refbox { border-style: dashed; }
+.f-reftag { font: 700 12px var(--ui); color: var(--muted); padding: 3px 10px; border-radius: 99px; border: 1px dashed var(--line-2); }
+.f-refslots { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 6px; }
+.f-refslots .f-pos b { font-weight: 800; margin-right: 2px; }
+.f-refen { margin: 6px 0; padding-left: 20px; display: grid; gap: 4px; font-size: 16px; color: var(--ink); }
+.f-refsrc { margin: 8px 0 0; font-size: 12.5px; line-height: 1.55; color: var(--muted); }
+.f-reffoot { margin: 0; flex: 1; text-align: center; font-size: 13px; color: var(--muted); }

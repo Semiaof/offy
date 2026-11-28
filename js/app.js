@@ -377,7 +377,7 @@ const Dict = {
   },
   show() {
     if (this.preset) { Object.assign(this.st, { q: '', lvl: 'all', status: '', pos: '', limit: 120 }, this.preset); this.preset = null; $('#qInput').value = this.st.q; }
-    const lv = [['all', `${T('ทั้งหมด')}`]].concat(LEVELS.filter(l => levelWords(l).length).map(l => [String(l), `HSK ${l}`]));
+    const lv = [['all', `${T('ทั้งหมด')}`]].concat(LEVELS.filter(l => levelWords(l).length).map(l => [String(l), lvlName(l)]));
     if (levelWords('C').length) lv.push(['C', `${T('คำของฉัน')}`]);
     if (!lv.some(x => x[0] === this.st.lvl)) this.st.lvl = 'all';
     $('#qLevels').innerHTML = lv.map(([k, n]) => `<button class="chip" data-l="${k}" ${k !== 'all' ? `style="--c:${lvlColor(k === 'C' ? 'C' : +k)}"` : ''}>${k !== 'all' ? '<span class="dot"></span>' : ''}${n}</button>`).join('');

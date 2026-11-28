@@ -6,7 +6,7 @@
    Data: data/tree.js (window.OFFY_TREE, ~1.3 MB) from แปล HSK1 5ภาษา/tools/build_tree.py — loaded when first opened.
    ===================================================================== */
 const OffyTree = (() => {
-  const SRC = 'data/tree.js?v=6';
+  const SRC = 'data/tree.js?v=7';
   const LVN = l => l === 7 ? '7-9' : String(l);
   const st = { node: null, ch: null, q: '', all: false, stage: 'r', form: null };       // node: {r: no} | {g: component}
   let D = null, host = null, rad = null;

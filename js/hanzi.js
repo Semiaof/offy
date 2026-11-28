@@ -166,6 +166,16 @@ const HzKit = (() => {
       Dict.detail(w.id);
       return true;
     }
+    /* HSK 5-9 words not translated yet live only in the library's reference list (five.js F5REF) */
+    if (typeof FIVE !== 'undefined' && FIVE.loadRef && typeof F5REF !== 'undefined' && typeof Dict !== 'undefined') {
+      FIVE.loadRef().then(() => {
+        if (!F5REF.list.length) F5REF.build();
+        const r = F5REF.list.find(x => x.zh === zh);
+        if (r) { try { sfx('tap'); } catch (e) {} Dict.detail(r.id); }
+        else if (typeof TTS !== 'undefined') TTS.speak(zh);
+      }).catch(() => { if (typeof TTS !== 'undefined') TTS.speak(zh); });
+      return true;
+    }
     if (typeof TTS !== 'undefined') TTS.speak(zh);
     if (typeof toast === 'function') toast(`${zh} · ${T('ฟังเสียงแล้ว')}`, { icon: 'vol' });
     return false;

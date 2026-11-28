@@ -97,7 +97,7 @@ const posParts = pos => String(pos || '').split(',').map(x => x.trim().toLowerCa
 const posKey = pos => POS_KEY[posParts(pos)[0]] || 'other';
 const posBadge = w => w.pos ? `<span class="pos-b p-${posKey(w.pos)}" title="${esc(w.pos)}">${esc(posParts(w.pos).map(p => POS_ABBR[p] || p).join(' · '))}</span>` : '';
 const lvlColor = l => `var(--hsk${l === 'C' ? 'C' : l})`;
-const lvlName = l => l === 'C' ? `${T('คำของฉัน')}` : `HSK ${l}`;
+const lvlName = l => l === 'C' ? `${T('คำของฉัน')}` : l === 7 ? 'HSK 7–9' : `HSK ${l}`;
 const lvlBadge = l => `<span class="badge lvl-b" style="--c:${lvlColor(l)}">${esc(lvlName(l))}</span>`;
 
 const RAW_WORDS = (window.OFFY_WORDS || []).map(r => ({ lvl: r[0], zh: r[1], py: r[2], pos: r[3], en: r[4], th: r[5], ex_zh: r[6], ex_py: r[7], ex_en: r[8], ex_th: r[9] }));

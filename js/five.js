@@ -47,7 +47,17 @@ const FIVE = (() => {
     NAME: { th: 'ไทย', en: 'English', zh: '中文', vi: 'Tiếng Việt', ja: '日本語' },
     SHORT: { th: 'TH', en: 'EN', zh: '中', vi: 'VI', ja: 'JA' },
     HL: { th: 'th', en: 'en', zh: 'zh-Hans', vi: 'vi', ja: 'ja' },
-    get: id => fullMap.get(id), meta: id => metaMap.get(id), has: id => metaMap.has(id), count: metaMap.size
+    get: id => fullMap.get(id), meta: id => metaMap.get(id), has: id => { const m = metaMap.get(id); return !!m && !m.ref; }, count: metaMap.size,
+    /** the skeleton (HSK 5+ not translated yet): data/vocab/ref.js, loaded by the library only */
+    refLoaded: false,
+    loadRef() {
+      if (this.refLoaded || !D.ref) return Promise.resolve(false);
+      if (this._refP) return this._refP;
+      return (this._refP = Fx.script(D.ref).then(() => {
+        (window.OFFY_REF || []).forEach(r => { if (r && r.app && !metaMap.has(r.app)) metaMap.set(r.app, r); });
+        this.refLoaded = true; this._refP = null; return true;
+      }).catch(err => { this._refP = null; throw err; }));
+    }
   };
 })();
 
@@ -313,7 +323,19 @@ function f5topics(f) {
       <b>${esc(f5topicName(t[1]))}</b><small lang="zh-Hans">${esc(t[2] || t[1])}</small>
     </button>`).join('')}</div></section>`;
 }
+/** a word not translated yet: the official 词性 of every slot + CC-CEDICT English, clearly marked as reference */
+function f5refMeaning(f) {
+  const r = f.ref || { en: [] };
+  const old = BY_ID.get(f.app), keep = old && !old._ref && (old.th || old.en);   // the 200 HSK 5/6 words the old app already had
+  return `${keep ? `<div class="f-senses"><article class="f-sense"><p class="f-main" lang="th">${esc(old.th)}</p>${old.en ? `<p class="f-def" lang="en">${esc(old.en)}</p>` : ''}</article></div>` : ''}<div class="f-senses"><article class="f-sense f-refbox">
+      <div class="f-sh"><span class="f-reftag">${T('อ้างอิง · ยังไม่ได้แปล')}</span></div>
+      <div class="f-refslots">${f.senses.map((m, i) => `<span class="f-pos">${f.senses.length > 1 ? `<b>${i + 1}</b> ` : ''}${f5cls(m.cls.zh)}${m.lvl !== f.lvl ? ` · HSK ${esc(m.lvl === 7 ? '7–9' : m.lvl)}` : ''}</span>`).join('')}</div>
+      <ul class="f-refen" lang="en">${r.en.map(g => `<li>${esc(g)}</li>`).join('') || `<li>—</li>`}</ul>
+      <p class="f-refsrc">${T('ความหมายภาษาอังกฤษจาก CC-CEDICT ยังไม่ได้แยกตามช่องความหมายของ HSK และยังไม่ได้ตรวจ · คำแปลไทย ประโยคตัวอย่าง และแบบฝึกจะมาเมื่อแปลระดับนี้')}</p>
+    </article></div>${f5measure(f)}`;
+}
 function f5meaning(f) {
+  if (f.ref) return f5refMeaning(f);
   const s = fiveS(), many = f.senses.length > 1, ex = f5explain();
   return `<div class="f-senses">${f.senses.map((m, i) => {
     const sn = m.sent === 'word' ? f.sent : m.sent;
@@ -377,8 +399,8 @@ function f5cross(f) {
 }
 /** prev / next among the five-language words of the current library list */
 function f5neighbours(id) {
-  const list = (Dict.res || WORDS).filter(w => FIVE.has(w.id)).map(w => w.id);
-  const ids = list.includes(id) ? list : FIVE.D.words.map(w => w.app).filter(Boolean);
+  const list = (Dict.res || WORDS).filter(w => FIVE.meta(w.id)).map(w => w.id);       // reference words too
+  const ids = list.includes(id) ? list : FIVE.D.words.map(w => w.app).filter(Boolean).concat(F5REF.list.map(w => w.id));   // opened from outside the library
   const i = ids.indexOf(id);
   return { i, n: ids.length, prev: ids[i - 1], next: ids[i + 1] };
 }
@@ -441,8 +463,12 @@ async function f5strokes(box, c, quiz) {
       F5UI.tab = 'char'; paint(); const sec = $('#f5ch-' + k, box); if (sec) { sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(() => f5strokes($('.f-sbox', sec), c), 380); } }; }
   }
   Dict.detail = function (id) {
-    base.call(this, id);
+    F5REF.with(() => base.call(this, id));
     const meta = FIVE.meta(id), body = $('#sheetBody'); if (!meta || !body) return;
+    if (meta.ref && F5REF.byId.has(id)) {        // not translated: nothing to practise yet
+      const foot = $('#sheetFoot'); if (foot) foot.innerHTML = `<p class="f-reffoot">${T('คำนี้ยังไม่ได้แปล จึงยังไม่อยู่ในด่านและแบบฝึก')}</p>`;
+      const kv = $('.kv', body); if (kv) kv.hidden = true;                 // never played: no score to show
+    }
     const head = $('.d-head', body); if (!head) return;
     $('#sheet').classList.add('f-wide');
     const box = document.createElement('div'); box.className = 'f5';
@@ -466,11 +492,46 @@ async function f5strokes(box, c, quiz) {
 /** list rows of the 5-language words: the main language, then the first extra language, quieter (used by core meanHTML) */
 function f5rowMean(w) {
   const f = FIVE.meta(w.id); if (!f) return '';
+  if (f.ref) return `<span class="f-rm f-refm" lang="en">${esc(f.r || '')}</span><small class="f-reft">${T('อ้างอิง')}</small>`;
   const main = f5main();
   const pick = l => f.m ? (f.m[l] || '') : f.senses.slice(0, 2).map(m => l === 'ja' ? (m.ja ? m.ja.w : '') : m[l]).filter(Boolean).join(' · ');
   const ml = pick(main) ? main : f5fall(), xl = f5extra().find(l => l !== ml && pick(l)), xt = xl ? pick(xl) : '';
   return `<span class="f-rm" ${f5L(ml)}>${esc(pick(ml))}</span>${xt ? `<span class="f-rx" ${f5L(xl)}> · ${esc(xt)}</span>` : ''}`;
 }
+/* ---------- the skeleton in the library: HSK 5+ words not translated yet ----------
+   Word objects for the reference rows that the old word list does not have; they live only here, so games, stages,
+   review and stats never meet a word without a meaning. The library swaps them in while it draws. */
+const F5REF = {
+  list: [], byId: new Map(), busy: false,
+  build() {
+    const have = new Set(RAW_WORDS.map(w => w.id));
+    this.list = (window.OFFY_REF || []).filter(r => r.app && !have.has(r.app)).map(r => {
+      const pos = [...new Set((r.p || []).map(c => F5POS[c]).filter(Boolean))].join(', ');
+      const w = indexWord({ id: r.app, lvl: r.lvl, zh: r.zh, py: r.py, pos: pos || 'phrase', th: '', en: '', ex_zh: '', ex_py: '', ex_th: '', ex_en: '', _f5: true, _ref: true });
+      w._en = String(r.r || '').toLowerCase(); w._x = w._en; w._xf = fold5(w._en); w._topics = []; w._t1 = []; w._quiz = [];
+      return w;
+    });
+    this.byId = new Map(this.list.map(w => [w.id, w]));
+  },
+  /** run fn with the reference words in WORDS / BY_LVL / BY_ID and HSK 7-9 in LEVELS; restored afterwards */
+  with(fn) {
+    if (this.busy || !this.list.length) return fn();
+    const W0 = WORDS, B0 = BY_LVL, I0 = BY_ID, add7 = !LEVELS.includes(7);
+    this.busy = true;
+    WORDS = W0.concat(this.list);
+    BY_LVL = {}; WORDS.forEach(w => { (BY_LVL[w.lvl] = BY_LVL[w.lvl] || []).push(w); });
+    BY_ID = new Map(I0); this.list.forEach(w => BY_ID.set(w.id, w));
+    if (add7) LEVELS.push(7);
+    try { return fn(); } finally { WORDS = W0; BY_LVL = B0; BY_ID = I0; if (add7) LEVELS.pop(); this.busy = false; }
+  }
+};
+Object.assign(window.OFFY_EN || {}, {
+  'อ้างอิง': 'reference', 'อ้างอิง · ยังไม่ได้แปล': 'Reference · not translated yet',
+  'ความหมายภาษาอังกฤษจาก CC-CEDICT ยังไม่ได้แยกตามช่องความหมายของ HSK และยังไม่ได้ตรวจ · คำแปลไทย ประโยคตัวอย่าง และแบบฝึกจะมาเมื่อแปลระดับนี้':
+    'English from CC-CEDICT, not yet split into the HSK sense slots or checked · Thai, example sentences and practice come when this level is translated',
+  'คำนี้ยังไม่ได้แปล จึงยังไม่อยู่ในด่านและแบบฝึก': 'Not translated yet, so not in stages or practice'
+});
+
 (function patchDict() {
   const show = Dict.show, render = Dict.render, search = Dict.search;
   const keep = () => { if (Dict.st.lvl === 'five') { Dict.st._five = true; Dict.st.lvl = 'all'; } };
@@ -497,6 +558,12 @@ function f5rowMean(w) {
     return res.concat(exact, loose);                              // typed with marks → those first, then "yeu" ≈ yêu
   };
   Dict.show = function () {
+    if (!FIVE.refLoaded && FIVE.D.ref) FIVE.loadRef().then(ok => { if (ok) { F5REF.build(); if (currentView === 'v-dict') Dict.show(); } }).catch(() => {});
+    return F5REF.with(() => showMain.call(this));
+  };
+  const more = Dict.more;
+  Dict.more = function () { return F5REF.with(() => more.call(this)); };
+  const showMain = function () {
     let wantFive = null, wantTopic = null;
     if (this.preset) {
       if (this.preset.lvl === 'five') { wantFive = true; this.preset.lvl = 'all'; }
@@ -511,7 +578,8 @@ function f5rowMean(w) {
     paint();
     this.render();
   };
-  Dict.render = function () {
+  Dict.render = function () { return F5REF.with(() => renderMain.call(this)); };
+  const renderMain = function () {
     keep();
     const st = this.st, five = !!st._five, topic = st.topic || '';
     if (topicSel && topicSel.value !== topic) topicSel.value = topic;
